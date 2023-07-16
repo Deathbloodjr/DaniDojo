@@ -7,6 +7,9 @@ There's a decent chance the mod won't work at all without having the proper asse
 This is something I have some plans for in the future, I will not distribute the assets here\
 
 
+With this mod installed, you can enter the Dani Course selection screen by hitting up in the mode select menu. It will mention it's the dani select course at the bottom right.
+
+
 [A vague roadmap for the mod can be found here](https://docs.google.com/spreadsheets/d/1fuAAfK-0Vw74TwxXF5WVy1fh1ADsVzUkDd7dOHc7EdQ/edit#gid=1112016116)\
 I will not guarantee that everything on this roadmap will be possible, or completed, nor will I give any sort of timeframe.
 
