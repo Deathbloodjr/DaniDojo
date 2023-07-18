@@ -814,6 +814,25 @@ namespace DaniDojo.Patches
             /// <returns>The current Course GameObject.</returns>
             public static void CreateSeriesAssets(DaniSeriesData seriesInfo, GameObject parent)
             {
+                FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
+
+                GameObject seriesTitleObject = GameObject.Find("SeriesTitle");
+                if (seriesTitleObject == null)
+                {
+                    seriesTitleObject = DaniDojoAssetUtility.CreateText("SeriesTitle", seriesInfo.seriesTitle, new Rect(1920 - 592, 777, 500, 100),
+                                          fontTMPMgr.GetDefaultFontAsset(DataConst.FontType.Japanese), fontTMPMgr.GetDefaultFontMaterial(DataConst.FontType.Japanese, DataConst.DefaultFontMaterialType.OutlineBlack),
+                                          HorizontalAlignmentOptions.Right, new Color32(0, 0, 0, 255), parent.transform);
+                    var seriesTitleText = seriesTitleObject.GetComponent<TextMeshProUGUI>();
+                    seriesTitleText.enableAutoSizing = false;
+                    seriesTitleText.fontSize = 50;
+                }
+                else
+                {
+                    var seriesTitleText = seriesTitleObject.GetComponent<TextMeshProUGUI>();
+                    seriesTitleText.text = seriesInfo.seriesTitle;
+                }
+
+
                 if (GameObject.Find("TopCourses"))
                 {
                     GameObject.Destroy(GameObject.Find("TopCourses"));
