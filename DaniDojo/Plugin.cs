@@ -108,7 +108,7 @@ namespace DaniDojo
                 Directory.CreateDirectory(folderPath);
             }
             DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-            var files = dirInfo.GetFiles("*.json").ToList();
+            var files = dirInfo.GetFiles("*.json", SearchOption.AllDirectories).ToList();
             for (int i = 0; i < files.Count; i++)
             {
                 Log.LogInfo("Initializing " + files[i].Name);

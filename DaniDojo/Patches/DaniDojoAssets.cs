@@ -1092,8 +1092,13 @@ namespace DaniDojo.Patches
                     DaniDojoAssetUtility.CreateImage("SongIndicator", GetAssetSprite(songIndicator), new Vector2(10, 10), songParent.transform);
 
                     var song = musicInfoAccessers.Find((x) => x.Id == courseInfo.songs[i].songId);
-                    var songTitle = wordDataMgr.GetWordListInfo("song_" + song.Id).Text;
-                    var songDetail = wordDataMgr.GetWordListInfo("song_detail_" + song.Id).Text;
+                    string songTitle = "Song not found: " + courseInfo.songs[i].songId;
+                    string songDetail = "";
+                    if (song != null)
+                    {
+                        songTitle = wordDataMgr.GetWordListInfo("song_" + song.Id).Text;
+                        songDetail = wordDataMgr.GetWordListInfo("song_detail_" + song.Id).Text;
+                    }
 
                     if (courseInfo.songs[i].isHidden)
                     {
@@ -1127,19 +1132,26 @@ namespace DaniDojo.Patches
 
                     SelectAssetName starAssetName;
 
-                    switch (song.Stars[(int)courseInfo.songs[i].level])
+                    if (song != null)
                     {
-                        case 1:  starAssetName = SelectAssetName.Star1;  break;
-                        case 2:  starAssetName = SelectAssetName.Star2;  break;
-                        case 3:  starAssetName = SelectAssetName.Star3;  break;
-                        case 4:  starAssetName = SelectAssetName.Star4;  break;
-                        case 5:  starAssetName = SelectAssetName.Star5;  break;
-                        case 6:  starAssetName = SelectAssetName.Star6;  break;
-                        case 7:  starAssetName = SelectAssetName.Star7;  break;
-                        case 8:  starAssetName = SelectAssetName.Star8;  break;
-                        case 9:  starAssetName = SelectAssetName.Star9;  break;
-                        case 10: starAssetName = SelectAssetName.Star10; break;
-                        default: starAssetName = SelectAssetName.Star10Plus; break; // Might as well have this as a default, it's kinda fun
+                        switch (song.Stars[(int)courseInfo.songs[i].level])
+                        {
+                            case 1: starAssetName = SelectAssetName.Star1; break;
+                            case 2: starAssetName = SelectAssetName.Star2; break;
+                            case 3: starAssetName = SelectAssetName.Star3; break;
+                            case 4: starAssetName = SelectAssetName.Star4; break;
+                            case 5: starAssetName = SelectAssetName.Star5; break;
+                            case 6: starAssetName = SelectAssetName.Star6; break;
+                            case 7: starAssetName = SelectAssetName.Star7; break;
+                            case 8: starAssetName = SelectAssetName.Star8; break;
+                            case 9: starAssetName = SelectAssetName.Star9; break;
+                            case 10: starAssetName = SelectAssetName.Star10; break;
+                            default: starAssetName = SelectAssetName.Star10Plus; break; // Might as well have this as a default, it's kinda fun
+                        }
+                    }
+                    else
+                    {
+                        starAssetName = SelectAssetName.Star10Plus;
                     }
 
                     DaniDojoAssetUtility.CreateImage("SongLevel", GetAssetSprite(starAssetName), new Vector2(121, 15), songParent.transform);
