@@ -35,6 +35,8 @@ namespace DaniDojo
         public ConfigEntry<string> ConfigDaniDojoAssetLocation;
         public ConfigEntry<string> ConfigDaniDojoSaveLocation;
 
+        public ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
+
         public static List<DaniSeriesData> AllDaniData;
         public static List<DaniDojoCurrentPlay> AllDaniScores;
 
@@ -87,6 +89,11 @@ namespace DaniDojo
                 "DaniDojoSaveLocation",
                 "BepInEx\\data\\DaniDojoSaves",
                 "The file location for dani dojo save data.");
+
+            ConfigNamePlateDanRankEnabled = Config.Bind("NamePlate",
+                "DanRankEnabled",
+                true,
+                "Enables the Dan Rank icon to the left of your name on the nameplate.");
         }
 
         private const string ASSETBUNDLE_NAME = "danidojo.scene";

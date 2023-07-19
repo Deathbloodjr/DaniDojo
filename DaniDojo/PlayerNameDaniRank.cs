@@ -20,6 +20,11 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void PlayerName_Start_Postfix(PlayerName __instance)
         {
+            if (!Plugin.Instance.ConfigNamePlateDanRankEnabled.Value)
+            {
+                return;
+            }
+
             Plugin.Log.LogInfo("PlayerName Start Postfix");
             var rect = __instance.gameObject.transform.FindChild("TextName").GetComponent<RectTransform>();
 
