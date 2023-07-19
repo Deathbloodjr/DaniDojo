@@ -89,21 +89,23 @@ namespace DaniDojo.Patches
                 //CreateAndLoadDaniDojoScene();
 
 
+                if (Plugin.Assets != null)
+                {
+                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("DaniDojo", true);
 
-                TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("DaniDojo", true);
+                    Plugin.Instance.StartCoroutine(AddCourseSelectManager());
+                }
+                else
+                {
+                    var daniDojoScene = SceneManager.CreateScene("DaniDojo");
 
-                Plugin.Instance.StartCoroutine(AddCourseSelectManager());
+                    var currentScene = SceneManager.GetActiveScene();
+                    SceneManager.UnloadSceneAsync(currentScene);
+                    SceneManager.SetActiveScene(daniDojoScene);
 
-
-
-                //var daniDojoScene = SceneManager.CreateScene("DaniDojo");
-
-                //var currentScene = SceneManager.GetActiveScene();
-                //SceneManager.UnloadSceneAsync(currentScene);
-                //SceneManager.SetActiveScene(daniDojoScene);
-
-                //var CourseSelectManager = new GameObject("CourseSelectManager");
-                //CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+                    var CourseSelectManager = new GameObject("CourseSelectManager");
+                    CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+                }
             }
         }
 

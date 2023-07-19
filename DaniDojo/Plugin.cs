@@ -102,6 +102,11 @@ namespace DaniDojo
         {
             Plugin.Log.LogInfo("danidojo scene load start");
             string assetBundlePath = Path.Combine(ConfigDaniDojoAssetLocation.Value, ASSETBUNDLE_NAME);
+            if (!File.Exists(assetBundlePath))
+            {
+                Assets = null;
+                return;
+            }
             Assets = AssetBundle.LoadFromFile(assetBundlePath);
             Plugin.Log.LogInfo("danidojo scene loaded?");
         }
