@@ -517,5 +517,43 @@ namespace DaniDojo.Patches
             return true;
         }
 
+        [HarmonyPatch(typeof(EnsoPauseMenu))]
+        [HarmonyPatch(nameof(EnsoPauseMenu.OnRestartClicked))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPostfix]
+        public static void EnsoPauseMenu_OnRestartClicked_Prefix(EnsoPauseMenu __instance)
+        {
+            // Restart the dan
+            if (DaniDojoSelectManager.isInDan)
+            {
+                DaniDojoSelectManager.isInDan = true;
+                DaniDojoSelectManager.currentDanSongIndex = 0;
+
+                result = new DaniDojoCurrentPlay(DaniDojoSelectManager.currentCourse);
+
+                BeginSong(DaniDojoSelectManager.currentCourse.songs[0].songId, DaniDojoSelectManager.currentCourse.songs[0].level);
+            }
+        }
+
+        [HarmonyPatch(typeof(EnsoPauseMenu))]
+        [HarmonyPatch(nameof(EnsoPauseMenu.OnReturnClicked))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPostfix]
+        public static void EnsoPauseMenu_OnReturnClicked_Postfix(EnsoPauseMenu __instance)
+        {
+            // Exit the dan
+            DaniDojoSelectManager.isInDan = false;
+        }
+
+        [HarmonyPatch(typeof(EnsoPauseMenu))]
+        [HarmonyPatch(nameof(EnsoPauseMenu.OnButtonModeClicked))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPostfix]
+        public static void EnsoPauseMenu_OnButtonModeClicked_Postfix(EnsoPauseMenu __instance)
+        {
+            // Exit the dan
+            DaniDojoSelectManager.isInDan = false;
+        }
+
     }
 }
