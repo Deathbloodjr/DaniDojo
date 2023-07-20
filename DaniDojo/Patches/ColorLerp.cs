@@ -35,27 +35,24 @@ namespace DaniDojo.Patches
             mainColor = image.color;
 
             DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(rainbowSpriteLocation, "LargeRainbow"));
-            var files = dirInfo.GetFiles("*.*");
-            for (int i = 0; i < files.Length; i++)
+            if (dirInfo.Exists)
             {
-                Texture2D tex = new Texture2D(2, 2);
-                tex.LoadImage(File.ReadAllBytes(files[i].FullName));
-
-                Rect rect = new Rect(0, 0, tex.width, tex.height);
-                rainbowSprites.Add(Sprite.Create(tex, rect, new Vector2(0, 0)));
+                var files = dirInfo.GetFiles("*.*");
+                for (int i = 0; i < files.Length; i++)
+                {
+                    rainbowSprites.Add(DaniDojoAssetUtility.CreateSprite(files[i].FullName));
+                }
             }
 
             dirInfo = new DirectoryInfo(Path.Combine(rainbowSpriteLocation, "SmallRainbow"));
-            files = dirInfo.GetFiles("*.*");
-            for (int i = 0; i < files.Length; i++)
+            if (dirInfo.Exists)
             {
-                Texture2D tex = new Texture2D(2, 2);
-                tex.LoadImage(File.ReadAllBytes(files[i].FullName));
-
-                Rect rect = new Rect(0, 0, tex.width, tex.height);
-                smallRainbowSprites.Add(Sprite.Create(tex, rect, new Vector2(0, 0)));
+                var files = dirInfo.GetFiles("*.*");
+                for (int i = 0; i < files.Length; i++)
+                {
+                    smallRainbowSprites.Add(DaniDojoAssetUtility.CreateSprite(files[i].FullName));
+                }
             }
-
 
             timeStarted = Time.time;
         }

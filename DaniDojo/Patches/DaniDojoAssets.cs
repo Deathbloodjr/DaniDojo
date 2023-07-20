@@ -81,6 +81,8 @@ namespace DaniDojo.Patches
             {
                 Plugin.Log.LogInfo("Create Panel");
                 var newPanel = DaniDojoAssetUtility.CreateImage(name, Path.Combine(BaseImageFilePath, "Enso", "RequirementPanel.png"), location, parent);
+
+
                 string requirementText = "Goods";
 
                 Plugin.Log.LogInfo("Initialize Requirement Text");
@@ -431,6 +433,10 @@ namespace DaniDojo.Patches
             /// <param name="isGold"></param>
             static void ChangeReqCurrentValue(GameObject panel, int value, bool isGold)
             {
+                if (!Directory.Exists(Path.Combine(BaseImageFilePath, "Digits")))
+                {
+                    return;
+                }
                 InitializeDigitSpriteLists();
                 value = Mathf.Max(value, 0);
                 value = Mathf.Min(value, 99999999); // 99,999,999
@@ -440,9 +446,11 @@ namespace DaniDojo.Patches
                     var numLocation = new Vector2(403 + (56 * i), 44);
                     var baseNumberPath = Path.Combine(BaseImageFilePath, "Digits", "Big");
 
+                    Plugin.Log.LogInfo("1");
                     var digitBorderTransform = panel.transform.Find("CurReqBarValueBorder" + i);
                     var digitFillTransform = panel.transform.Find("CurReqBarValueFill" + i);
                     var digitTransparentTransform = panel.transform.Find("CurReqBarValueTransparent" + i);
+                    Plugin.Log.LogInfo("2");
                     if (digitBorderTransform == null)
                     {
                         digitBorderTransform = DaniDojoAssetUtility.CreateImage("CurReqBarValueBorder" + i, Path.Combine(baseNumberPath, "Border", "0.png"), numLocation, panel.transform).transform;
@@ -455,42 +463,96 @@ namespace DaniDojo.Patches
                     {
                         digitTransparentTransform = DaniDojoAssetUtility.CreateImage("CurReqBarValueTransparent" + i, Path.Combine(baseNumberPath, "Transparent", "0.png"), numLocation, panel.transform).transform;
                     }
+                    Plugin.Log.LogInfo("3");
 
                     GameObject digitBorder = digitBorderTransform.gameObject;
                     GameObject digitFill = digitFillTransform.gameObject;
                     GameObject digitTransparent = digitTransparentTransform.gameObject;
 
+                    Plugin.Log.LogInfo("4");
                     if (i < num.Length)
                     {
                         int numValue = int.Parse(num[i].ToString());
-                        DaniDojoAssetUtility.ChangeImageSprite(digitBorder, DigitBigBorder[numValue]);
-                        DaniDojoAssetUtility.ChangeImageSprite(digitFill, DigitBigFill[numValue]);
-                        DaniDojoAssetUtility.ChangeImageSprite(digitTransparent, DigitBigTransparent[numValue]);
+                        if (DigitBigBorder.Count > numValue)
+                        {
+                            DaniDojoAssetUtility.ChangeImageSprite(digitBorder, DigitBigBorder[numValue]);
+                        }
+                        if (DigitBigFill.Count > numValue)
+                        {
+                            DaniDojoAssetUtility.ChangeImageSprite(digitFill, DigitBigFill[numValue]);
+                        }
+                        if (DigitBigTransparent.Count > numValue)
+                        {
+                            DaniDojoAssetUtility.ChangeImageSprite(digitTransparent, DigitBigTransparent[numValue]);
+                        }
 
-                        if (isGold)
+                        var digitBorderImage = digitBorder.GetComponent<Image>();
+                        var digitFillImage = digitFill.GetComponent<Image>();
+                        var digitTransparentImage = digitTransparent.GetComponent<Image>();
+
+                        if (digitBorderImage != null)
                         {
-                            digitBorder.GetComponent<Image>().color = GoldReqTextBorderColor;
-                            digitFill.GetComponent<Image>().color = GoldReqTextFillColor;
-                            digitTransparent.GetComponent<Image>().color = GoldReqTextTransparentColor;
+                            if (isGold)
+                            {
+                                digitBorderImage.color = GoldReqTextBorderColor;
+                            }
+                            else if (num == "0")
+                            {
+                                digitBorderImage.color = ZeroTextBorderColor;
+                            }
+                            else
+                            {
+                                digitBorderImage.color = NormalTextBorderColor;
+                            }
                         }
-                        else if (num == "0")
+                        if (digitFillImage != null)
                         {
-                            digitBorder.GetComponent<Image>().color = ZeroTextBorderColor;
-                            digitFill.GetComponent<Image>().color = ZeroTextFillColor;
-                            digitTransparent.GetComponent<Image>().color = ZeroTextTransparentColor;
+                            if (isGold)
+                            {
+                                digitFillImage.color = GoldReqTextBorderColor;
+                            }
+                            else if (num == "0")
+                            {
+                                digitFillImage.color = ZeroTextBorderColor;
+                            }
+                            else
+                            {
+                                digitFillImage.color = NormalTextBorderColor;
+                            }
                         }
-                        else
+                        if (digitTransparentImage != null)
                         {
-                            digitBorder.GetComponent<Image>().color = NormalTextBorderColor;
-                            digitFill.GetComponent<Image>().color = NormalTextFillColor;
-                            digitTransparent.GetComponent<Image>().color = NormalTextTransparentColor;
+                            if (isGold)
+                            {
+                                digitTransparentImage.color = GoldReqTextBorderColor;
+                            }
+                            else if (num == "0")
+                            {
+                                digitTransparentImage.color = ZeroTextBorderColor;
+                            }
+                            else
+                            {
+                                digitTransparentImage.color = NormalTextBorderColor;
+                            }
                         }
                     }
                     else
                     {
-                        digitBorder.GetComponent<Image>().color = InvisibleColor;
-                        digitFill.GetComponent<Image>().color = InvisibleColor;
-                        digitTransparent.GetComponent<Image>().color = InvisibleColor;
+                        var digitBorderImage = digitBorder.GetComponent<Image>();
+                        var digitFillImage = digitFill.GetComponent<Image>();
+                        var digitTransparentImage = digitTransparent.GetComponent<Image>();
+                        if (digitBorderImage != null)
+                        {
+                            digitBorderImage.color = InvisibleColor;
+                        }
+                        if (digitFillImage != null)
+                        {
+                            digitFillImage.color = InvisibleColor;
+                        }
+                        if (digitTransparentImage != null)
+                        {
+                            digitTransparentImage.color = InvisibleColor;
+                        }
                     }
 
                 }
@@ -499,6 +561,7 @@ namespace DaniDojo.Patches
             static void InitializeDigitSpriteLists()
             {
                 //Plugin.Log.LogInfo("Initialize DigitBigBorder");
+
                 if (DigitBigBorder == null)
                 {
                     DigitBigBorder = new List<Sprite>();
@@ -509,13 +572,7 @@ namespace DaniDojo.Patches
                     DigitBigBorder = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Big", "Border", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitBigBorder.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Big", "Border", i.ToString() + ".png")));
                     }
                 }
                 //Plugin.Log.LogInfo("Initialize DigitBigFill");
@@ -529,13 +586,7 @@ namespace DaniDojo.Patches
                     DigitBigFill = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Big", "NoBorder", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitBigFill.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Big", "NoBorder", i.ToString() + ".png")));
                     }
                 }
                 //Plugin.Log.LogInfo("Initialize DigitBigTransparent");
@@ -549,13 +600,7 @@ namespace DaniDojo.Patches
                     DigitBigTransparent = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Big", "Transparent", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitBigTransparent.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Big", "Transparent", i.ToString() + ".png")));
                     }
                 }
 
@@ -570,13 +615,7 @@ namespace DaniDojo.Patches
                     DigitSmallBorder = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Small", "Border", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitSmallBorder.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Small", "Border", i.ToString() + ".png")));
                     }
                 }
                 //Plugin.Log.LogInfo("Initialize DigitSmallFill");
@@ -590,13 +629,7 @@ namespace DaniDojo.Patches
                     DigitSmallFill = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Small", "NoBorder", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitSmallFill.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Small", "NoBorder", i.ToString() + ".png")));
                     }
                 }
                 //Plugin.Log.LogInfo("Initialize DigitSmallTransparent");
@@ -610,13 +643,7 @@ namespace DaniDojo.Patches
                     DigitSmallTransparent = new List<Sprite>();
                     for (int i = 0; i < 10; i++)
                     {
-                        Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-                        tex.LoadImage(File.ReadAllBytes(Path.Combine(BaseImageFilePath, "Digits", "Small", "Transparent", i.ToString() + ".png")));
-
-                        Rect rect = new Rect(0, 0, tex.width, tex.height);
-                        Sprite sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
-                        DigitSmallTransparent.Add(sprite);
+                        DigitBigBorder.Add(DaniDojoAssetUtility.CreateSprite(Path.Combine(BaseImageFilePath, "Digits", "Small", "Transparent", i.ToString() + ".png")));
                     }
                 }
                 //Plugin.Log.LogInfo("Initialize Digits Finish");
@@ -781,20 +808,27 @@ namespace DaniDojo.Patches
                 if (!SelectAssetSprites.ContainsKey(asset))
                 {
                     DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(BaseImageFilePath));
-                    var assetFile = dirInfo.GetFiles(asset.ToString() + ".png", SearchOption.AllDirectories);
-                    if (assetFile.Length >= 0)
+                    if (dirInfo.Exists)
                     {
-                        if (assetFile.Length > 1)
+                        var assetFile = dirInfo.GetFiles(asset.ToString() + ".png", SearchOption.AllDirectories);
+                        if (assetFile.Length > 0)
                         {
-                            Plugin.Log.LogInfo("Multiple files for " + asset.ToString() + " found, loading the first one found!");
+                            if (assetFile.Length > 1)
+                            {
+                                Plugin.Log.LogInfo("Multiple files for " + asset.ToString() + " found, loading the first one found!");
 
+                            }
+                            var sprite = DaniDojoAssetUtility.CreateSprite(assetFile[0].FullName);
+                            SelectAssetSprites.Add(asset, sprite);
                         }
-                        var sprite = DaniDojoAssetUtility.CreateSprite(assetFile[0].FullName);
-                        SelectAssetSprites.Add(asset, sprite);
+                        else
+                        {
+                            Plugin.Log.LogError(asset.ToString() + ".png not found!");
+                        }
                     }
                     else
                     {
-                        Plugin.Log.LogInfo(asset.ToString() + ".png not found!");
+                        Plugin.Log.LogError("DaniDojoAsset file path not found!");
                     }
                 }
             }
@@ -802,7 +836,14 @@ namespace DaniDojo.Patches
             private static Sprite GetAssetSprite(SelectAssetName asset)
             {
                 InitializeSelectAssetSprite(asset);
-                return SelectAssetSprites[asset];
+                if (SelectAssetSprites.ContainsKey(asset))
+                {
+                    return SelectAssetSprites[asset];
+                }
+                else
+                {
+                    return DaniDojoAssetUtility.CreateSprite("");
+                }
             }
 
             /// <summary>
