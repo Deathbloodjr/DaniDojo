@@ -57,7 +57,7 @@ namespace DaniDojo.Patches
             if (!File.Exists(filePath))
             {
                 Plugin.Log.LogError("Could not find file: " + filePath);
-                return null;
+                return new GameObject(name);
             }
             
             //var imageCanvas = newImageObj.AddComponent<Canvas>();
@@ -175,12 +175,11 @@ namespace DaniDojo.Patches
 
         public static Sprite CreateSprite(string filePath)
         {
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
             Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-            tex.LoadImage(File.ReadAllBytes(filePath));
+            if (File.Exists(filePath))
+            {
+                tex.LoadImage(File.ReadAllBytes(filePath));
+            }
 
             Rect rect = new Rect(0, 0, tex.width, tex.height);
             return Sprite.Create(tex, rect, new Vector2(0, 0));
@@ -219,7 +218,10 @@ namespace DaniDojo.Patches
         public static void ChangeImageSprite(GameObject obj, Sprite sprite)
         {
             var image = obj.GetComponent<Image>();
-            image.sprite = sprite;
+            if (image != null)
+            {
+                image.sprite = sprite;
+            }
         }
     }
 }
