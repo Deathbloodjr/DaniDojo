@@ -32,7 +32,7 @@
     <TargetFramework Condition="$(DefineConstants.Contains('TAIKO_MONO'))">net48</TargetFramework>
     <AssemblyName>com.db.DaniDojo</AssemblyName>
     <Description>A mod to allow players to play DaniDojo mode in TDMX.</Description>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RootNamespace>DaniDojo</RootNamespace>
