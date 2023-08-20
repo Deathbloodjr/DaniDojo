@@ -8,5 +8,6 @@ namespace DaniDojo.Managers
 {
     internal class SaveDataManager
     {
+
     }
 }

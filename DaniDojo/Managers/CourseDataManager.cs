@@ -35,12 +35,12 @@ namespace DaniDojo.Managers
 
             for (int i = 0; i < files.Count; i++)
             {
-                Plugin.LogInfo("Loading File \"" + files[i].Name + "\"", true);
+                Plugin.LogInfo("Loading File \"" + files[i].Name + "\"", false);
                 var text = File.ReadAllText(files[i].FullName);
                 JsonNode node = JsonNode.Parse(text);
                 var series = LoadSeries(node);
                 allSeriesData.Add(series);
-                Plugin.LogInfo("Loading File \"" + files[i].Name + "\" complete", true);
+                Plugin.LogInfo("Loading File \"" + files[i].Name + "\" complete", false);
             }
 
             allSeriesData.Sort((x, y) => x.Order > y.Order ? 1 : -1);
@@ -81,17 +81,48 @@ namespace DaniDojo.Managers
             course.Id = node["Id"].GetValue<string>();
             course.Title = node["Title"].GetValue<string>();
             course.Order = node["Order"].GetValue<int>();
+
             course.IsLocked = node["IsLocked"].GetValue<bool>();
-            var background = node["Background"].GetValue<string>();
-            switch (background)
+
+            if (node["Background"] != null)
             {
-                case "Tan": course.Background = CourseBackground.Tan; break;
-                case "Wood": course.Background = CourseBackground.Wood; break;
-                case "Blue": course.Background = CourseBackground.Blue; break;
-                case "Red": course.Background = CourseBackground.Red; break;
-                case "Silver": course.Background = CourseBackground.Silver; break;
-                case "Gold": course.Background = CourseBackground.Gold; break;
-                default: course.Background = CourseBackground.Tan; break;
+                var background = node["Background"].GetValue<string>();
+                switch (background)
+                {
+                    case "Tan": course.Background = CourseBackground.Tan; break;
+                    case "Wood": course.Background = CourseBackground.Wood; break;
+                    case "Blue": course.Background = CourseBackground.Blue; break;
+                    case "Red": course.Background = CourseBackground.Red; break;
+                    case "Silver": course.Background = CourseBackground.Silver; break;
+                    case "Gold": course.Background = CourseBackground.Gold; break;
+                    default: course.Background = CourseBackground.Tan; break;
+                }
+            }
+            else
+            {
+                switch (course.Id.ToLower().Trim())
+                {
+                    case "5kyuu":
+                    case "4kyuu":
+                    case "3kyuu":
+                    case "2kyuu":
+                    case "1kyuu": course.Background = CourseBackground.Wood; break;
+                    case "1dan":
+                    case "2dan":
+                    case "3dan":
+                    case "4dan":
+                    case "5dan": course.Background = CourseBackground.Blue; break;
+                    case "6dan":
+                    case "7dan":
+                    case "8dan":
+                    case "9dan":
+                    case "10dan": course.Background = CourseBackground.Red; break;
+                    case "11dan":
+                    case "12dan":
+                    case "13dan": course.Background = CourseBackground.Silver; break;
+                    case "14dan": course.Background = CourseBackground.Gold; break;
+                    default: course.Background = CourseBackground.Tan; break;
+                }
             }
 
             var songs = node["Songs"].AsArray();
@@ -120,6 +151,67 @@ namespace DaniDojo.Managers
             song.TitleEng = node["TitleEng"].GetValue<string>();
             song.TitleJp = node["TitleJp"].GetValue<string>();
             song.Level = (EnsoData.EnsoLevelType)(node["Level"]!.GetValue<int>() - 1);
+
+            string levelString = string.Empty;
+            try
+            {
+                var levelInt = node["Level"]!.GetValue<int>();
+                levelString = levelInt.ToString();
+                Plugin.LogInfo("Level int = " + levelInt, true);
+            }
+            catch { }
+            try
+            {
+                levelString = node["Level"]!.GetValue<string>();
+                Plugin.LogInfo("Level string = " + levelString, true);
+            }
+            catch { }
+
+            switch (levelString.ToLower().Trim())
+            {
+                case "1":
+                case "easy":
+                case "かんたん":
+                case "kantan":
+                    song.Level = EnsoData.EnsoLevelType.Easy;
+                    break;
+                case "2":
+                case "normal":
+                case "ふつう":
+                case "futsu":
+                case "futsuu":
+                    song.Level = EnsoData.EnsoLevelType.Normal;
+                    break;
+                case "3":
+                case "hard":
+                case "muzukashi":
+                case "muzukashii":
+                case "むずかしい":
+                    song.Level = EnsoData.EnsoLevelType.Hard;
+                    break;
+                case "4":
+                case "oni":
+                case "おに":
+                case "extreme":
+                case "mania":
+                    song.Level = EnsoData.EnsoLevelType.Mania;
+                    break;
+                case "5":
+                case "edit":
+                case "extraextreme":
+                case "extra extreme":
+                case "exex":
+                case "ura":
+                case "uraoni":
+                case "えでぃと":
+                    song.Level = EnsoData.EnsoLevelType.Ura;
+                    break;
+                default:
+                    song.Level = EnsoData.EnsoLevelType.Mania;
+                    Plugin.LogError("Error reading Song Level of " + levelString + ", defaulted to Oni");
+                    break;
+            }
+
             song.IsHidden = node["IsHidden"].GetValue<bool>();
             Plugin.LogInfo("Loading Song Data finish", true);
             return song;
@@ -129,10 +221,75 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("Loading Border start", true);
             DaniBorder border = new DaniBorder();
-            border.BorderType = (BorderType)node["BorderType"]!.GetValue<int>();
+            Plugin.LogInfo("Loading BorderType", true);
+            string borderTypeString = string.Empty;
+            try
+            {
+                var borderTypeInt = node["BorderType"]!.GetValue<int>();
+                borderTypeString = borderTypeInt.ToString();
+                Plugin.LogInfo("BorderType int = " + borderTypeInt, true);
+            }
+            catch { }
+            try
+            {
+                borderTypeString = node["BorderType"]!.GetValue<string>();
+                Plugin.LogInfo("BorderType string = " + borderTypeString, true);
+            }
+            catch { }
+
+            switch (borderTypeString.ToLower())
+            {
+                case "1":
+                case "soul gauge":
+                case "soulgauge":
+                    border.BorderType = BorderType.SoulGauge;
+                    break;
+                case "2":
+                case "good":
+                case "goods":
+                    border.BorderType = BorderType.Goods;
+                    break;
+                case "3":
+                case "ok":
+                case "oks":
+                    border.BorderType = BorderType.Oks;
+                    break;
+                case "4":
+                case "bad":
+                case "bads":
+                    border.BorderType = BorderType.Bads;
+                    break;
+                case "5":
+                case "combo":
+                    border.BorderType = BorderType.Combo;
+                    break;
+                case "6":
+                case "drumroll":
+                case "renda":
+                    border.BorderType = BorderType.Drumroll;
+                    break;
+                case "7":
+                case "score":
+                    border.BorderType = BorderType.Score;
+                    break;
+                case "8":
+                case "totalhits":
+                case "total hits":
+                case "totalhit":
+                case "total hit":
+                    border.BorderType = BorderType.TotalHits;
+                    break;
+                default:
+                    border.BorderType = BorderType.TotalHits;
+                    Plugin.LogError("Error reading BorderType of " + borderTypeString + ", defaulted to TotalHits");
+                    break;
+            }
+
+            Plugin.LogInfo("BorderType Loaded", true);
             var redBorder = node["RedBorder"];
             if (redBorder is JsonArray)
             {
+                Plugin.LogInfo("Border is Array", true);
                 var redBorderArray = redBorder.AsArray();
                 var goldBorderArray = node["GoldBorder"].AsArray();
                 for (int i = 0; i < redBorderArray.Count; i++)
@@ -140,11 +297,14 @@ namespace DaniDojo.Managers
                     border.RedReqs.Add(redBorderArray[i].GetValue<int>());
                     border.GoldReqs.Add(goldBorderArray[i].GetValue<int>());
                 }
+                border.IsTotal = false;
             }
             else
             {
+                Plugin.LogInfo("Border is not Array", true);
                 border.RedReqs.Add(node["RedBorder"].GetValue<int>());
                 border.GoldReqs.Add(node["GoldBorder"].GetValue<int>());
+                border.IsTotal = true;
             }
             Plugin.LogInfo("Loading Border finish", true);
             return border;
@@ -179,6 +339,79 @@ namespace DaniDojo.Managers
             course.Order = node["danId"]!.GetValue<int>();
             course.Id = course.Order.ToString();
             course.Title = node["title"]!.GetValue<string>();
+            if (node["Background"] != null)
+            {
+                var background = node["Background"].GetValue<string>();
+                switch (background)
+                {
+                    case "Tan": course.Background = CourseBackground.Tan; break;
+                    case "Wood": course.Background = CourseBackground.Wood; break;
+                    case "Blue": course.Background = CourseBackground.Blue; break;
+                    case "Red": course.Background = CourseBackground.Red; break;
+                    case "Silver": course.Background = CourseBackground.Silver; break;
+                    case "Gold": course.Background = CourseBackground.Gold; break;
+                    default: course.Background = CourseBackground.Tan; break;
+                }
+            }
+            else
+            {
+                switch (course.Title)
+                {
+                    case "5kyuu":
+                    case "五級 5th Kyu":
+                    case "4kyuu":
+                    case "四級 4th Kyu":
+                    case "3kyuu":
+                    case "三級 3rd Kyu":
+                    case "2kyuu":
+                    case "二級 2nd Kyu":
+                    case "1kyuu":
+                    case "一級 1st Kyu":
+                        course.Background = CourseBackground.Wood;
+                        break;
+                    case "1dan":
+                    case "初段 1st Dan":
+                    case "2dan":
+                    case "二段 2nd Dan":
+                    case "3dan":
+                    case "三段 3rd Dan":
+                    case "4dan":
+                    case "四段 4th Dan":
+                    case "5dan":
+                    case "五段 5th Dan":
+                        course.Background = CourseBackground.Blue;
+                        break;
+                    case "6dan":
+                    case "六段 6th Dan":
+                    case "7dan":
+                    case "七段 7th Dan":
+                    case "8dan":
+                    case "八段 8th Dan":
+                    case "9dan":
+                    case "九段 9th Dan":
+                    case "10dan":
+                    case "十段 10th Dan":
+                        course.Background = CourseBackground.Red;
+                        break;
+                    case "11dan":
+                    case "玄人 Kuroto":
+                    case "12dan":
+                    case "名人 Meijin":
+                    case "13dan":
+                    case "超人 Chojin":
+                        course.Background = CourseBackground.Silver;
+                        break;
+                    case "14dan":
+                    case "達人 Tatsujin":
+                        course.Background = CourseBackground.Gold;
+                        break;
+                    default:
+                        course.Background = CourseBackground.Tan;
+                        break;
+                }
+                
+
+            }
 
             // Check to see if "locked" is in the json for this course
             if (node["locked"] != null)

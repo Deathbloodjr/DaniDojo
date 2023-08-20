@@ -24,6 +24,7 @@ namespace DaniDojo.Data
 
     public enum CourseBackground
     {
+        None,
         Tan,
         Wood,
         Blue,

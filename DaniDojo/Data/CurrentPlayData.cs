@@ -9,4 +9,9 @@ namespace DaniDojo.Data
     internal class CurrentPlayData
     {
     }
+
+    public class PlayData
+    {
+
+    }
 }

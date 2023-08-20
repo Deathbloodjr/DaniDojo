@@ -343,14 +343,7 @@ namespace DaniDojo
 
         public static void LogInfo(string value, bool isDetailed = false)
         {
-            //if (ConfigLoggingEnabled != null && ConfigDetailedEnabled != null)
-            {
-                //if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
-                {
-                    Instance.LogInfoInstance(value, isDetailed);
-                }
-            }
-            //Instance.LogInfoInstance(value, isDetailed);
+            Instance.LogInfoInstance(value, isDetailed);
         }
 
         public void LogErrorInstance(string value, bool isDetailed = false)
@@ -362,14 +355,8 @@ namespace DaniDojo
         }
         public static void LogError(string value, bool isDetailed = false)
         {
-            //if (ConfigLoggingEnabled != null && ConfigDetailedEnabled != null)
-            {
-                //if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
-                {
-                    Instance.LogErrorInstance(value, isDetailed);
-                }
-            }
-            //Instance.LogErrorInstance(value, isDetailed);
+            Instance.LogErrorInstance(value, isDetailed);
         }
+
     }
 }
