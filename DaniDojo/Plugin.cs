@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Text.Json.Nodes;
 using System.Linq;
 using System.Text.Json;
+using DaniDojo.Managers;
 
 #if TAIKO_IL2CPP
 using BepInEx.Unity.IL2CPP.Utils;
@@ -30,14 +31,18 @@ namespace DaniDojo
         private Harmony _harmony;
         public static ManualLogSource Log;
 
-        public ConfigEntry<bool> ConfigEnabled;
-        public ConfigEntry<string> ConfigDaniDojoDataLocation;
-        public ConfigEntry<string> ConfigDaniDojoAssetLocation;
-        public ConfigEntry<string> ConfigDaniDojoSaveLocation;
+        public  ConfigEntry<bool> ConfigEnabled;
+        public  ConfigEntry<string> ConfigDaniDojoDataLocation;
+        public  ConfigEntry<string> ConfigDaniDojoAssetLocation;
+        public  ConfigEntry<string> ConfigDaniDojoSaveLocation;
+               
+        public  ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
+               
+        public  ConfigEntry<bool> ConfigLoggingEnabled;
+        public  ConfigEntry<bool> ConfigDetailedEnabled;
 
-        public ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
 
-        public static List<DaniSeriesData> AllDaniData;
+        //public static List<DaniSeriesData> AllDaniData;
         public static List<DaniDojoCurrentPlay> AllDaniScores;
 
 #if TAIKO_MONO
@@ -58,7 +63,8 @@ namespace DaniDojo
 
             InitializeDaniDojoSceneAssetBundle();
 
-            InitializeDaniData();
+            //InitializeDaniData();
+            CourseDataManager.LoadCourseData();
             InitializeDaniRecords();
 
             SetupHarmony();
@@ -94,6 +100,16 @@ namespace DaniDojo
                 "DanRankEnabled",
                 true,
                 "Enables the Dan Rank icon to the left of your name on the nameplate.");
+
+            ConfigLoggingEnabled = Config.Bind("Debug",
+                "LoggingEnabled",
+                false,
+                "Enables logs to be sent to the console.");
+
+            ConfigDetailedEnabled = Config.Bind("Debug",
+                "DetailedLoggingEnabled",
+                false,
+                "Enables more detailed logs to be sent to the console.");
         }
 
         private const string ASSETBUNDLE_NAME = "danidojo.scene";
@@ -111,46 +127,48 @@ namespace DaniDojo
             Plugin.Log.LogInfo("danidojo scene loaded?");
         }
 
-        private void InitializeDaniData()
-        {
-            AllDaniData = new List<DaniSeriesData>();
-            string folderPath = Plugin.Instance.ConfigDaniDojoDataLocation.Value;
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-            var files = dirInfo.GetFiles("*.json", SearchOption.AllDirectories).ToList();
-            for (int i = 0; i < files.Count; i++)
-            {
-                Log.LogInfo("Initializing " + files[i].Name);
-                var text = File.ReadAllText(files[i].FullName);
-                JsonNode node = JsonNode.Parse(text)!;
-                DaniSeriesData seriesData = new DaniSeriesData();
-                seriesData.seriesTitle = node["danSeriesTitle"]!.GetValue<string>();
-                seriesData.seriesId = node["danSeriesId"]!.GetValue<string>();
-                seriesData.isActiveDan = node["isActiveDan"]!.GetValue<bool>();
-                seriesData.order = node["order"]!.GetValue<int>();
-                var courses = node["courses"].AsArray();
-                for (int j = 0; j < courses.Count; j++)
-                {
-                    DaniData course = new DaniData(courses[j]!, seriesData);
+        //private void InitializeDaniData()
+        //{
+        //    AllDaniData = new List<DaniSeriesData>();
+        //    string folderPath = Plugin.Instance.ConfigDaniDojoDataLocation.Value;
+        //    if (!Directory.Exists(folderPath))
+        //    {
+        //        Directory.CreateDirectory(folderPath);
+        //    }
+        //    DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
+        //    var files = dirInfo.GetFiles("*.json", SearchOption.AllDirectories).ToList();
+        //    for (int i = 0; i < files.Count; i++)
+        //    {
+        //        Log.LogInfo("Initializing " + files[i].Name);
+        //        var text = File.ReadAllText(files[i].FullName);
+        //        JsonNode node = JsonNode.Parse(text)!;
+        //        DaniSeriesData seriesData = new DaniSeriesData();
+        //        seriesData.seriesTitle = node["danSeriesTitle"]!.GetValue<string>();
+        //        seriesData.seriesId = node["danSeriesId"]!.GetValue<string>();
+        //        seriesData.isActiveDan = node["isActiveDan"]!.GetValue<bool>();
+        //        seriesData.order = node["order"]!.GetValue<int>();
+        //        var courses = node["courses"].AsArray();
+        //        for (int j = 0; j < courses.Count; j++)
+        //        {
+        //            DaniData course = new DaniData(courses[j]!, seriesData);
 
-                    seriesData.courseData.Add(course);
-                }
-                seriesData.courseData.Sort((x, y) => x.danId > y.danId ? 1 : -1);
+        //            seriesData.courseData.Add(course);
+        //        }
+        //        seriesData.courseData.Sort((x, y) => x.danId > y.danId ? 1 : -1);
 
-                AllDaniData.Add(seriesData);
-            }
-            AllDaniData.Sort((x, y) => x.order > y.order ? 1 : -1);
-            Log.LogInfo("AllDaniData Initialized!");
-        }
+        //        AllDaniData.Add(seriesData);
+        //    }
+        //    // This needs to be more robust
+        //    // Case where x.order == y.order would probably break
+        //    AllDaniData.Sort((x, y) => x.order > y.order ? 1 : -1);
+        //    Log.LogInfo("AllDaniData Initialized!");
+        //}
 
         private void InitializeDaniRecords()
         {
             Plugin.Log.LogInfo("InitializeDaniRecords");
             AllDaniScores = new List<DaniDojoCurrentPlay>();
-            string folderPath = Plugin.Instance.ConfigDaniDojoSaveLocation.Value;
+            string folderPath = ConfigDaniDojoSaveLocation.Value;
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
@@ -182,18 +200,19 @@ namespace DaniDojo
 
 
 
-                for (int i = 0; i < AllDaniData.Count; i++)
+                for (int i = 0; i < CourseDataManager.AllSeriesData.Count; i++)
                 {
-                    for (int j = 0; j < AllDaniData[i].courseData.Count; j++)
+                    for (int j = 0; j < CourseDataManager.AllSeriesData[i].Courses.Count; j++)
                     {
-                        var course = AllDaniData[i].courseData[j];
+                        var course = CourseDataManager.AllSeriesData[i].Courses[j];
                         for (int k = 0; k < AllDaniScores.Count; k++)
                         {
-                            if (course.hash == AllDaniScores[k].hash)
+                            if (course.Hash == AllDaniScores[k].hash)
                             {
                                 Log.LogInfo("Started reading in dan hash: " + AllDaniScores[k].hash);
                                 AllDaniScores[k].course = course;
                                 AllDaniScores[k].danResult = AllDaniScores[k].CalculateRequirements();
+                                AllDaniScores[k].comboResult = AllDaniScores[k].CalculateComboResult();
 
                                 break;
                             }
@@ -249,7 +268,7 @@ namespace DaniDojo
             }
             Plugin.Log.LogInfo("SaveDaniRecords 10");
 
-            var filePath = Path.Combine(Plugin.Instance.ConfigDaniDojoSaveLocation.Value, "dansave.json");
+            var filePath = Path.Combine(ConfigDaniDojoSaveLocation.Value, "dansave.json");
             Plugin.Log.LogInfo("FilePath: " + filePath);
 
             try
@@ -313,5 +332,44 @@ namespace DaniDojo
 #endif
         }
 
+        public void LogInfoInstance(string value, bool isDetailed = false)
+        {
+            // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
+            if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+            {
+                Log.LogInfo(value);
+            }
+        }
+
+        public static void LogInfo(string value, bool isDetailed = false)
+        {
+            //if (ConfigLoggingEnabled != null && ConfigDetailedEnabled != null)
+            {
+                //if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+                {
+                    Instance.LogInfoInstance(value, isDetailed);
+                }
+            }
+            //Instance.LogInfoInstance(value, isDetailed);
+        }
+
+        public void LogErrorInstance(string value, bool isDetailed = false)
+        {
+            if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+            {
+                Log.LogError(value);
+            }
+        }
+        public static void LogError(string value, bool isDetailed = false)
+        {
+            //if (ConfigLoggingEnabled != null && ConfigDetailedEnabled != null)
+            {
+                //if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+                {
+                    Instance.LogErrorInstance(value, isDetailed);
+                }
+            }
+            //Instance.LogErrorInstance(value, isDetailed);
+        }
     }
 }

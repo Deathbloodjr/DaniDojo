@@ -68,4 +68,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Assets\" />
+    <Folder Include="Hooks\" />
+  </ItemGroup>
+
 </Project>

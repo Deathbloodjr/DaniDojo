@@ -39,7 +39,7 @@ namespace DaniDojo.Patches
                     }
 
                     DaniDojoSelectManager.currentDanSongIndex++;
-                    if (DaniDojoSelectManager.currentDanSongIndex < DaniDojoSelectManager.currentCourse.songs.Count)
+                    if (DaniDojoSelectManager.currentDanSongIndex < DaniDojoSelectManager.currentCourse.Songs.Count)
                     {
                         if (result.HasFailed())
                         {
@@ -51,7 +51,7 @@ namespace DaniDojo.Patches
                         }
                         else
                         {
-                            BeginSong(DaniDojoSelectManager.currentCourse.songs[DaniDojoSelectManager.currentDanSongIndex].songId, DaniDojoSelectManager.currentCourse.songs[DaniDojoSelectManager.currentDanSongIndex].level);
+                            BeginSong(DaniDojoSelectManager.currentCourse.Songs[DaniDojoSelectManager.currentDanSongIndex].SongId, DaniDojoSelectManager.currentCourse.Songs[DaniDojoSelectManager.currentDanSongIndex].Level);
                             result.AdvanceSong();
                             return false;
                         }
@@ -151,21 +151,21 @@ namespace DaniDojo.Patches
                     if (hitResult == (int)HitResultTypes.Fuka || hitResult == (int)HitResultTypes.Drop)
                     {
                         result.AddBad();
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Bads);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Bads);
                     }
                     else if (hitResult == (int)HitResultTypes.Ka)
                     {
                         result.AddOk();
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Oks);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Combo);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Oks);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                     }
                     else if (hitResult == (int)HitResultTypes.Ryo)
                     {
                         result.AddGood();
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Goods);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Combo);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Goods);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                     }
                 }
                 else if (info.onpuType == (int)OnpuTypes.Renda || info.onpuType == (int)OnpuTypes.DaiRenda || info.onpuType == (int)OnpuTypes.Imo || info.onpuType == (int)OnpuTypes.GekiRenda)
@@ -173,8 +173,8 @@ namespace DaniDojo.Patches
                     if (hitResult == (int)HitResultTypes.Ryo)
                     {
                         result.AddRenda();
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Drumroll);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Drumroll);
                     }
                 }
             }
@@ -204,21 +204,21 @@ namespace DaniDojo.Patches
                             if (hitResult == (int)HitResultTypes.Fuka || hitResult == (int)HitResultTypes.Drop)
                             {
                                 result.AddBad();
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Bads);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Bads);
                             }
                             else if (hitResult == (int)HitResultTypes.Ka)
                             {
                                 result.AddOk();
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Oks);
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Combo);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Oks);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                             }
                             else if (hitResult == (int)HitResultTypes.Ryo)
                             {
                                 result.AddGood();
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Goods);
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Combo);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Goods);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                             }
                         }
                         else if (info.onpuType == (int)OnpuTypes.Renda || info.onpuType == (int)OnpuTypes.DaiRenda)
@@ -226,16 +226,14 @@ namespace DaniDojo.Patches
                             if (hitResult == (int)HitResultTypes.Ryo)
                             {
                                 result.AddRenda();
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
-                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Drumroll);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
+                                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Drumroll);
                             }
                         }
                     }
                 }
             }
         }
-
-
 
         #endregion
 
@@ -420,7 +418,32 @@ namespace DaniDojo.Patches
 
                 if (DaniDojoSelectManager.currentCourse != null)
                 {
-                    var imageNames = DaniDojoSelectManager.currentCourse.GetDanCourseImagePaths();
+                    (string bgImage, string textImage) imageNames;
+
+                    switch (DaniDojoSelectManager.currentCourse.Id)
+                    {
+                        case "5kyuu": imageNames = ("WoodBg.png", "kyuu5.png"); break;
+                        case "4kyuu": imageNames = ("WoodBg.png", "kyuu4.png"); break;
+                        case "3kyuu": imageNames =  ("WoodBg.png", "kyuu3.png"); break;
+                        case "2kyuu": imageNames =  ("WoodBg.png", "kyuu2.png"); break;
+                        case "1kyuu": imageNames = ("WoodBg.png", "kyuu1.png"); break;
+                        case "1dan": imageNames =  ("BlueBg.png", "dan1.png"); break;
+                        case "2dan": imageNames =  ("BlueBg.png", "dan2.png"); break;
+                        case "3dan": imageNames =  ("BlueBg.png", "dan3.png"); break;
+                        case "4dan": imageNames =  ("BlueBg.png", "dan4.png"); break;
+                        case "5dan": imageNames =  ("BlueBg.png", "dan5.png"); break;
+                        case "6dan": imageNames =  ("RedBg.png", "dan6.png"); break;
+                        case "7dan": imageNames =  ("RedBg.png", "dan7.png"); break;
+                        case "8dan": imageNames =  ("RedBg.png", "dan8.png"); break;
+                        case "9dan": imageNames = ("RedBg.png", "dan9.png"); break;
+                        case "10dan": imageNames =  ("RedBg.png", "dan10.png"); break;
+                        case "11dan": imageNames =  ("SilverBg.png", "kuroto.png"); break;
+                        case "12dan": imageNames =  ("SilverBg.png", "meijin.png"); break;
+                        case "13dan": imageNames =  ("SilverBg.png", "chojin.png"); break;
+                        case "14dan": imageNames = ("GoldBg.png", "tatsujin.png"); break;
+                        default: imageNames = ("TanBg.png", "gaiden.png"); break;
+                    }
+
                     string bgImageName = imageNames.bgImage;
                     string textImageName = imageNames.textImage;
 
@@ -531,7 +554,7 @@ namespace DaniDojo.Patches
 
                 result = new DaniDojoCurrentPlay(DaniDojoSelectManager.currentCourse);
 
-                BeginSong(DaniDojoSelectManager.currentCourse.songs[0].songId, DaniDojoSelectManager.currentCourse.songs[0].level);
+                BeginSong(DaniDojoSelectManager.currentCourse.Songs[0].SongId, DaniDojoSelectManager.currentCourse.Songs[0].Level);
             }
         }
 

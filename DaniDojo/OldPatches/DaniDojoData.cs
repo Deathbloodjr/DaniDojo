@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using DaniDojo.Utility;
+using DaniDojo.Data;
+using DaniDojo.Managers;
 
 namespace DaniDojo.Patches
 {
@@ -422,7 +425,7 @@ namespace DaniDojo.Patches
         gaiden,
     }
 
-    public enum BorderType
+    public enum OldBorderType
     {
         SoulGauge = 1,
         Goods,
@@ -443,6 +446,7 @@ namespace DaniDojo.Patches
 
     public enum DanComboResult
     {
+        None,
         Clear,
         FC,
         DFC,
@@ -450,7 +454,7 @@ namespace DaniDojo.Patches
 
     public class DaniDojoCurrentPlay
     {
-        public DaniData course { get; set; }
+        public Data.DaniCourse course { get; set; }
         public int currentSong { get; set; }
         public int currentCombo { get; set; }
         public int combo { get; set; }
@@ -466,15 +470,15 @@ namespace DaniDojo.Patches
         /// Constructor for creating a clean new CurrentPlay class
         /// </summary>
         /// <param name="newCourse"></param>
-        public DaniDojoCurrentPlay(DaniData newCourse)
+        public DaniDojoCurrentPlay(Data.DaniCourse newCourse)
         {
             course = newCourse;
-            hash = course.hash;
+            hash = course.Hash;
             combo = 0;
             currentCombo = 0;
             songResults = new List<SongResult>();
 
-            for (int i = 0; i < course.songs.Count; i++)
+            for (int i = 0; i < course.Songs.Count; i++)
             {
                 SongResult song = new SongResult();
                 songResults.Add(song);
@@ -559,20 +563,24 @@ namespace DaniDojo.Patches
                     break;
             }
             // Just temporary, I'd want a bit more checks to make sure the songs were all completely played
-            if (songResults.Sum((x) => x.oks) == 0 && songResults.Sum((x) => x.bads) == 0)
+            switch (CalculateComboResult())
             {
-                resultString += " DFC";
-                comboResult = DanComboResult.DFC;
+                case DanComboResult.None:
+                    comboResult = DanComboResult.None;
+                    break;
+                case DanComboResult.Clear:
+                    comboResult = DanComboResult.Clear;
+                    break;
+                case DanComboResult.FC:
+                    resultString += " FC";
+                    comboResult = DanComboResult.FC;
+                    break;
+                case DanComboResult.DFC:
+                    resultString += " DFC";
+                    comboResult = DanComboResult.DFC;
+                    break;
             }
-            else if (songResults.Sum((x) => x.bads) == 0)
-            {
-                resultString += " FC";
-                comboResult = DanComboResult.FC;
-            }
-            else
-            {
-                comboResult = DanComboResult.Clear;
-            }
+            
 
             for (int i = 0; i < songResults.Count; i++)
             {
@@ -721,186 +729,212 @@ namespace DaniDojo.Patches
 
         public void SaveCurrentRecord()
         {
-            var hash = course.GetDanCourseHash();
+            var hash = course.Hash;
 
             playCount = 1;
 
             var index = Plugin.AllDaniScores.FindIndex((x) => x.hash == hash);
             if (index >= 0)
             {
-                
                 Plugin.Log.LogInfo("playCount Before: " + Plugin.AllDaniScores[index].playCount);
                 Plugin.AllDaniScores[index].playCount++;
                 Plugin.Log.LogInfo("playCount After: " + Plugin.AllDaniScores[index].playCount);
 
+                bool isImprovement = false;
+                bool isTie = false;
                 // Set the main result to the newly obtained result, if it is higher
                 if (danResult > Plugin.AllDaniScores[index].danResult)
                 {
                     Plugin.AllDaniScores[index].danResult = danResult;
                     Plugin.AllDaniScores[index].comboResult = comboResult;
+                    isImprovement = true;
                 }
                 else if (danResult == Plugin.AllDaniScores[index].danResult && comboResult > Plugin.AllDaniScores[index].comboResult)
                 {
                     Plugin.AllDaniScores[index].comboResult = comboResult;
+                    isImprovement = true;
+                }
+                else if (danResult == Plugin.AllDaniScores[index].danResult && comboResult == Plugin.AllDaniScores[index].comboResult)
+                {
+                    isTie = true;
                 }
 
-                for (int i = 0; i < course.borders.Count; i++)
+                if (isTie)
                 {
-                    switch (course.borders[i].borderType)
+                    for (int i = 0; i < course.Borders.Count; i++)
                     {
-                        case BorderType.Goods:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.goods) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.goods))
+                        switch (course.Borders[i].BorderType)
+                        {
+                            case Data.BorderType.Goods:
+                                if (course.Borders[i].IsTotal)
+                                {
+                                    if (songResults.Sum((SongResult x) => x.goods) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.goods))
+                                    {
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].goods = songResults[j].goods;
+                                        }
+                                    }
+                                }
+                                else
                                 {
                                     for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].goods = songResults[j].goods;
+                                        if (songResults[j].goods > Plugin.AllDaniScores[index].songResults[j].goods)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].goods = songResults[j].goods;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                break;
+                            case Data.BorderType.Oks:
+                                if (course.Borders[i].IsTotal)
                                 {
-                                    if (songResults[j].goods > Plugin.AllDaniScores[index].songResults[j].goods)
+                                    if (songResults.Sum((SongResult x) => x.oks) < Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.oks))
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].goods = songResults[j].goods;
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].oks = songResults[j].oks;
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case BorderType.Oks:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.oks) < Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.oks))
+                                else
                                 {
                                     for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].oks = songResults[j].oks;
+                                        if (songResults[j].oks < Plugin.AllDaniScores[index].songResults[j].oks)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].oks = songResults[j].oks;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                break;
+                            case Data.BorderType.Bads:
+                                if (course.Borders[i].IsTotal)
                                 {
-                                    if (songResults[j].oks < Plugin.AllDaniScores[index].songResults[j].oks)
+                                    if (songResults.Sum((SongResult x) => x.bads) < Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.bads))
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].oks = songResults[j].oks;
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].bads = songResults[j].bads;
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case BorderType.Bads:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.bads) < Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.bads))
+                                else
                                 {
                                     for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].bads = songResults[j].bads;
+                                        if (songResults[j].bads < Plugin.AllDaniScores[index].songResults[j].bads)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].bads = songResults[j].bads;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                break;
+                            case Data.BorderType.Combo:
+                                if (course.Borders[i].IsTotal)
                                 {
-                                    if (songResults[j].bads < Plugin.AllDaniScores[index].songResults[j].bads)
+                                    if (combo > Plugin.AllDaniScores[index].combo)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].bads = songResults[j].bads;
+                                        Plugin.AllDaniScores[index].combo = combo;
                                     }
                                 }
-                            }
-                            break;
-                        case BorderType.Combo:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (combo > Plugin.AllDaniScores[index].combo)
-                                {
-                                    Plugin.AllDaniScores[index].combo = combo;
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
-                                {
-                                    if (songResults[j].songCombo > Plugin.AllDaniScores[index].songResults[j].songCombo)
-                                    {
-                                        Plugin.AllDaniScores[index].songResults[j].songCombo = songResults[j].songCombo;
-                                    }
-                                }
-                            }
-                            break;
-                        case BorderType.Drumroll:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.renda) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.renda))
+                                else
                                 {
                                     for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].renda = songResults[j].renda;
+                                        if (songResults[j].songCombo > Plugin.AllDaniScores[index].songResults[j].songCombo)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].songCombo = songResults[j].songCombo;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                break;
+                            case Data.BorderType.Drumroll:
+                                if (course.Borders[i].IsTotal)
                                 {
-                                    if (songResults[j].renda > Plugin.AllDaniScores[index].songResults[j].renda)
+                                    if (songResults.Sum((SongResult x) => x.renda) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.renda))
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].renda = songResults[j].renda;
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].renda = songResults[j].renda;
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case BorderType.Score:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.score) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.score))
-                                {
-                                    for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
-                                    {
-                                        Plugin.AllDaniScores[index].songResults[j].score = songResults[j].score;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
-                                {
-                                    if (songResults[j].score > Plugin.AllDaniScores[index].songResults[j].score)
-                                    {
-                                        Plugin.AllDaniScores[index].songResults[j].score = songResults[j].score;
-                                    }
-                                }
-                            }
-                            break;
-                        case BorderType.TotalHits:
-                            if (course.borders[i].isTotalRequirements)
-                            {
-                                if (songResults.Sum((SongResult x) => x.totalHits) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.totalHits))
+                                else
                                 {
                                     for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].totalHits = songResults[j].totalHits;
+                                        if (songResults[j].renda > Plugin.AllDaniScores[index].songResults[j].renda)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].renda = songResults[j].renda;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                break;
+                            case Data.BorderType.Score:
+                                if (course.Borders[i].IsTotal)
                                 {
-                                    if (songResults[j].totalHits > Plugin.AllDaniScores[index].songResults[j].totalHits)
+                                    if (songResults.Sum((SongResult x) => x.score) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.score))
                                     {
-                                        Plugin.AllDaniScores[index].songResults[j].totalHits = songResults[j].totalHits;
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].score = songResults[j].score;
+                                        }
                                     }
                                 }
-                            }
-                            break;
+                                else
+                                {
+                                    for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                    {
+                                        if (songResults[j].score > Plugin.AllDaniScores[index].songResults[j].score)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].score = songResults[j].score;
+                                        }
+                                    }
+                                }
+                                break;
+                            case Data.BorderType.TotalHits:
+                                if (course.Borders[i].IsTotal)
+                                {
+                                    if (songResults.Sum((SongResult x) => x.totalHits) > Plugin.AllDaniScores[index].songResults.Sum((SongResult x) => x.totalHits))
+                                    {
+                                        for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].totalHits = songResults[j].totalHits;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                                    {
+                                        if (songResults[j].totalHits > Plugin.AllDaniScores[index].songResults[j].totalHits)
+                                        {
+                                            Plugin.AllDaniScores[index].songResults[j].totalHits = songResults[j].totalHits;
+                                        }
+                                    }
+                                }
+                                break;
+                        }
                     }
                 }
+               
+                if (isImprovement)
+                {
+                    Plugin.AllDaniScores[index].combo = combo;
+                    for (int j = 0; j < Plugin.AllDaniScores[index].songResults.Count; j++)
+                    {
+                        Plugin.AllDaniScores[index].songResults[j].score = songResults[j].score;
+                        Plugin.AllDaniScores[index].songResults[j].goods = songResults[j].goods;
+                        Plugin.AllDaniScores[index].songResults[j].oks = songResults[j].oks;
+                        Plugin.AllDaniScores[index].songResults[j].bads = songResults[j].bads;
+                        Plugin.AllDaniScores[index].songResults[j].songCombo = songResults[j].songCombo;
+                        Plugin.AllDaniScores[index].songResults[j].renda = songResults[j].renda;
+                        Plugin.AllDaniScores[index].songResults[j].totalHits = songResults[j].totalHits;
+                    }
+                }
+
                 Plugin.AllDaniScores[index].songReached = Math.Max(songReached, Plugin.AllDaniScores[index].songReached);
             }
             else
@@ -926,12 +960,12 @@ namespace DaniDojo.Patches
         public DanResult CalculateRequirements()
         {
             DanResult result = DanResult.GoldClear;
-            for (int i = 0; i < course.borders.Count; i++)
+            for (int i = 0; i < course.Borders.Count; i++)
             {
                 List<int> individualRequirements = new List<int>();
                 for (int j = 0; j < songResults.Count; j++)
                 {
-                    switch (course.borders[i].borderType)
+                    switch (course.Borders[i].BorderType)
                     {
                         case BorderType.SoulGauge:
                             individualRequirements.Add(100);
@@ -948,7 +982,7 @@ namespace DaniDojo.Patches
                             individualRequirements.Add(songResults[j].bads);
                             break;
                         case BorderType.Combo:
-                            if (course.borders[i].isTotalRequirements)
+                            if (course.Borders[i].IsTotal)
                             {
                                 individualRequirements.Add(combo);
                             }
@@ -968,10 +1002,30 @@ namespace DaniDojo.Patches
                             break;
                     }
                 }
-                result = (DanResult)Math.Min((int)result, (int)course.borders[i].CheckRequirement(individualRequirements));
+                //result = (DanResult)Math.Min((int)result, (int)course.Borders[i].CheckRequirement(individualRequirements));
             }
 
             return result;
+        }
+
+        public DanComboResult CalculateComboResult()
+        {
+            if (songResults.Sum((x) => x.oks + x.bads) == 0 && songReached == course.Songs.Count - 1)
+            {
+                return DanComboResult.DFC;
+            }
+            else if (songResults.Sum((x) => x.bads) == 0 && songReached == course.Songs.Count - 1)
+            {
+                return DanComboResult.FC;
+            }
+            else if (songReached == course.Songs.Count - 1)
+            {
+                return DanComboResult.Clear;
+            }
+            else
+            {
+                return DanComboResult.None;
+            }
         }
 
         /// <summary>
@@ -985,14 +1039,14 @@ namespace DaniDojo.Patches
             {
                 Plugin.Log.LogInfo("HasFailed Start");
             }
-            for (int i = 0; i < course.borders.Count; i++)
+            for (int i = 0; i < course.Borders.Count; i++)
             {
-                if (course.borders[i].isTotalRequirements)
+                if (course.Borders[i].IsTotal)
                 {
-                    if (course.borders[i].borderType == BorderType.Oks)
+                    if (course.Borders[i].BorderType == BorderType.Oks)
                     {
                         var current = songResults.Sum((x) => x.oks);
-                        var requirement = course.borders[i].redBorders.Sum();
+                        var requirement = course.Borders[i].RedReqs.Sum();
                         if (isDebugLog)
                         {
                             Plugin.Log.LogInfo("HasFailed: BorderType.Oks: current = " + current);
@@ -1003,10 +1057,10 @@ namespace DaniDojo.Patches
                             return true;
                         }
                     }
-                    else if (course.borders[i].borderType == BorderType.Bads)
+                    else if (course.Borders[i].BorderType == BorderType.Bads)
                     {
                         var current = songResults.Sum((x) => x.bads);
-                        var requirement = course.borders[i].redBorders.Sum();
+                        var requirement = course.Borders[i].RedReqs.Sum();
                         if (isDebugLog)
                         {
                             Plugin.Log.LogInfo("HasFailed: BorderType.Bads: current = " + current);
@@ -1022,11 +1076,11 @@ namespace DaniDojo.Patches
                 {
                     for (int j = 0; j < currentSong + 1; j++)
                     {
-                        switch (course.borders[i].borderType)
+                        switch (course.Borders[i].BorderType)
                         {
                             case BorderType.Goods:
                                 var current = songResults[j].goods;
-                                var requirement = course.borders[i].redBorders[j];
+                                var requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Goods: current = " + current);
@@ -1039,7 +1093,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.Oks:
                                 current = songResults[j].oks;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Oks: current = " + current);
@@ -1052,7 +1106,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.Bads:
                                 current = songResults[j].bads;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Bads: current = " + current);
@@ -1065,7 +1119,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.Combo:
                                 current = songResults[j].songCombo;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Combo: current = " + current);
@@ -1078,7 +1132,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.Drumroll:
                                 current = songResults[j].renda;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Drumroll: current = " + current);
@@ -1091,7 +1145,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.Score:
                                 current = songResults[j].score;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.Score: current = " + current);
@@ -1104,7 +1158,7 @@ namespace DaniDojo.Patches
                                 break;
                             case BorderType.TotalHits:
                                 current = songResults[j].goods + songResults[j].oks + songResults[j].renda;
-                                requirement = course.borders[i].redBorders[j];
+                                requirement = course.Borders[i].RedReqs[j];
                                 if (isDebugLog)
                                 {
                                     Plugin.Log.LogInfo("HasFailed: BorderType.TotalHits: current = " + current);

@@ -8,6 +8,8 @@ using DaniDojo.Patches;
 using HarmonyLib;
 using System.IO;
 using System.Text.Json.Nodes;
+using DaniDojo.Data;
+using DaniDojo.Managers;
 
 namespace DaniDojo.Patches
 {
@@ -20,7 +22,7 @@ namespace DaniDojo.Patches
 
         public static bool isInDan = false; // Only set to true for testing, set to false for the real thing
         public static int currentDanSongIndex = -1;
-        public static DaniData currentDan;
+        public static Data.DaniCourse currentDan;
 
 
         [HarmonyPatch(typeof(SongSelectManager))]
@@ -86,7 +88,7 @@ namespace DaniDojo.Patches
             }
         }
         public SongSelectManager SceneManager { get; set; }
-        public DaniSeriesData selectedSeries;
+        public DaniSeries selectedSeries;
 
         private void Start()
         {
@@ -112,19 +114,19 @@ namespace DaniDojo.Patches
                 {
                     selectedSeries = null;
                 }
-                for (int j = 0; j < selectedSeries.courseData.Count; j++)
+                for (int j = 0; j < selectedSeries.Courses.Count; j++)
                 {
                     buttonRow = (j + 1) / numButtonsPerRow;
                     buttonCol = (j + 1) % numButtonsPerRow;
-                    if (GUI.Button(new Rect(ButtonLeft + (buttonCol * ButtonWidth), ButtonTop + (buttonRow * ButtonHeight), ButtonWidth, ButtonHeight), selectedSeries.courseData[j].title))
+                    if (GUI.Button(new Rect(ButtonLeft + (buttonCol * ButtonWidth), ButtonTop + (buttonRow * ButtonHeight), ButtonWidth, ButtonHeight), selectedSeries.Courses[j].Title))
                     {
-                        DaniDojoTempSelect.currentDan = selectedSeries.courseData[j];
+                        DaniDojoTempSelect.currentDan = selectedSeries.Courses[j];
                         DaniDojoTempSelect.isInDan = true;
                         DaniDojoTempSelect.currentDanSongIndex = 0;
 
                         DaniDojoTempEnso.result = new DaniDojoCurrentPlay(DaniDojoTempSelect.currentDan);
 
-                        DaniDojoTempEnso.BeginSong(DaniDojoTempSelect.currentDan.songs[0].songId, DaniDojoTempSelect.currentDan.songs[0].level);
+                        DaniDojoTempEnso.BeginSong(DaniDojoTempSelect.currentDan.Songs[0].SongId, DaniDojoTempSelect.currentDan.Songs[0].Level);
                     }
                 }
             }
@@ -137,13 +139,13 @@ namespace DaniDojo.Patches
                 int ButtonTop = 300;
                 int ButtonHeight = 30;
 
-                for (int j = 0; j < Plugin.AllDaniData.Count; j++)
+                for (int j = 0; j < CourseDataManager.AllSeriesData.Count; j++)
                 {
                     int buttonRow = (j) / numButtonsPerRow;
                     int buttonCol = (j) % numButtonsPerRow;
-                    if (GUI.Button(new Rect(ButtonLeft + (buttonCol * ButtonWidth), ButtonTop + (buttonRow * ButtonHeight), ButtonWidth, ButtonHeight), Plugin.AllDaniData[j].seriesTitle))
+                    if (GUI.Button(new Rect(ButtonLeft + (buttonCol * ButtonWidth), ButtonTop + (buttonRow * ButtonHeight), ButtonWidth, ButtonHeight), CourseDataManager.AllSeriesData[j].Title))
                     {
-                        selectedSeries = Plugin.AllDaniData[j];
+                        selectedSeries = CourseDataManager.AllSeriesData[j];
                     }
                 }
             }
