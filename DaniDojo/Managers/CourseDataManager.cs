@@ -17,7 +17,7 @@ namespace DaniDojo.Managers
         public static void LoadCourseData()
         {
             Plugin.LogInfo("LoadCourseData Start", true);
-            AllSeriesData = new List<DaniSeries>();
+            AllSeriesData = new List<DaniSeries>(); // I'm not sure if this line is actually needed, or even detrimental
             AllSeriesData = LoadCourseData(Plugin.Instance.ConfigDaniDojoDataLocation.Value);
             Plugin.LogInfo("LoadCourseData Finished", true);
         }
@@ -150,20 +150,33 @@ namespace DaniDojo.Managers
             song.SongId = node["SongId"].GetValue<string>();
             song.TitleEng = node["TitleEng"].GetValue<string>();
             song.TitleJp = node["TitleJp"].GetValue<string>();
-            song.Level = (EnsoData.EnsoLevelType)(node["Level"]!.GetValue<int>() - 1);
+            //song.Level = (EnsoData.EnsoLevelType)(node["Level"]!.GetValue<int>() - 1);
 
             string levelString = string.Empty;
             try
             {
-                var levelInt = node["Level"]!.GetValue<int>();
+                var levelInt = node["Level"].GetValue<int>();
                 levelString = levelInt.ToString();
                 Plugin.LogInfo("Level int = " + levelInt, true);
             }
             catch { }
             try
             {
-                levelString = node["Level"]!.GetValue<string>();
+                levelString = node["Level"].GetValue<string>();
                 Plugin.LogInfo("Level string = " + levelString, true);
+            }
+            catch { }
+            try
+            {
+                var levelInt = node["Course"].GetValue<int>();
+                levelString = levelInt.ToString();
+                Plugin.LogInfo("Course int = " + levelInt, true);
+            }
+            catch { }
+            try
+            {
+                levelString = node["Course"].GetValue<string>();
+                Plugin.LogInfo("Course string = " + levelString, true);
             }
             catch { }
 

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace DaniDojo.Data
 {
-    public class SaveData
+    public class DaniSaveData
     {
         public List<SaveCourse> Courses { get; set; }
 
-        public SaveData()
+        public DaniSaveData()
         {
             Courses = new List<SaveCourse>();
         }
@@ -107,5 +107,32 @@ namespace DaniDojo.Data
         {
             PlayData = new List<PlayData>();
         }
+    }
+
+    public struct PlayModifiers
+    {
+        public DataConst.SpeedTypes Speed { get; set; }
+        public DataConst.OptionOnOff Vanish { get; set; } // Dron
+        public DataConst.OptionOnOff Inverse { get; set; } // Reverse
+        public DataConst.RandomLevel Random { get; set; }
+        public DataConst.SpecialTypes Special { get; set; }
+        public PlayModifiers(DataConst.SpeedTypes speed, DataConst.OptionOnOff vanish, DataConst.OptionOnOff inverse, DataConst.RandomLevel random, DataConst.SpecialTypes special)
+        {
+            Speed = speed;
+            Vanish = vanish;
+            Inverse = inverse;
+            Random = random;
+            Special = special;
+        }
+    }
+
+    public class PlayData
+    {
+        public DaniRankCombo RankCombo { get; set; }
+        public DateTime PlayDateTime { get; set; }
+        public PlayModifiers Modifiers { get; set; }
+        public int TotalCombo { get; set; }
+        public int SoulGauge { get; set; }
+        public List<SongPlayData> SongPlayData { get; set; }
     }
 }

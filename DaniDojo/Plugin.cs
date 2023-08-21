@@ -296,13 +296,16 @@ namespace DaniDojo
 
             if (ConfigEnabled.Value)
             {
-                if (!Directory.Exists(ConfigDaniDojoDataLocation.Value))
-                {
-                    Directory.CreateDirectory(ConfigDaniDojoDataLocation.Value);
-                }
+                // This stuff shouldn't be done here
+                // It should be in their respective managers
+                // And each of these will have their own managers
                 if (!Directory.Exists(ConfigDaniDojoAssetLocation.Value))
                 {
                     Directory.CreateDirectory(ConfigDaniDojoAssetLocation.Value);
+                }
+                if (!Directory.Exists(ConfigDaniDojoSaveLocation.Value))
+                {
+                    Directory.CreateDirectory(ConfigDaniDojoSaveLocation.Value);
                 }
 
 
