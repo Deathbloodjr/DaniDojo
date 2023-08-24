@@ -65,7 +65,8 @@ namespace DaniDojo
 
             //InitializeDaniData();
             CourseDataManager.LoadCourseData();
-            InitializeDaniRecords();
+            //InitializeDaniRecords();
+            SaveDataManager.LoadSaveData();
 
             SetupHarmony();
         }
