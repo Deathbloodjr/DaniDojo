@@ -21,10 +21,10 @@ namespace DaniDojo.Managers
         #region Loading
         public static void LoadSaveData()
         {
-            Plugin.LogInfo("LoadSaveData Start", true);
+            Plugin.LogInfo("LoadSaveData Start", 1);
             SaveData = new DaniSaveData(); // I'm not sure if this line is actually needed, or even detrimental
             SaveData = LoadSaveData(Plugin.Instance.ConfigDaniDojoSaveLocation.Value);
-            Plugin.LogInfo("LoadSaveData Finished", true);
+            Plugin.LogInfo("LoadSaveData Finished", 1);
         }
 
         static DaniSaveData LoadSaveData(string folderLocation)
@@ -48,8 +48,9 @@ namespace DaniDojo.Managers
             {
                 var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
                 data = LoadOldSaveFile(node);
+                SaveDaniSaveData(data);
             }
-            
+
 
             return data;
         }
@@ -77,9 +78,15 @@ namespace DaniDojo.Managers
             var playDataObject = node["PlayData"].AsArray();
             for (int i = 0; i < playDataObject.Count; i++)
             {
-                course.PlayData.Add(LoadPlayDataObject(playDataObject[i]));
+                var playData = LoadPlayDataObject(playDataObject[i]);
+                var rank = DaniPlayManager.CalculateRankBorders(CourseDataManager.GetCourseFromHash(course.Hash), playData);
+                var combo = DaniPlayManager.CalculateComboRank(playData);
+                playData.RankCombo = new DaniRankCombo(rank, combo);
+                course.PlayData.Add(playData);
             }
 
+            course.SongReached = course.PlayData.Max((x) => x.SongReached);
+            course.RankCombo = course.PlayData.Max((x) => x.RankCombo);
             return course;
         }
 
@@ -88,13 +95,14 @@ namespace DaniDojo.Managers
             PlayData playData = new PlayData();
 
             playData.PlayDateTime = node["DateTime"].GetValue<DateTime>();
+            var modifiers = node["Modifiers"];
             playData.Modifiers = new PlayModifiers(
-                (DataConst.SpeedTypes)node["Speed"].GetValue<int>(),
-                (DataConst.OptionOnOff)node["Vanish"].GetValue<int>(),
-                (DataConst.OptionOnOff)node["Inverse"].GetValue<int>(),
-                (DataConst.RandomLevel)node["Random"].GetValue<int>(),
-                (DataConst.SpecialTypes)node["Special"].GetValue<int>());
-            playData.TotalCombo = node["TotalCombo"].GetValue<int>();
+                (DataConst.SpeedTypes)modifiers["Speed"].GetValue<int>(),
+                (DataConst.OptionOnOff)modifiers["Vanish"].GetValue<int>(),
+                (DataConst.OptionOnOff)modifiers["Inverse"].GetValue<int>(),
+                (DataConst.RandomLevel)modifiers["Random"].GetValue<int>(),
+                (DataConst.SpecialTypes)modifiers["Special"].GetValue<int>());
+            playData.MaxCombo = node["MaxCombo"].GetValue<int>();
             playData.SoulGauge = node["SoulGauge"].GetValue<int>();
 
             var songDataObject = node["Songs"].AsArray();
@@ -103,6 +111,20 @@ namespace DaniDojo.Managers
                 playData.SongPlayData.Add(LoadSongDataObject(songDataObject[i]));
             }
 
+            for (int i = 0; i < playData.SongPlayData.Count; i++)
+            {
+                if (playData.SongPlayData[i].Score == 0 &&
+                    playData.SongPlayData[i].Goods == 0 &&
+                    playData.SongPlayData[i].Oks == 0 &&
+                    playData.SongPlayData[i].Bads == 0 &&
+                    playData.SongPlayData[i].Drumroll == 0 &&
+                    playData.SongPlayData[i].Combo == 0)
+                {
+                    playData.SongReached = i;
+                    break;
+                }
+                playData.SongReached = i + 1;
+            }
             return playData;
         }
 
@@ -126,7 +148,7 @@ namespace DaniDojo.Managers
 
             data.Courses = new List<SaveCourse>();
 
-            var courses = node["Courses"].AsArray();
+            var courses = node["courses"].AsArray();
             for (int i = 0; i < courses.Count; i++)
             {
                 data.Courses.Add(LoadOldCourseObject(courses[i]));
@@ -143,13 +165,17 @@ namespace DaniDojo.Managers
 
             PlayData play = new PlayData();
             play.SoulGauge = node["totalSoulGauge"].GetValue<int>();
-            play.TotalCombo = node["totalCombo"].GetValue<int>();
+            play.MaxCombo = node["totalCombo"].GetValue<int>();
 
             var songsObject = node["songScores"].AsArray();
             for (int i = 0; i < songsObject.Count; i++)
             {
                 play.SongPlayData.Add(LoadOldSongObject(songsObject[i]));
             }
+
+            var rank = DaniPlayManager.CalculateRankBorders(CourseDataManager.GetCourseFromHash(course.Hash), play);
+            var combo = DaniPlayManager.CalculateComboRank(play);
+            play.RankCombo = new DaniRankCombo(rank, combo);
 
             course.PlayData.Add(play);
 
@@ -182,6 +208,7 @@ namespace DaniDojo.Managers
 
         static void SaveDaniSaveData(DaniSaveData saveData)
         {
+            Plugin.LogInfo("Saving Dani Data", 1);
             var saveJsonObject = new JsonObject()
             {
                 ["Courses"] = new JsonArray(),
@@ -212,6 +239,7 @@ namespace DaniDojo.Managers
                 File.Move(Path.Combine(folderLocation, TmpSaveFileName), Path.Combine(folderLocation, SaveFileName));
             }
 
+            Plugin.LogInfo("Saving Dani Data Complete", 1);
         }
 
         static JsonObject SaveCourseObject(SaveCourse course)
@@ -235,7 +263,7 @@ namespace DaniDojo.Managers
         {
             var playDataJsonObject = new JsonObject()
             {
-                ["DateTime"] = playData.PlayDateTime.ToString(),
+                ["DateTime"] = playData.PlayDateTime.ToString("s"),
                 ["Modifiers"] = new JsonObject()
                 {
                     ["Speed"] = (int)playData.Modifiers.Speed,
@@ -244,7 +272,7 @@ namespace DaniDojo.Managers
                     ["Random"] = (int)playData.Modifiers.Random,
                     ["Special"] = (int)playData.Modifiers.Special,
                 },
-                ["TotalCombo"] = playData.TotalCombo,
+                ["MaxCombo"] = playData.MaxCombo,
                 ["SoulGauge"] = playData.SoulGauge,
                 ["Songs"] = new JsonArray(),
             };
@@ -273,5 +301,70 @@ namespace DaniDojo.Managers
 
         #endregion
 
+		static public void AddPlayData(uint hash, PlayData play)
+        {
+            var course = GetCourseRecord(hash);
+            course.PlayData.Add(play);
+        }
+
+        static public SaveCourse GetCourseRecord(uint hash)
+        {
+            for (int i = 0; i < SaveData.Courses.Count; i++)
+            {
+                if (SaveData.Courses[i].Hash == hash)
+                {
+                    return SaveData.Courses[i];
+                }
+            }
+            // Do I return null?
+            // Or do I return an empty SaveCourse?
+            var course = new SaveCourse(hash);
+            SaveData.Courses.Add(course);
+            return course;
+        }
+
+        /// <summary>
+        /// This returns the course after the highest cleared course, or the highest course if the highest has been cleared.
+        /// </summary>
+        /// <param name="series">The series to search for the course.</param>
+        /// <returns>The next highest course.</returns>
+        static public DaniCourse GetDefaultCourse(DaniSeries series)
+        {
+            // First find the first dan, which is generally the starting point
+            // Then move up from there to find the highest cleared dan
+            int highestClearedIndex = 0;
+            for (int i = 0; i < series.Courses.Count; i++)
+            {
+                if (series.Courses[i].Id == "1dan")
+                {
+                    highestClearedIndex = i;
+                    break;
+                }
+            }
+
+            for (int i = highestClearedIndex; i < series.Courses.Count - 1; i++)
+            {
+                var saveCourse = GetCourseRecord(series.Courses[i].Hash);
+                if (saveCourse != null && saveCourse.RankCombo.Rank >= DaniRank.RedClear)
+                {
+                    highestClearedIndex = i;
+                }
+            }
+
+            return series.Courses[highestClearedIndex + 1];
+        }
+
+        static public bool IsCourseLocked(DaniSeries series, DaniCourse course)
+        {
+            if (!course.IsLocked)
+            {
+                return false;
+            }
+            var previousCourse = CourseDataManager.GetPreviousCourse(series, course);
+            var saveData = GetCourseRecord(previousCourse.Hash);
+            // If the previous rank is red or higher, this course is not locked
+            // This course is locked if it is not red or higher
+            return !(saveData.RankCombo.Rank >= DaniRank.RedClear);
+        }
     }
 }

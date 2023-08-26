@@ -33,6 +33,32 @@ namespace DaniDojo.Data
         Gold,
     }
 
+    // I'm not sure if I'll end up using this, but I'd like to keep it for now just in case.
+    public enum DaniCourseLevel
+    {
+        None,
+        kyuu5,
+        kyuu4,
+        kyuu3,
+        kyuu2,
+        kyuu1,
+        dan1,
+        dan2,
+        dan3,
+        dan4,
+        dan5,
+        dan6,
+        dan7,
+        dan8,
+        dan9,
+        dan10,
+        kuroto,
+        meijin,
+        chojin,
+        tatsujin,
+        gaiden,
+    }
+
     public class DaniCourse
     {
         public DaniSeries Parent { get; set; }

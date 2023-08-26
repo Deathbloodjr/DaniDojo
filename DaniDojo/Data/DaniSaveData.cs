@@ -102,10 +102,24 @@ namespace DaniDojo.Data
         public DaniCourse Course { get; set; }
         public DaniRankCombo RankCombo { get; set; }
         public List<PlayData> PlayData { get; set; }
+        public int SongReached { get; set; } // 1 indexed, where 0 means no song played
 
         public SaveCourse()
         {
+            SetDefaultData();
+        }
+
+        public SaveCourse(uint hash)
+        {
+            SetDefaultData();
+            Hash = hash;
+        }
+
+        private void SetDefaultData()
+        {
             PlayData = new List<PlayData>();
+            SongReached = 0;
+            RankCombo = new DaniRankCombo(DaniRank.None, DaniCombo.None);
         }
     }
 
@@ -124,15 +138,5 @@ namespace DaniDojo.Data
             Random = random;
             Special = special;
         }
-    }
-
-    public class PlayData
-    {
-        public DaniRankCombo RankCombo { get; set; }
-        public DateTime PlayDateTime { get; set; }
-        public PlayModifiers Modifiers { get; set; }
-        public int TotalCombo { get; set; }
-        public int SoulGauge { get; set; }
-        public List<SongPlayData> SongPlayData { get; set; }
     }
 }

@@ -39,11 +39,11 @@ namespace DaniDojo
         public  ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
                
         public  ConfigEntry<bool> ConfigLoggingEnabled;
-        public  ConfigEntry<bool> ConfigDetailedEnabled;
+        public  ConfigEntry<int> ConfigLoggingDetailLevelEnabled;
 
 
         //public static List<DaniSeriesData> AllDaniData;
-        public static List<DaniDojoCurrentPlay> AllDaniScores;
+        //public static List<DaniDojoCurrentPlay> AllDaniScores;
 
 #if TAIKO_MONO
         private void Awake()
@@ -107,10 +107,10 @@ namespace DaniDojo
                 false,
                 "Enables logs to be sent to the console.");
 
-            ConfigDetailedEnabled = Config.Bind("Debug",
-                "DetailedLoggingEnabled",
-                false,
-                "Enables more detailed logs to be sent to the console.");
+            ConfigLoggingDetailLevelEnabled = Config.Bind("Debug",
+                "LoggingDetailLevelEnabled",
+                0,
+                "Enables more detailed logs to be sent to the console. The higher the number, the more logs will be displayed. Mostly for my own debugging.");
         }
 
         private const string ASSETBUNDLE_NAME = "danidojo.scene";
@@ -165,130 +165,130 @@ namespace DaniDojo
         //    Log.LogInfo("AllDaniData Initialized!");
         //}
 
-        private void InitializeDaniRecords()
-        {
-            Plugin.Log.LogInfo("InitializeDaniRecords");
-            AllDaniScores = new List<DaniDojoCurrentPlay>();
-            string folderPath = ConfigDaniDojoSaveLocation.Value;
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            Plugin.Log.LogInfo("1");
-            DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-            var files = dirInfo.GetFiles("dansave.json").ToList();
-            Plugin.Log.LogInfo("2");
-            if (files.Count != 0)
-            {
-                var text = File.ReadAllText(files[0].FullName);
-                JsonNode node = JsonNode.Parse(text)!;
-                Plugin.Log.LogInfo("3");
+        //private void InitializeDaniRecords()
+        //{
+        //    Plugin.Log.LogInfo("InitializeDaniRecords");
+        //    AllDaniScores = new List<DaniDojoCurrentPlay>();
+        //    string folderPath = ConfigDaniDojoSaveLocation.Value;
+        //    if (!Directory.Exists(folderPath))
+        //    {
+        //        Directory.CreateDirectory(folderPath);
+        //    }
+        //    Plugin.Log.LogInfo("1");
+        //    DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
+        //    var files = dirInfo.GetFiles("dansave.json").ToList();
+        //    Plugin.Log.LogInfo("2");
+        //    if (files.Count != 0)
+        //    {
+        //        var text = File.ReadAllText(files[0].FullName);
+        //        JsonNode node = JsonNode.Parse(text)!;
+        //        Plugin.Log.LogInfo("3");
 
-                //List<uint> allHashes = new List<uint>();
-                var courses = node["courses"].AsArray();
-                Plugin.Log.LogInfo("4");
-                for (int i = 0; i < courses.Count; i++)
-                {
-                    //allHashes.Add(courses[i]!["danHash"].GetValue<uint>());
-                    Plugin.Log.LogInfo("courses[i]!.GetValue<uint>(): " + courses[i]!["danHash"].GetValue<uint>());
-                    DaniDojoCurrentPlay record = new DaniDojoCurrentPlay(courses[i]);
+        //        //List<uint> allHashes = new List<uint>();
+        //        var courses = node["courses"].AsArray();
+        //        Plugin.Log.LogInfo("4");
+        //        for (int i = 0; i < courses.Count; i++)
+        //        {
+        //            //allHashes.Add(courses[i]!["danHash"].GetValue<uint>());
+        //            Plugin.Log.LogInfo("courses[i]!.GetValue<uint>(): " + courses[i]!["danHash"].GetValue<uint>());
+        //            DaniDojoCurrentPlay record = new DaniDojoCurrentPlay(courses[i]);
 
-                    Log.LogInfo("1");
+        //            Log.LogInfo("1");
                     
-                    AllDaniScores.Add(record);
-                }
-                Plugin.Log.LogInfo("5");
+        //            AllDaniScores.Add(record);
+        //        }
+        //        Plugin.Log.LogInfo("5");
 
 
 
-                for (int i = 0; i < CourseDataManager.AllSeriesData.Count; i++)
-                {
-                    for (int j = 0; j < CourseDataManager.AllSeriesData[i].Courses.Count; j++)
-                    {
-                        var course = CourseDataManager.AllSeriesData[i].Courses[j];
-                        for (int k = 0; k < AllDaniScores.Count; k++)
-                        {
-                            if (course.Hash == AllDaniScores[k].hash)
-                            {
-                                Log.LogInfo("Started reading in dan hash: " + AllDaniScores[k].hash);
-                                AllDaniScores[k].course = course;
-                                AllDaniScores[k].danResult = AllDaniScores[k].CalculateRequirements();
-                                AllDaniScores[k].comboResult = AllDaniScores[k].CalculateComboResult();
+        //        for (int i = 0; i < CourseDataManager.AllSeriesData.Count; i++)
+        //        {
+        //            for (int j = 0; j < CourseDataManager.AllSeriesData[i].Courses.Count; j++)
+        //            {
+        //                var course = CourseDataManager.AllSeriesData[i].Courses[j];
+        //                for (int k = 0; k < AllDaniScores.Count; k++)
+        //                {
+        //                    if (course.Hash == AllDaniScores[k].hash)
+        //                    {
+        //                        Log.LogInfo("Started reading in dan hash: " + AllDaniScores[k].hash);
+        //                        AllDaniScores[k].course = course;
+        //                        AllDaniScores[k].danResult = AllDaniScores[k].CalculateRequirements();
+        //                        AllDaniScores[k].comboResult = AllDaniScores[k].CalculateComboResult();
 
-                                break;
-                            }
-                        }
-                    }
-                }
-                Plugin.Log.LogInfo("6");
+        //                        break;
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        Plugin.Log.LogInfo("6");
 
-            }
-            Plugin.Log.LogInfo("InitializeDaniRecords Finished!");
-        }
+        //    }
+        //    Plugin.Log.LogInfo("InitializeDaniRecords Finished!");
+        //}
 
-        public void SaveDaniRecords()
-        {
-            Plugin.Log.LogInfo("SaveDaniRecords Start");
-            var scoresJsonObject = new JsonObject()
-            {
-                ["courses"] = new JsonArray(),
-            };
+        //public void SaveDaniRecords()
+        //{
+        //    Plugin.Log.LogInfo("SaveDaniRecords Start");
+        //    var scoresJsonObject = new JsonObject()
+        //    {
+        //        ["courses"] = new JsonArray(),
+        //    };
 
-            for (int i = 0; i < AllDaniScores.Count; i++)
-            {
-                Plugin.Log.LogInfo("Starting course " + (i + 1));
-                var course = new JsonObject
-                {
-                    ["danHash"] = AllDaniScores[i].hash,
-                    ["danResult"] = (int)AllDaniScores[i].danResult,
-                    ["danComboResult"] = (int)AllDaniScores[i].comboResult,
-                    ["playCount"] = AllDaniScores[i].playCount,
-                    ["songReached"] = AllDaniScores[i].songReached,
-                    ["totalSoulGauge"] = 100,
-                    ["totalCombo"] = AllDaniScores[i].combo,
-                    ["songScores"] = new JsonArray(),
-                };
+        //    for (int i = 0; i < AllDaniScores.Count; i++)
+        //    {
+        //        Plugin.Log.LogInfo("Starting course " + (i + 1));
+        //        var course = new JsonObject
+        //        {
+        //            ["danHash"] = AllDaniScores[i].hash,
+        //            ["danResult"] = (int)AllDaniScores[i].danResult,
+        //            ["danComboResult"] = (int)AllDaniScores[i].comboResult,
+        //            ["playCount"] = AllDaniScores[i].playCount,
+        //            ["songReached"] = AllDaniScores[i].songReached,
+        //            ["totalSoulGauge"] = 100,
+        //            ["totalCombo"] = AllDaniScores[i].combo,
+        //            ["songScores"] = new JsonArray(),
+        //        };
 
-                for (int j = 0; j < AllDaniScores[i].songResults.Count; j++)
-                {
-                    var song = AllDaniScores[i].songResults[j];
-                    var json = new JsonObject()
-                    {
-                        ["score"] = song.score,
-                        ["goods"] = song.goods,
-                        ["oks"] = song.oks,
-                        ["bads"] = song.bads,
-                        ["combo"] = song.songCombo,
-                        ["drumroll"] = song.renda,
-                        ["totalhits"] = song.goods + song.oks + song.renda,
-                    };
-                    course["songScores"].AsArray().Add(json);
-                }
-                scoresJsonObject["courses"].AsArray().Add(course);
-                Plugin.Log.LogInfo("Added course " + (i + 1));
-            }
-            Plugin.Log.LogInfo("SaveDaniRecords 10");
+        //        for (int j = 0; j < AllDaniScores[i].songResults.Count; j++)
+        //        {
+        //            var song = AllDaniScores[i].songResults[j];
+        //            var json = new JsonObject()
+        //            {
+        //                ["score"] = song.score,
+        //                ["goods"] = song.goods,
+        //                ["oks"] = song.oks,
+        //                ["bads"] = song.bads,
+        //                ["combo"] = song.songCombo,
+        //                ["drumroll"] = song.renda,
+        //                ["totalhits"] = song.goods + song.oks + song.renda,
+        //            };
+        //            course["songScores"].AsArray().Add(json);
+        //        }
+        //        scoresJsonObject["courses"].AsArray().Add(course);
+        //        Plugin.Log.LogInfo("Added course " + (i + 1));
+        //    }
+        //    Plugin.Log.LogInfo("SaveDaniRecords 10");
 
-            var filePath = Path.Combine(ConfigDaniDojoSaveLocation.Value, "dansave.json");
-            Plugin.Log.LogInfo("FilePath: " + filePath);
+        //    var filePath = Path.Combine(ConfigDaniDojoSaveLocation.Value, "dansave.json");
+        //    Plugin.Log.LogInfo("FilePath: " + filePath);
 
-            try
-            {
-                JsonSerializerOptions options = new JsonSerializerOptions();
-                options.WriteIndented = true;
-                var jsonString = scoresJsonObject.ToJsonString(options);
-                //Plugin.Log.LogInfo("JsonString:" + jsonString);
-                File.WriteAllText(filePath, jsonString);
-            }
-            catch (Exception e)
-            {
-                Log.LogInfo("Error creating JsonString: " + e.Message);
-                throw;
-            }
+        //    try
+        //    {
+        //        JsonSerializerOptions options = new JsonSerializerOptions();
+        //        options.WriteIndented = true;
+        //        var jsonString = scoresJsonObject.ToJsonString(options);
+        //        //Plugin.Log.LogInfo("JsonString:" + jsonString);
+        //        File.WriteAllText(filePath, jsonString);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Log.LogInfo("Error creating JsonString: " + e.Message);
+        //        throw;
+        //    }
 
 
-            Plugin.Log.LogInfo("SaveDaniRecords Finished");
-        }
+        //    Plugin.Log.LogInfo("SaveDaniRecords Finished");
+        //}
 
         private void SetupHarmony()
         {
@@ -312,7 +312,7 @@ namespace DaniDojo
 
 
                 _harmony.PatchAll(typeof(DaniDojoTempEnso));
-                _harmony.PatchAll(typeof(DaniDojoTempSelect));
+                //_harmony.PatchAll(typeof(DaniDojoTempSelect));
                 _harmony.PatchAll(typeof(DaniDojoSongSelect));
                 _harmony.PatchAll(typeof(PlayerNameDaniRank));
                 //_harmony.PatchAll(typeof(testing));
@@ -336,30 +336,43 @@ namespace DaniDojo
 #endif
         }
 
-        public void LogInfoInstance(string value, bool isDetailed = false)
+        public void LogInfoInstance(string value, int detailLevel = 0)
         {
             // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
-            if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
                 Log.LogInfo(value);
             }
         }
-
-        public static void LogInfo(string value, bool isDetailed = false)
+        public static void LogInfo(string value, int detailLevel = 0)
         {
-            Instance.LogInfoInstance(value, isDetailed);
+            Instance.LogInfoInstance(value, detailLevel);
         }
 
-        public void LogErrorInstance(string value, bool isDetailed = false)
+
+        public void LogWarningInstance(string value, int detailLevel = 0)
         {
-            if (ConfigLoggingEnabled.Value && (ConfigDetailedEnabled.Value || !isDetailed))
+            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+            {
+                Log.LogWarning(value);
+            }
+        }
+        public static void LogWarning(string value, int detailLevel = 0)
+        {
+            Instance.LogWarningInstance(value, detailLevel);
+        }
+
+
+        public void LogErrorInstance(string value, int detailLevel = 0)
+        {
+            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
                 Log.LogError(value);
             }
         }
-        public static void LogError(string value, bool isDetailed = false)
+        public static void LogError(string value, int detailLevel = 0)
         {
-            Instance.LogErrorInstance(value, isDetailed);
+            Instance.LogErrorInstance(value, detailLevel);
         }
 
     }

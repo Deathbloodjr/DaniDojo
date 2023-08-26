@@ -1,4 +1,5 @@
 ﻿using DaniDojo.Data;
+using DaniDojo.Managers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,27 +44,24 @@ namespace DaniDojo.Patches
                 DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
                 DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
 
-
-                if (DaniDojoSelectManager.currentCourse != null)
+                var borders = DaniPlayManager.GetCurrentCourseBorders();
+                int numPanels = 0;
+                for (int j = 0; j < borders.Count && numPanels < 3; j++)
                 {
-                    int numPanels = 0;
-                    for (int j = 0; j < DaniDojoSelectManager.currentCourse.Borders.Count && numPanels < 3; j++)
+                    if (borders[j].BorderType != BorderType.SoulGauge)
                     {
-                        if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.SoulGauge)
-                        {
-                            CreatePanel("Panel" + j, new Vector2(117, 353 - (159 * numPanels)), parent.transform, DaniDojoSelectManager.currentCourse.Borders[j]);
-                            numPanels++;
-                        }
+                        CreatePanel("Panel" + j, new Vector2(117, 353 - (159 * numPanels)), parent.transform, borders[j]);
+                        numPanels++;
                     }
+                }
 
-                    numPanels = 0;
-                    for (int j = 0; j < DaniDojoSelectManager.currentCourse.Borders.Count && numPanels < 3; j++)
+                numPanels = 0;
+                for (int j = 0; j < borders.Count && numPanels < 3; j++)
+                {
+                    if (borders[j].BorderType != BorderType.SoulGauge)
                     {
-                        if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.SoulGauge)
-                        {
-                            UpdateRequirementBar(DaniDojoSelectManager.currentCourse.Borders[j].BorderType);
-                            numPanels++;
-                        }
+                        UpdateRequirementBar(borders[j].BorderType);
+                        numPanels++;
                     }
                 }
             }
@@ -91,7 +89,7 @@ namespace DaniDojo.Patches
                 var fontManager = GameObject.Find("FontTMPManager").GetComponent<FontTMPManager>();
                 TMP_FontAsset reqTypefont = fontManager.GetDefaultFontAsset(DataConst.FontType.EFIGS);
                 Material reqTypeFontMaterial = fontManager.GetDefaultFontMaterial(DataConst.FontType.EFIGS, DataConst.DefaultFontMaterialType.OutlineBrown03);
-                switch ((BorderType)border.BorderType)
+                switch (border.BorderType)
                 {
                     case BorderType.SoulGauge:
                         requirementText = "Soul Gauge";
@@ -125,18 +123,18 @@ namespace DaniDojo.Patches
 
                 Plugin.Log.LogInfo("Create SongIndicators");
 
-                string songNumIndImagePath = Path.Combine("Enso", "CurSongIndicator1.png");//@"enso_dani\enso\dani_enso\dani_enso_detail\dani_enso_detail dani_enso_detail_cur_song_indicator_1.png";
+                string songNumIndImagePath = Path.Combine("Enso", "CurSongIndicator1.png");
                 if (border.IsTotal)
                 {
-                    songNumIndImagePath = Path.Combine("Enso", "CurSongIndicatorTotal.png");//@"enso_dani\enso\dani_enso\dani_enso_detail\dani_enso_detail dani_enso_detail_cur_song_indicator_total.png";
+                    songNumIndImagePath = Path.Combine("Enso", "CurSongIndicatorTotal.png");
                 }
                 else
                 {
-                    if (DaniDojoTempEnso.result.currentSong == 1)
+                    if (DaniPlayManager.GetCurrentSongNumber() == 1)
                     {
                         songNumIndImagePath = Path.Combine("Enso", "CurSongIndicator2.png");
                     }
-                    else if (DaniDojoTempEnso.result.currentSong == 2)
+                    else if (DaniPlayManager.GetCurrentSongNumber() == 2)
                     {
                         songNumIndImagePath = Path.Combine("Enso", "CurSongIndicator3.png");
                     }
@@ -146,7 +144,7 @@ namespace DaniDojo.Patches
                 Plugin.Log.LogInfo("Create Requirement Value Text");
 
                 var requirementValueString = string.Empty;
-                if (border.BorderType == Data.BorderType.Oks || border.BorderType == Data.BorderType.Bads)
+                if (border.BorderType == BorderType.Oks || border.BorderType == BorderType.Bads)
                 {
                     if (border.IsTotal)
                     {
@@ -154,7 +152,7 @@ namespace DaniDojo.Patches
                     }
                     else
                     {
-                        requirementValueString = "Less than " + border.RedReqs[DaniDojoTempEnso.result.currentSong];
+                        requirementValueString = "Less than " + border.RedReqs[DaniPlayManager.GetCurrentSongNumber()];
                     }
                 }
                 else
@@ -165,7 +163,7 @@ namespace DaniDojo.Patches
                     }
                     else
                     {
-                        requirementValueString = border.RedReqs[DaniDojoTempEnso.result.currentSong] + " or more";
+                        requirementValueString = border.RedReqs[DaniPlayManager.GetCurrentSongNumber()] + " or more";
                     }
                 }
 
@@ -212,13 +210,13 @@ namespace DaniDojo.Patches
                 {
                     DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarTop", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 73), newPanel.transform);
                     DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarBot", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 23), newPanel.transform);
-                    if (DaniDojoTempEnso.result.currentSong >= 1)
+                    if (DaniPlayManager.GetCurrentSongNumber() >= 1)
                     {
                         DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator1.png"), new Vector2(1085, 83), newPanel.transform);
                         DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(1128, 83), newPanel.transform);
                         DaniDojoAssetUtility.CreateNewImage("PrevSongHitReqOneBarFill", PinkBarColor, new Rect(1130, 90, 234, 33), newPanel.transform);
                         DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBarBorder", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBarBorder.png"), new Vector2(1128, 83), newPanel.transform);
-                        if (DaniDojoTempEnso.result.currentSong >= 2)
+                        if (DaniPlayManager.GetCurrentSongNumber() >= 2)
                         {
                             DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator2.png"), new Vector2(1085, 33), newPanel.transform);
                             DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(1128, 33), newPanel.transform);
@@ -229,183 +227,153 @@ namespace DaniDojo.Patches
                 }
             }
 
-            public static void UpdateRequirementBar(Data.BorderType borderType)
+            public static void UpdateRequirementBar(BorderType borderType)
             {
-                if (DaniDojoSelectManager.currentCourse != null)
+                var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
+                var values = DaniPlayManager.GetCurrentBorderValue(borderType);
+                var borders = DaniPlayManager.GetCurrentBorderOfType(borderType);
+                var currentValue = DaniPlayManager.GetCurrentBorderValue(borderType);
+
+                for (int j = 0; j < indexes.Count; j++)
                 {
-                    int numPanels = 0;
-                    for (int j = 0; j < DaniDojoSelectManager.currentCourse.Borders.Count && numPanels < 3; j++)
+                    GameObject panel = GameObject.Find("Panel" + j);
+                    if (panel != null)
                     {
-                        if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType == borderType)
+                        //var bar = panel.transform.Find("CurReqBarFill");
+                        var bar = panel.transform.Find("CurReqBarFill");
+                        var emptyBar = panel.transform.Find("CurReqBarEmpty");
+                        if (bar != null && emptyBar != null)
                         {
-                            GameObject panel = GameObject.Find("Panel" + j);
-                            if (panel != null)
+                            var image = bar.GetComponent<Image>();
+                            var emptyImage = emptyBar.GetComponent<Image>();
+                            var colorLerp = bar.GetComponent<ColorLerp>();
+                            if (image != null && emptyImage != null)
                             {
-                                //var bar = panel.transform.Find("CurReqBarFill");
-                                var bar = panel.transform.Find("CurReqBarFill");
-                                var emptyBar = panel.transform.Find("CurReqBarEmpty");
-                                if (bar != null && emptyBar != null)
+                                int requirementValue = DaniPlayManager.GetCurrentBorderRequirement(borders[j]);
+                                bool isGold = false;
+
+                                isGold = DaniPlayManager.CalculateBorder(borders[j]) == DaniRank.GoldClear;
+
+                                if (isGold && colorLerp != null)
                                 {
-                                    var image = bar.GetComponent<Image>();
-                                    var emptyImage = emptyBar.GetComponent<Image>();
-                                    var colorLerp = bar.GetComponent<ColorLerp>();
-                                    if (image != null && emptyImage != null)
+                                    colorLerp.BeginRainbow(borders[j].IsTotal);
+                                }
+
+                                var newScale = emptyImage.transform.localScale;
+                                if (borderType == BorderType.Oks ||
+                                    borderType == BorderType.Bads)
+                                {
+                                    currentValue[j] = requirementValue - currentValue[j];
+                                    currentValue[j] = Math.Max(currentValue[j], 0);
+                                }
+
+                                ChangeReqCurrentValue(panel, currentValue[j], isGold);
+
+                                newScale.x = currentValue[j] / (float)requirementValue;
+
+                                newScale.x = Math.Max(newScale.x, 0);
+                                newScale.x = Math.Min(newScale.x, 1);
+
+                                // Previously was resizing the filled area
+                                // Currently resizing the empty area
+                                // Hopefully this math is correct
+                                newScale.x -= 1;
+                                emptyImage.transform.localScale = newScale;
+                                if (!isGold)
+                                {
+                                    if (newScale.x + 1 > 0.66)
                                     {
-                                        int requirementValue;
-                                        int currentValue;
-                                        bool isGold = false;
-                                        currentValue = DaniDojoTempEnso.result.GetCurrentResultValues((BorderType)DaniDojoSelectManager.currentCourse.Borders[j].BorderType, DaniDojoSelectManager.currentCourse.Borders[j].IsTotal);
-                                        if (DaniDojoSelectManager.currentCourse.Borders[j].IsTotal)
+                                        image.color = PinkBarColor;
+                                    }
+                                    else if (newScale.x + 1 > 0.33)
+                                    {
+                                        image.color = YellowBarColor;
+                                    }
+                                    else
+                                    {
+                                        image.color = RedBarColor;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Why is this even here?
+                        // This should only be updated once at the start of the 2nd and 3rd song
+                        // This is instead being updated any time the main bar is updated for that border, when nothing here should change
+                        if (DaniPlayManager.GetCurrentSongNumber() > 0)
+                        {
+                            var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill");
+                            if (prevSongBar1 != null)
+                            {
+                                var image = prevSongBar1.GetComponent<Image>();
+                                if (image != null)
+                                {
+                                    int requirementValue = borders[j].RedReqs[0];
+                                    var newScale = image.transform.localScale;
+                                    if (borderType == BorderType.Oks ||
+                                        borderType == BorderType.Bads)
+                                    {
+                                        newScale.x = (requirementValue - currentValue[j]) / (float)requirementValue;
+                                    }
+                                    else
+                                    {
+                                        newScale.x = currentValue[j] / (float)requirementValue;
+                                    }
+                                    newScale.x = Math.Max(newScale.x, 0);
+                                    newScale.x = Math.Min(newScale.x, 1);
+                                    image.transform.localScale = newScale;
+                                    if (newScale.x > 0.66)
+                                    {
+                                        image.color = PinkBarColor;
+                                    }
+                                    else if (newScale.x > 0.33)
+                                    {
+                                        image.color = YellowBarColor;
+                                    }
+                                    else
+                                    {
+                                        image.color = RedBarColor;
+                                    }
+                                }
+                            }
+                            if (DaniPlayManager.GetCurrentSongNumber() > 1)
+                            {
+                                var prevSongBar2 = panel.transform.Find("PrevSongHitReqTwoBarFill");
+                                if (prevSongBar2 != null)
+                                {
+                                    var image = prevSongBar2.GetComponent<Image>();
+                                    if (image != null)
+                                    {
+                                        int requirementValue = borders[j].RedReqs[1];
+                                        var newScale = image.transform.localScale;
+                                        if (borderType == BorderType.Oks ||
+                                            borderType == BorderType.Bads)
                                         {
-                                            requirementValue = DaniDojoSelectManager.currentCourse.Borders[j].RedReqs[0];
-                                            if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.Oks &&
-                                                DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.Bads)
-                                            {
-                                                if (currentValue >= DaniDojoSelectManager.currentCourse.Borders[j].GoldReqs[0])
-                                                {
-                                                    isGold = true;
-                                                }
-                                            }
+                                            newScale.x = (requirementValue - currentValue[j]) / (float)requirementValue;
                                         }
                                         else
                                         {
-                                            requirementValue = DaniDojoSelectManager.currentCourse.Borders[j].RedReqs[DaniDojoTempEnso.result.currentSong];
-                                            if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.Oks &&
-                                                DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.Bads)
-                                            {
-                                                if (currentValue >= DaniDojoSelectManager.currentCourse.Borders[j].GoldReqs[DaniDojoTempEnso.result.currentSong])
-                                                {
-                                                    isGold = true;
-                                                }
-                                            }
+                                            newScale.x = currentValue[j] / (float)requirementValue;
                                         }
-
-                                        if (isGold && colorLerp != null)
-                                        {
-                                            colorLerp.BeginRainbow(DaniDojoSelectManager.currentCourse.Borders[j].IsTotal);
-                                        }
-
-                                        var newScale = emptyImage.transform.localScale;
-                                        if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Oks ||
-                                            DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Bads)
-                                        {
-                                            currentValue = requirementValue - currentValue;
-                                            currentValue = Math.Max(currentValue, 0);
-                                        }
-
-                                        ChangeReqCurrentValue(panel, currentValue, isGold);
-
-
-                                        newScale.x = currentValue / (float)requirementValue;
-
                                         newScale.x = Math.Max(newScale.x, 0);
                                         newScale.x = Math.Min(newScale.x, 1);
-
-                                        // Previously was resizing the filled area
-                                        // Currently resizing the empty area
-                                        // Hopefully this math is correct
-                                        newScale.x -= 1;
-                                        emptyImage.transform.localScale = newScale;
-                                        if (!isGold)
+                                        image.transform.localScale = newScale;
+                                        if (newScale.x > 0.66)
                                         {
-                                            if (newScale.x + 1 > 0.66)
-                                            {
-                                                image.color = PinkBarColor;
-                                            }
-                                            else if (newScale.x + 1 > 0.33)
-                                            {
-                                                image.color = YellowBarColor;
-                                            }
-                                            else
-                                            {
-                                                image.color = RedBarColor;
-                                            }
+                                            image.color = PinkBarColor;
                                         }
-                                    }
-                                }
-
-                                if (DaniDojoTempEnso.result.currentSong > 0)
-                                {
-                                    var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill");
-                                    if (prevSongBar1 != null)
-                                    {
-                                        var image = prevSongBar1.GetComponent<Image>();
-                                        if (image != null)
+                                        else if (newScale.x > 0.33)
                                         {
-                                            int requirementValue = DaniDojoSelectManager.currentCourse.Borders[j].RedReqs[0];
-                                            int currentValue = DaniDojoTempEnso.result.GetCurrentResultValues((BorderType)DaniDojoSelectManager.currentCourse.Borders[j].BorderType, DaniDojoSelectManager.currentCourse.Borders[j].IsTotal, 0);
-                                            var newScale = image.transform.localScale;
-                                            if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Oks ||
-                                                DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Bads)
-                                            {
-                                                newScale.x = (requirementValue - currentValue) / (float)requirementValue;
-                                            }
-                                            else
-                                            {
-                                                newScale.x = currentValue / (float)requirementValue;
-                                            }
-                                            newScale.x = Math.Max(newScale.x, 0);
-                                            newScale.x = Math.Min(newScale.x, 1);
-                                            image.transform.localScale = newScale;
-                                            if (newScale.x > 0.66)
-                                            {
-                                                image.color = PinkBarColor;
-                                            }
-                                            else if (newScale.x > 0.33)
-                                            {
-                                                image.color = YellowBarColor;
-                                            }
-                                            else
-                                            {
-                                                image.color = RedBarColor;
-                                            }
+                                            image.color = YellowBarColor;
                                         }
-                                    }
-                                    if (DaniDojoTempEnso.result.currentSong > 1)
-                                    {
-                                        var prevSongBar2 = panel.transform.Find("PrevSongHitReqTwoBarFill");
-                                        if (prevSongBar2 != null)
+                                        else
                                         {
-                                            var image = prevSongBar2.GetComponent<Image>();
-                                            if (image != null)
-                                            {
-                                                int requirementValue = DaniDojoSelectManager.currentCourse.Borders[j].RedReqs[1];
-                                                int currentValue = DaniDojoTempEnso.result.GetCurrentResultValues((BorderType)DaniDojoSelectManager.currentCourse.Borders[j].BorderType, DaniDojoSelectManager.currentCourse.Borders[j].IsTotal, 1);
-                                                var newScale = image.transform.localScale;
-                                                if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Oks ||
-                                                    DaniDojoSelectManager.currentCourse.Borders[j].BorderType == Data.BorderType.Bads)
-                                                {
-                                                    newScale.x = (requirementValue - currentValue) / (float)requirementValue;
-                                                }
-                                                else
-                                                {
-                                                    newScale.x = currentValue / (float)requirementValue;
-                                                }
-                                                newScale.x = Math.Max(newScale.x, 0);
-                                                newScale.x = Math.Min(newScale.x, 1);
-                                                image.transform.localScale = newScale;
-                                                if (newScale.x > 0.66)
-                                                {
-                                                    image.color = PinkBarColor;
-                                                }
-                                                else if (newScale.x > 0.33)
-                                                {
-                                                    image.color = YellowBarColor;
-                                                }
-                                                else
-                                                {
-                                                    image.color = RedBarColor;
-                                                }
-                                            }
+                                            image.color = RedBarColor;
                                         }
                                     }
                                 }
 
                             }
-                        }
-                        if (DaniDojoSelectManager.currentCourse.Borders[j].BorderType != Data.BorderType.SoulGauge)
-                        {
-                            numPanels++;
                         }
                     }
                 }
@@ -880,10 +848,9 @@ namespace DaniDojo.Patches
                 topCoursesParent.transform.SetParent(parent.transform);
                 for (int i = 0; i < seriesInfo.Courses.Count; i++)
                 {
-                    var highScore = Plugin.AllDaniScores.Find((x) => x.hash == seriesInfo.Courses[i].Hash);
+                    var highScore = SaveDataManager.GetCourseRecord(seriesInfo.Courses[i].Hash);
 
                     SelectAssetName backgroundName;
-                    SelectAssetName textName;
                     switch (seriesInfo.Courses[i].Background)
                     {
                         case CourseBackground.Tan:
@@ -913,131 +880,70 @@ namespace DaniDojo.Patches
                     {
                         courseId = seriesInfo.Courses[i].Title;
                     }
-                    switch (courseId)
+                    var textName = courseId switch
                     {
-                        case "5kyuu":
-                        case "五級 5th Kyu":
-                            textName = SelectAssetName.Top5kyuu;
-                            break;
-                        case "4kyuu":
-                        case "四級 4th Kyu":
-                            textName = SelectAssetName.Top4kyuu;
-                            break;
-                        case "3kyuu":
-                        case "三級 3rd Kyu":
-                            textName = SelectAssetName.Top3kyuu;
-                            break;
-                        case "2kyuu":
-                        case "二級 2nd Kyu":
-                            textName = SelectAssetName.Top2kyuu;
-                            break;
-                        case "1kyuu":
-                        case "一級 1st Kyu":
-                            textName = SelectAssetName.Top1kyuu;
-                            break;
-                        case "1dan":
-                        case "初段 1st Dan":
-                            textName = SelectAssetName.Top1dan;
-                            break;
-                        case "2dan":
-                        case "二段 2nd Dan":
-                            textName = SelectAssetName.Top2dan;
-                            break;
-                        case "3dan":
-                        case "三段 3rd Dan":
-                            textName = SelectAssetName.Top3dan;
-                            break;
-                        case "4dan":
-                        case "四段 4th Dan":
-                            textName = SelectAssetName.Top4dan;
-                            break;
-                        case "5dan":
-                        case "五段 5th Dan":
-                            textName = SelectAssetName.Top5dan;
-                            break;
-                        case "6dan":
-                        case "六段 6th Dan":
-                            textName = SelectAssetName.Top6dan;
-                            break;
-                        case "7dan":
-                        case "七段 7th Dan":
-                            textName = SelectAssetName.Top7dan;
-                            break;
-                        case "8dan":
-                        case "八段 8th Dan":
-                            textName = SelectAssetName.Top8dan;
-                            break;
-                        case "9dan":
-                        case "九段 9th Dan":
-                            textName = SelectAssetName.Top9dan;
-                            break;
-                        case "10dan":
-                        case "十段 10th Dan":
-                            textName = SelectAssetName.Top10dan;
-                            break;
-                        case "11dan":
-                        case "玄人 Kuroto":
-                            textName = SelectAssetName.TopKuroto;
-                            break;
-                        case "12dan":
-                        case "名人 Meijin":
-                            textName = SelectAssetName.TopMeijin;
-                            break;
-                        case "13dan":
-                        case "超人 Chojin":
-                            textName = SelectAssetName.TopChojin;
-                            break;
-                        case "14dan":
-                        case "達人 Tatsujin":
-                            textName = SelectAssetName.TopTatsujin;
-                            break;
-                        default:
-                            textName = SelectAssetName.TopGaiden;
-                            break;
-                    }
+                        "5kyuu" or "五級 5th Kyu" => SelectAssetName.Top5kyuu,
+                        "4kyuu" or "四級 4th Kyu" => SelectAssetName.Top4kyuu,
+                        "3kyuu" or "三級 3rd Kyu" => SelectAssetName.Top3kyuu,
+                        "2kyuu" or "二級 2nd Kyu" => SelectAssetName.Top2kyuu,
+                        "1kyuu" or "一級 1st Kyu" => SelectAssetName.Top1kyuu,
+                        "1dan" or "初段 1st Dan" => SelectAssetName.Top1dan,
+                        "2dan" or "二段 2nd Dan" => SelectAssetName.Top2dan,
+                        "3dan" or "三段 3rd Dan" => SelectAssetName.Top3dan,
+                        "4dan" or "四段 4th Dan" => SelectAssetName.Top4dan,
+                        "5dan" or "五段 5th Dan" => SelectAssetName.Top5dan,
+                        "6dan" or "六段 6th Dan" => SelectAssetName.Top6dan,
+                        "7dan" or "七段 7th Dan" => SelectAssetName.Top7dan,
+                        "8dan" or "八段 8th Dan" => SelectAssetName.Top8dan,
+                        "9dan" or "九段 9th Dan" => SelectAssetName.Top9dan,
+                        "10dan" or "十段 10th Dan" => SelectAssetName.Top10dan,
+                        "11dan" or "玄人 Kuroto" => SelectAssetName.TopKuroto,
+                        "12dan" or "名人 Meijin" => SelectAssetName.TopMeijin,
+                        "13dan" or "超人 Chojin" => SelectAssetName.TopChojin,
+                        "14dan" or "達人 Tatsujin" => SelectAssetName.TopTatsujin,
+                        _ => SelectAssetName.TopGaiden,
+                    };
                     GameObject topCourseObject = new GameObject(seriesInfo.Courses[i].Title);
                     topCourseObject.transform.SetParent(topCoursesParent.transform);
                     topCourseObject.transform.position = new Vector2(183 + (68 * i), 884);
                     DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Background", GetAssetSprite(backgroundName), new Vector2(0, 0), topCourseObject.transform);
                     DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Text", GetAssetSprite(textName), new Vector2(19, 24), topCourseObject.transform);
 
-                    if (highScore != null)
+                    bool skip = false;
+                    SelectAssetName recordName;
+                    // I don't like that I'm calling new for each of these, seems very inefficient
+                    if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Rainbow))
                     {
-                        bool skip = false;
-                        SelectAssetName recordName;
-                        if (highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.DFC)
-                        {
-                            recordName = SelectAssetName.SmallGoldDFC;
-                        }
-                        else if (highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.FC)
-                        {
-                            recordName = SelectAssetName.SmallGoldFC;
-                        }
-                        else if (highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.Clear)
-                        {
-                            recordName = SelectAssetName.SmallGoldClear;
-                        }
-                        else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.DFC)
-                        {
-                            recordName = SelectAssetName.SmallRedDFC;
-                        }
-                        else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.FC)
-                        {
-                            recordName = SelectAssetName.SmallRedFC;
-                        }
-                        else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.Clear)
-                        {
-                            recordName = SelectAssetName.SmallRedClear;
-                        }
-                        else
-                        {
-                            recordName = SelectAssetName.CourseNormal; // This line is just here so it won't yell at me for being uninitialized;
-                            skip = true;
-                        }
-                        if (!skip)
-                        {
-                            DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Record", GetAssetSprite(recordName), new Vector2(0, 98), topCourseObject.transform);
-                        }
+                        recordName = SelectAssetName.SmallGoldDFC;
+                    }
+                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Gold))
+                    {
+                        recordName = SelectAssetName.SmallGoldFC;
+                    }
+                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Silver))
+                    {
+                        recordName = SelectAssetName.SmallGoldClear;
+                    }
+                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Rainbow))
+                    {
+                        recordName = SelectAssetName.SmallRedDFC;
+                    }
+                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Gold))
+                    {
+                        recordName = SelectAssetName.SmallRedFC;
+                    }
+                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Silver))
+                    {
+                        recordName = SelectAssetName.SmallRedClear;
+                    }
+                    else
+                    {
+                        recordName = SelectAssetName.CourseNormal; // This line is just here so it won't yell at me for being uninitialized;
+                        skip = true;
+                    }
+                    if (!skip)
+                    {
+                        DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Record", GetAssetSprite(recordName), new Vector2(0, 98), topCourseObject.transform);
                     }
                 }
             }
@@ -1057,10 +963,9 @@ namespace DaniDojo.Patches
             }
 
             static int courseBgNum = 0;
-            public static GameObject CreateCourseAssets(Data.DaniCourse courseInfo, GameObject parent, CourseCreateDir dir = CourseCreateDir.Center)
+            public static GameObject CreateCourseAssets(DaniCourse courseInfo, GameObject parent, CourseCreateDir dir = CourseCreateDir.Center)
             {
-
-                var highScore = Plugin.AllDaniScores.Find((x) => x.hash == courseInfo.Hash);
+                var highScore = SaveDataManager.GetCourseRecord(courseInfo.Hash);
 
                 Vector2 CourseBgLocation = new Vector2(342, 26);
                 switch (dir)
@@ -1170,15 +1075,7 @@ namespace DaniDojo.Patches
 
                     if (courseInfo.Songs[i].IsHidden)
                     {
-                        if (highScore != null)
-                        {
-                            if (highScore.songReached < i)
-                            {
-                                songTitle = "? ? ?";
-                                songDetail = "";
-                            }
-                        }
-                        else
+                        if (highScore == null || highScore.SongReached < i)
                         {
                             songTitle = "? ? ?";
                             songDetail = "";
@@ -1189,12 +1086,12 @@ namespace DaniDojo.Patches
                     SelectAssetName levelAssetName;
                     switch (courseInfo.Songs[i].Level)
                     {
-                        case EnsoData.EnsoLevelType.Easy:   levelAssetName = SelectAssetName.CourseEasy;   break;
+                        case EnsoData.EnsoLevelType.Easy: levelAssetName = SelectAssetName.CourseEasy; break;
                         case EnsoData.EnsoLevelType.Normal: levelAssetName = SelectAssetName.CourseNormal; break;
-                        case EnsoData.EnsoLevelType.Hard:   levelAssetName = SelectAssetName.CourseHard;   break;
-                        case EnsoData.EnsoLevelType.Mania:  levelAssetName = SelectAssetName.CourseOni;    break;
-                        case EnsoData.EnsoLevelType.Ura:    levelAssetName = SelectAssetName.CourseUra;    break;
-                        default:                            levelAssetName = SelectAssetName.CourseOni;    break;
+                        case EnsoData.EnsoLevelType.Hard: levelAssetName = SelectAssetName.CourseHard; break;
+                        case EnsoData.EnsoLevelType.Mania: levelAssetName = SelectAssetName.CourseOni; break;
+                        case EnsoData.EnsoLevelType.Ura: levelAssetName = SelectAssetName.CourseUra; break;
+                        default: levelAssetName = SelectAssetName.CourseOni; break;
                     }
                     DaniDojoAssetUtility.CreateImage("SongCourse", GetAssetSprite(levelAssetName), new Vector2(112, 42), songParent.transform);
 
@@ -1259,7 +1156,7 @@ namespace DaniDojo.Patches
                 int soulGaugeRequirement = 100;
                 for (int i = 0; i < courseInfo.Borders.Count; i++)
                 {
-                    if (courseInfo.Borders[i].BorderType == Data.BorderType.SoulGauge)
+                    if (courseInfo.Borders[i].BorderType == BorderType.SoulGauge)
                     {
                         soulGaugeRequirement = courseInfo.Borders[i].RedReqs[0];
                         break;
@@ -1268,15 +1165,15 @@ namespace DaniDojo.Patches
 
                 Rect SoulGaugeReqValueRect = new Rect(50, 73, 256, 39);
                 DaniDojoAssetUtility.CreateText("SoulGaugeReqValue", soulGaugeRequirement.ToString() + "% or higher", SoulGaugeReqValueRect, reqValueFont, reqValueFontMaterial, HorizontalAlignmentOptions.Right, new Color32(74, 64, 51, 255), SoulGaugeReqPanel.transform);
-                
-                if (highScore != null)
+
+                if (highScore.SongReached > 0)
                 {
                     Rect SoulGaugeHighScoreHeaderRect = new Rect(12, 27, 100, 25);
                     var SoulGaugeHighScoreHeader = DaniDojoAssetUtility.CreateText("SoulGaugeHighScoreHeader", "High Score", SoulGaugeHighScoreHeaderRect, detailFont, detailFontMaterial, HorizontalAlignmentOptions.Left, new Color32(0, 0, 0, 0), SoulGaugeReqPanel.transform);
                     SoulGaugeHighScoreHeader.GetComponent<TextMeshProUGUI>().color = Color.black;
 
                     Rect SoulGaugeHighScoreValueRect = new Rect(200, 20, 100, 40);
-                    var SoulGaugeHighScoreValue = DaniDojoAssetUtility.CreateText("SoulGaugeHighScoreValue", highScore.soulGauge.ToString() + " %", SoulGaugeHighScoreValueRect, detailFont, detailFontMaterial, HorizontalAlignmentOptions.Right, new Color32(0, 0, 0, 0), SoulGaugeReqPanel.transform);
+                    var SoulGaugeHighScoreValue = DaniDojoAssetUtility.CreateText("SoulGaugeHighScoreValue", highScore.PlayData.Max((x) => x.SoulGauge).ToString() + " %", SoulGaugeHighScoreValueRect, detailFont, detailFontMaterial, HorizontalAlignmentOptions.Right, new Color32(0, 0, 0, 0), SoulGaugeReqPanel.transform);
                     SoulGaugeHighScoreValue.GetComponent<TextMeshProUGUI>().color = Color.black;
                 }
 
@@ -1285,7 +1182,7 @@ namespace DaniDojo.Patches
                 bool passedSoulGauge = false;
                 for (int i = 0; i < courseInfo.Borders.Count; i++)
                 {
-                    if (courseInfo.Borders[i].BorderType == Data.BorderType.SoulGauge)
+                    if (courseInfo.Borders[i].BorderType == BorderType.SoulGauge)
                     {
                         passedSoulGauge = true;
                         continue;
@@ -1296,13 +1193,13 @@ namespace DaniDojo.Patches
                     string requirementTypeText = string.Empty;
                     switch (courseInfo.Borders[i].BorderType)
                     {
-                        case Data.BorderType.Goods:     requirementTypeText = "GOODs"; break;
-                        case Data.BorderType.Oks:       requirementTypeText = "OKs"; break;
-                        case Data.BorderType.Bads:      requirementTypeText = "BADs"; break;
-                        case Data.BorderType.Combo:     requirementTypeText = "Combo"; break;
-                        case Data.BorderType.Drumroll:  requirementTypeText = "Drumrolls"; break;
-                        case Data.BorderType.Score:     requirementTypeText = "Score"; break;
-                        case Data.BorderType.TotalHits: requirementTypeText = "Total Hits"; break;
+                        case BorderType.Goods: requirementTypeText = "GOODs"; break;
+                        case BorderType.Oks: requirementTypeText = "OKs"; break;
+                        case BorderType.Bads: requirementTypeText = "BADs"; break;
+                        case BorderType.Combo: requirementTypeText = "Combo"; break;
+                        case BorderType.Drumroll: requirementTypeText = "Drumrolls"; break;
+                        case BorderType.Score: requirementTypeText = "Score"; break;
+                        case BorderType.TotalHits: requirementTypeText = "Total Hits"; break;
                     }
                     DaniDojoAssetUtility.CreateText("SoulGaugeHeader", requirementTypeText, reqPanelHeaderRect, reqTypeFont, reqTypeFontMaterial, HorizontalAlignmentOptions.Center, new Color32(74, 64, 51, 255), reqPanel.transform);
 
@@ -1311,7 +1208,7 @@ namespace DaniDojo.Patches
                         var reqPanelValue = DaniDojoAssetUtility.CreateImage("ReqPanelValue" + (i + 1), GetAssetSprite(SelectAssetName.ReqSongIndicatorTotal), new Vector2(14, 49), reqPanel.transform);
 
                         string valueText = string.Empty;
-                        if (courseInfo.Borders[i].BorderType == Data.BorderType.Oks || courseInfo.Borders[i].BorderType == Data.BorderType.Bads)
+                        if (courseInfo.Borders[i].BorderType == BorderType.Oks || courseInfo.Borders[i].BorderType == BorderType.Bads)
                         {
                             valueText = "Less than " + courseInfo.Borders[i].RedReqs[0];
                         }
@@ -1324,7 +1221,7 @@ namespace DaniDojo.Patches
 
                         var reqPanelBest = DaniDojoAssetUtility.CreateImage("ReqPanelBest" + (i + 1), GetAssetSprite(SelectAssetName.PersonalBestBg), new Vector2(14, 11), reqPanel.transform);
 
-                        if (highScore != null)
+                        if (highScore.SongReached > 0)
                         {
                             Rect highScoreHeaderRect = new Rect(12, 3, 100, 25);
                             var highScoreHeader = DaniDojoAssetUtility.CreateText("HighScoreHeader", "High Score", highScoreHeaderRect, detailFont, detailFontMaterial, HorizontalAlignmentOptions.Left, new Color32(0, 0, 0, 0), reqPanelBest.transform);
@@ -1333,13 +1230,13 @@ namespace DaniDojo.Patches
                             string highScoreValueText = string.Empty;
                             switch (courseInfo.Borders[i].BorderType)
                             {
-                                case Data.BorderType.Goods:     highScoreValueText = highScore.songResults.Sum((x) => x.goods).ToString(); break;
-                                case Data.BorderType.Oks:       highScoreValueText = highScore.songResults.Sum((x) => x.oks).ToString(); break;
-                                case Data.BorderType.Bads:      highScoreValueText = highScore.songResults.Sum((x) => x.bads).ToString(); break;
-                                case Data.BorderType.Combo:     highScoreValueText = highScore.combo.ToString(); break;
-                                case Data.BorderType.Drumroll:  highScoreValueText = highScore.songResults.Sum((x) => x.renda).ToString(); break;
-                                case Data.BorderType.Score:     highScoreValueText = highScore.songResults.Sum((x) => x.score).ToString(); break;
-                                case Data.BorderType.TotalHits: highScoreValueText = highScore.songResults.Sum((x) => x.totalHits).ToString(); break;
+                                case BorderType.Goods: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData.Sum((y) => y.Goods)).ToString(); break;
+                                case BorderType.Oks: highScoreValueText = highScore.PlayData.Min((x) => x.SongPlayData.Sum((y) => y.Oks)).ToString(); break;
+                                case BorderType.Bads: highScoreValueText = highScore.PlayData.Min((x) => x.SongPlayData.Sum((y) => y.Bads)).ToString(); break;
+                                case BorderType.Combo: highScoreValueText = highScore.PlayData.Max((x) => x.MaxCombo).ToString(); break;
+                                case BorderType.Drumroll: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData.Sum((y) => y.Drumroll)).ToString(); break;
+                                case BorderType.Score: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData.Sum((y) => y.Score)).ToString(); break;
+                                case BorderType.TotalHits: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData.Sum((y) => y.Goods + y.Oks + y.Drumroll)).ToString(); break;
                             }
 
                             Rect highScoreValueRect = new Rect(200, -3, 100, 35);
@@ -1363,7 +1260,7 @@ namespace DaniDojo.Patches
                             }
                             var reqPanelValue = DaniDojoAssetUtility.CreateImage("ReqPanelValue" + (j + 1), GetAssetSprite(SongIndicatorAsset), new Vector2(14 + xOffset, 49), reqPanel.transform);
                             string valueText = string.Empty;
-                            if (courseInfo.Borders[i].BorderType == Data.BorderType.Oks || courseInfo.Borders[i].BorderType == Data.BorderType.Bads)
+                            if (courseInfo.Borders[i].BorderType == BorderType.Oks || courseInfo.Borders[i].BorderType == BorderType.Bads)
                             {
                                 valueText = "Less than " + courseInfo.Borders[i].RedReqs[j];
                             }
@@ -1376,7 +1273,8 @@ namespace DaniDojo.Patches
 
                             var reqPanelBest = DaniDojoAssetUtility.CreateImage("ReqPanelBest" + (j + 1), GetAssetSprite(SelectAssetName.PersonalBestBg), new Vector2(14 + xOffset, 11), reqPanel.transform);
 
-                            if (highScore != null)
+                            // SongReached of 0 means it wasn't played
+                            if (highScore.SongReached > 0)
                             {
                                 Rect highScoreHeaderRect = new Rect(17, 3, 100, 25);
                                 var highScoreHeader = DaniDojoAssetUtility.CreateText("HighScoreHeader", "High Score", highScoreHeaderRect, detailFont, detailFontMaterial, HorizontalAlignmentOptions.Left, new Color32(0, 0, 0, 0), reqPanelBest.transform);
@@ -1385,13 +1283,13 @@ namespace DaniDojo.Patches
                                 string highScoreValueText = string.Empty;
                                 switch (courseInfo.Borders[i].BorderType)
                                 {
-                                    case Data.BorderType.Goods: highScoreValueText = highScore.songResults[j].goods.ToString(); break;
-                                    case Data.BorderType.Oks: highScoreValueText = highScore.songResults[j].oks.ToString(); break;
-                                    case Data.BorderType.Bads: highScoreValueText = highScore.songResults[j].bads.ToString(); break;
-                                    case Data.BorderType.Combo: highScoreValueText = highScore.songResults[j].songCombo.ToString(); break;
-                                    case Data.BorderType.Drumroll: highScoreValueText = highScore.songResults[j].renda.ToString(); break;
-                                    case Data.BorderType.Score: highScoreValueText = highScore.songResults[j].score.ToString(); break;
-                                    case Data.BorderType.TotalHits: highScoreValueText = highScore.songResults[j].totalHits.ToString(); break;
+                                    case BorderType.Goods: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData[j].Goods).ToString(); break;
+                                    case BorderType.Oks: highScoreValueText = highScore.PlayData.Min((x) => x.SongPlayData[j].Oks).ToString(); break;
+                                    case BorderType.Bads: highScoreValueText = highScore.PlayData.Min((x) => x.SongPlayData[j].Bads).ToString(); break;
+                                    case BorderType.Combo: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData[j].Combo).ToString(); break;
+                                    case BorderType.Drumroll: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData[j].Drumroll).ToString(); break;
+                                    case BorderType.Score: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData[j].Score).ToString(); break;
+                                    case BorderType.TotalHits: highScoreValueText = highScore.PlayData.Max((x) => x.SongPlayData[j].Goods + x.SongPlayData[j].Oks + x.SongPlayData[j].Drumroll).ToString(); break;
                                 }
 
                                 Rect highScoreValueRect = new Rect(200, -3, 100, 35);
@@ -1403,158 +1301,77 @@ namespace DaniDojo.Patches
 
                 }
 
-                SelectAssetName bgImage;
-                switch (courseInfo.Background)
+                var bgImage = courseInfo.Background switch
                 {
-                    case CourseBackground.Wood:
-                        bgImage = SelectAssetName.WoodBg;
-                        break;
-                    case CourseBackground.Blue:
-                        bgImage = SelectAssetName.BlueBg;
-                        break;
-                    case CourseBackground.Red:
-                        bgImage = SelectAssetName.RedBg;
-                        break;
-                    case CourseBackground.Silver:
-                        bgImage = SelectAssetName.SilverBg;
-                        break;
-                    case CourseBackground.Gold:
-                        bgImage = SelectAssetName.GoldBg;
-                        break;
-                    default:
-                        bgImage = SelectAssetName.TanBg;
-                        break;
-                }
+                    CourseBackground.Wood => SelectAssetName.WoodBg,
+                    CourseBackground.Blue => SelectAssetName.BlueBg,
+                    CourseBackground.Red => SelectAssetName.RedBg,
+                    CourseBackground.Silver => SelectAssetName.SilverBg,
+                    CourseBackground.Gold => SelectAssetName.GoldBg,
+                    _ => SelectAssetName.TanBg,
+                };
 
-                SelectAssetName textImage;
                 var courseId = courseInfo.Id;
                 if (int.TryParse(courseId, out int _))
                 {
                     courseId = courseInfo.Title;
                 }
-                switch (courseId)
+
+                var textImage = courseId switch
                 {
-                    case "5kyuu":
-                    case "五級 5th Kyu":
-                        textImage = SelectAssetName.kyuu5;
-                        break;
-                    case "4kyuu":
-                    case "四級 4th Kyu":
-                        textImage = SelectAssetName.kyuu4;
-                        break;
-                    case "3kyuu":
-                    case "三級 3rd Kyu":
-                        textImage = SelectAssetName.kyuu3;
-                        break;
-                    case "2kyuu":
-                    case "二級 2nd Kyu":
-                        textImage = SelectAssetName.kyuu2;
-                        break;
-                    case "1kyuu":
-                    case "一級 1st Kyu":
-                        textImage = SelectAssetName.kyuu1;
-                        break;
-                    case "1dan":
-                    case "初段 1st Dan":
-                        textImage = SelectAssetName.dan1;
-                        break;
-                    case "2dan":
-                    case "二段 2nd Dan":
-                        textImage = SelectAssetName.dan2;
-                        break;
-                    case "3dan":
-                    case "三段 3rd Dan":
-                        textImage = SelectAssetName.dan3;
-                        break;
-                    case "4dan":
-                    case "四段 4th Dan":
-                        textImage = SelectAssetName.dan4;
-                        break;
-                    case "5dan":
-                    case "五段 5th Dan":
-                        textImage = SelectAssetName.dan5;
-                        break;
-                    case "6dan":
-                    case "六段 6th Dan":
-                        textImage = SelectAssetName.dan6;
-                        break;
-                    case "7dan":
-                    case "七段 7th Dan":
-                        textImage = SelectAssetName.dan7;
-                        break;
-                    case "8dan":
-                    case "八段 8th Dan":
-                        textImage = SelectAssetName.dan8;
-                        break;
-                    case "9dan":
-                    case "九段 9th Dan":
-                        textImage = SelectAssetName.dan9;
-                        break;
-                    case "10dan":
-                    case "十段 10th Dan":
-                        textImage = SelectAssetName.dan10;
-                        break;
-                    case "11dan":
-                    case "玄人 Kuroto":
-                        textImage = SelectAssetName.kuroto;
-                        break;
-                    case "12dan":
-                    case "名人 Meijin":
-                        textImage = SelectAssetName.meijin;
-                        break;
-                    case "13dan":
-                    case "超人 Chojin":
-                        textImage = SelectAssetName.chojin;
-                        break;
-                    case "14dan":
-                    case "達人 Tatsujin":
-                        textImage = SelectAssetName.tatsujin;
-                        break;
-                    default:
-                        textImage = SelectAssetName.gaiden;
-                        break;
-                }
+                    "5kyuu" or "五級 5th Kyu" => SelectAssetName.kyuu5,
+                    "4kyuu" or "四級 4th Kyu" => SelectAssetName.kyuu4,
+                    "3kyuu" or "三級 3rd Kyu" => SelectAssetName.kyuu3,
+                    "2kyuu" or "二級 2nd Kyu" => SelectAssetName.kyuu2,
+                    "1kyuu" or "一級 1st Kyu" => SelectAssetName.kyuu1,
+                    "1dan" or "初段 1st Dan" => SelectAssetName.dan1,
+                    "2dan" or "二段 2nd Dan" => SelectAssetName.dan2,
+                    "3dan" or "三段 3rd Dan" => SelectAssetName.dan3,
+                    "4dan" or "四段 4th Dan" => SelectAssetName.dan4,
+                    "5dan" or "五段 5th Dan" => SelectAssetName.dan5,
+                    "6dan" or "六段 6th Dan" => SelectAssetName.dan6,
+                    "7dan" or "七段 7th Dan" => SelectAssetName.dan7,
+                    "8dan" or "八段 8th Dan" => SelectAssetName.dan8,
+                    "9dan" or "九段 9th Dan" => SelectAssetName.dan9,
+                    "10dan" or "十段 10th Dan" => SelectAssetName.dan10,
+                    "11dan" or "玄人 Kuroto" => SelectAssetName.kuroto,
+                    "12dan" or "名人 Meijin" => SelectAssetName.meijin,
+                    "13dan" or "超人 Chojin" => SelectAssetName.chojin,
+                    "14dan" or "達人 Tatsujin" => SelectAssetName.tatsujin,
+                    _ => SelectAssetName.gaiden,
+                };
 
                 var baseCourseTagPos = new Vector2(-212, 332);
                 DaniDojoAssetUtility.CreateImage("CurrentDanMarkerBack", GetAssetSprite(bgImage), baseCourseTagPos, courseObject.transform);
                 DaniDojoAssetUtility.CreateImage("CurrentDanMarkerText", GetAssetSprite(textImage), new Vector2(baseCourseTagPos.x + 52, baseCourseTagPos.y + 124), courseObject.transform);
 
 
-                if (highScore != null)
+                if (highScore.SongReached > 0)
                 {
                     bool skip = false;
-                    SelectAssetName resultAsset;
-                    if (highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.DFC)
+                    SelectAssetName resultAsset = SelectAssetName.CourseNormal;
+                    if (highScore.RankCombo.Rank == DaniRank.GoldClear)
                     {
-                        resultAsset = SelectAssetName.BigGoldDFC;
+                        switch (highScore.RankCombo.Combo)
+                        {
+                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigGoldClear; break;
+                            case DaniCombo.Gold: resultAsset = SelectAssetName.BigGoldFC; break;
+                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigGoldDFC; break;
+                        }
                     }
-                    else if (highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.FC)
+                    else if (highScore.RankCombo.Rank == DaniRank.RedClear)
                     {
-                        resultAsset = SelectAssetName.BigGoldFC;
-                    }
-                    else if(highScore.danResult == DanResult.GoldClear && highScore.comboResult == DanComboResult.Clear)
-                    {
-                        resultAsset = SelectAssetName.BigGoldClear;
-                    }
-                    else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.DFC)
-                    {
-                        resultAsset = SelectAssetName.BigRedDFC;
-                    }
-                    else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.FC)
-                    {
-                        resultAsset = SelectAssetName.BigRedFC;
-                    }
-                    else if (highScore.danResult == DanResult.RedClear && highScore.comboResult == DanComboResult.Clear)
-                    {
-                        resultAsset = SelectAssetName.BigRedClear;
-                    }
-                    else
-                    {
-                        resultAsset = SelectAssetName.CourseNormal; // This line is just here so it won't yell at me for being uninitialized;
-                        skip = true;
+                        switch (highScore.RankCombo.Combo)
+                        {
+                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigRedDFC; break;
+                            case DaniCombo.Gold: resultAsset = SelectAssetName.BigRedFC; break;
+
+
+                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigRedClear; break;
+                        }
                     }
 
-                    if (!skip)
+                    if (resultAsset != SelectAssetName.CourseNormal)
                     {
                         DaniDojoAssetUtility.CreateImage("DanResult", GetAssetSprite(resultAsset), new Vector2(-242, 291), courseObject.transform);
                     }

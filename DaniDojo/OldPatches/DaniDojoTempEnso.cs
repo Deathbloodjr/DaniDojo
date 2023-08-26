@@ -1,5 +1,6 @@
 ﻿using App;
 using Blittables;
+using DaniDojo.Managers;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -17,16 +18,13 @@ namespace DaniDojo.Patches
 {
     internal class DaniDojoTempEnso
     {
-        public static DaniDojoCurrentPlay result;
-
-
         [HarmonyPatch(typeof(EnsoGameManager))]
         [HarmonyPatch(nameof(EnsoGameManager.CheckEnsoEnd))]
         [HarmonyPatch(MethodType.Normal)]
         [HarmonyPrefix]
         public static bool EnsoGameManager_CheckEnsoEnd_Prefix(EnsoGameManager __instance)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
 
@@ -38,31 +36,10 @@ namespace DaniDojo.Patches
                         return false;
                     }
 
-                    DaniDojoSelectManager.currentDanSongIndex++;
-                    if (DaniDojoSelectManager.currentDanSongIndex < DaniDojoSelectManager.currentCourse.Songs.Count)
+                    if (DaniPlayManager.AdvanceSong())
                     {
-                        if (result.HasFailed())
-                        {
-                            DaniDojoSelectManager.isInDan = false;
-                            //DaniDojoSelectManager.currentCourse = null;
-                            DaniDojoSelectManager.currentDanSongIndex = 0;
-
-                            result.SaveResults();
-                        }
-                        else
-                        {
-                            BeginSong(DaniDojoSelectManager.currentCourse.Songs[DaniDojoSelectManager.currentDanSongIndex].SongId, DaniDojoSelectManager.currentCourse.Songs[DaniDojoSelectManager.currentDanSongIndex].Level);
-                            result.AdvanceSong();
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        DaniDojoSelectManager.isInDan = false;
-                        //DaniDojoSelectManager.currentCourse = null;
-                        DaniDojoSelectManager.currentDanSongIndex = 0;
-
-                        result.SaveResults();
+                        var songData = DaniPlayManager.GetSongData();
+                        BeginSong(songData.SongId, songData.Level);
                     }
                 }
             }
@@ -71,44 +48,46 @@ namespace DaniDojo.Patches
         }
 
 
+        // This function can be useful
+        // It is how I attempted to get SoulGauge and Score Points data previously
 
-        [HarmonyPatch(typeof(EnsoGameManager))]
-        [HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
-        [HarmonyPatch(MethodType.Normal)]
-        [HarmonyPostfix]
-        public static void EnsoGameManager_ProcExecMain_Postfix(EnsoGameManager __instance)
-        {
-            if (DaniDojoSelectManager.isInDan && result != null)
-            {
-                if (!result.HasSetConstPoints())
-                {
-                    Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If Start");
-                    TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
+        //[HarmonyPatch(typeof(EnsoGameManager))]
+        //[HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
+        //[HarmonyPatch(MethodType.Normal)]
+        //[HarmonyPostfix]
+        //public static void EnsoGameManager_ProcExecMain_Postfix(EnsoGameManager __instance)
+        //{
+        //    if (DaniDojoSelectManager.isInDan && result != null)
+        //    {
+        //        if (!result.HasSetConstPoints())
+        //        {
+        //            Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If Start");
+        //            TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
 
-                    int tamashiiMax = frameResults.eachPlayer[0].constTamashiiMax;
-                    int[] tamashiiPoints = new int[3];
+        //            int tamashiiMax = frameResults.eachPlayer[0].constTamashiiMax;
+        //            int[] tamashiiPoints = new int[3];
 
-                    for (int i = 0; i < 3; i++)
-                    {
-                        tamashiiPoints[i] = (int)frameResults.eachPlayer[0].constTamashiiPoint[i];
-                    }
+        //            for (int i = 0; i < 3; i++)
+        //            {
+        //                tamashiiPoints[i] = (int)frameResults.eachPlayer[0].constTamashiiPoint[i];
+        //            }
 
-                    int shinuchiScore = (int)frameResults.eachPlayer[0].constShinuchiScore;
+        //            int shinuchiScore = (int)frameResults.eachPlayer[0].constShinuchiScore;
 
-                    for (int i = 0; i < frameResults.eachPlayer[0].constTamashiiPoint.Length; i++)
-                    {
-                        Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiPoint[" + i + "]: " + frameResults.eachPlayer[0].constTamashiiPoint[i]);
-                    }
-                    Plugin.Log.LogInfo("frameResults.eachPlayer[0].constShinuchiScore: " + frameResults.eachPlayer[0].constShinuchiScore);
+        //            for (int i = 0; i < frameResults.eachPlayer[0].constTamashiiPoint.Length; i++)
+        //            {
+        //                Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiPoint[" + i + "]: " + frameResults.eachPlayer[0].constTamashiiPoint[i]);
+        //            }
+        //            Plugin.Log.LogInfo("frameResults.eachPlayer[0].constShinuchiScore: " + frameResults.eachPlayer[0].constShinuchiScore);
 
-                    // This might always be 10000
-                    Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiMax: " + frameResults.eachPlayer[0].constTamashiiMax);
+        //            // This might always be 10000
+        //            Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiMax: " + frameResults.eachPlayer[0].constTamashiiMax);
 
-                    result.SetConstPoints(tamashiiPoints, shinuchiScore, tamashiiMax);
-                    Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If End");
-                }
-            }
-        }
+        //            result.SetConstPoints(tamashiiPoints, shinuchiScore, tamashiiMax);
+        //            Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If End");
+        //        }
+        //    }
+        //}
 
         public static void BeginSong(string songId, EnsoData.EnsoLevelType level)
         {
@@ -141,8 +120,9 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void HitEffect_switchPlayAnimationOnpuTypes_Postfix(HitEffect __instance, HitResultInfo info)
         {
-            if (DaniDojoSelectManager.isInDan && result != null)
+            if (DaniPlayManager.CheckIsInDan())
             {
+                DaniPlayManager.AddHitResult(info);
                 int hitResult = info.hitResult;
                 if (info.onpuType == (int)OnpuTypes.Don || info.onpuType == (int)OnpuTypes.Do || info.onpuType == (int)OnpuTypes.Ko || info.onpuType == (int)OnpuTypes.Katsu || info.onpuType == (int)OnpuTypes.Ka
                     || info.onpuType == (int)OnpuTypes.DaiDon || info.onpuType == (int)OnpuTypes.DaiKatsu
@@ -150,19 +130,16 @@ namespace DaniDojo.Patches
                 {
                     if (hitResult == (int)HitResultTypes.Fuka || hitResult == (int)HitResultTypes.Drop)
                     {
-                        result.AddBad();
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Bads);
                     }
                     else if (hitResult == (int)HitResultTypes.Ka)
                     {
-                        result.AddOk();
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Oks);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                     }
                     else if (hitResult == (int)HitResultTypes.Ryo)
                     {
-                        result.AddGood();
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Goods);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
@@ -172,7 +149,6 @@ namespace DaniDojo.Patches
                 {
                     if (hitResult == (int)HitResultTypes.Ryo)
                     {
-                        result.AddRenda();
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Drumroll);
                     }
@@ -187,7 +163,7 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void EnsoGameManager_ProcExecMain_Postfix_GetNoteResults(EnsoGameManager __instance)
         {
-            if (DaniDojoSelectManager.isInDan && result != null)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 var frameResult = __instance.ensoParam.GetFrameResults();
                 for (int i = 0; i < frameResult.hitResultInfoNum - 1; i++)
@@ -196,6 +172,7 @@ namespace DaniDojo.Patches
                     {
                         var info = frameResult.hitResultInfo[i];
 
+                        DaniPlayManager.AddHitResult(info);
                         int hitResult = info.hitResult;
                         if (info.onpuType == (int)OnpuTypes.Don || info.onpuType == (int)OnpuTypes.Do || info.onpuType == (int)OnpuTypes.Ko || info.onpuType == (int)OnpuTypes.Katsu || info.onpuType == (int)OnpuTypes.Ka
                             || info.onpuType == (int)OnpuTypes.DaiDon || info.onpuType == (int)OnpuTypes.DaiKatsu
@@ -203,19 +180,16 @@ namespace DaniDojo.Patches
                         {
                             if (hitResult == (int)HitResultTypes.Fuka || hitResult == (int)HitResultTypes.Drop)
                             {
-                                result.AddBad();
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Bads);
                             }
                             else if (hitResult == (int)HitResultTypes.Ka)
                             {
-                                result.AddOk();
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Oks);
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
                             }
                             else if (hitResult == (int)HitResultTypes.Ryo)
                             {
-                                result.AddGood();
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Goods);
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
@@ -225,7 +199,6 @@ namespace DaniDojo.Patches
                         {
                             if (hitResult == (int)HitResultTypes.Ryo)
                             {
-                                result.AddRenda();
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                                 DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Drumroll);
                             }
@@ -246,7 +219,7 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void EnsoGraphicManager_CreateParts_Postfix(EnsoGraphicManager __instance)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 Plugin.Log.LogInfo("Image Change Start");
 
@@ -416,11 +389,11 @@ namespace DaniDojo.Patches
                 Plugin.Log.LogInfo("Panels created");
 
 
-                if (DaniDojoSelectManager.currentCourse != null)
+                if (DaniPlayManager.GetCurrentCourse() != null)
                 {
                     (string bgImage, string textImage) imageNames;
 
-                    switch (DaniDojoSelectManager.currentCourse.Id)
+                    switch (DaniPlayManager.GetCurrentCourse().Id)
                     {
                         case "5kyuu": imageNames = ("WoodBg.png", "kyuu5.png"); break;
                         case "4kyuu": imageNames = ("WoodBg.png", "kyuu4.png"); break;
@@ -485,7 +458,7 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void IconCourse_Start_Postfix(IconCourse __instance)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 DaniDojoAssets.EnsoAssets.ChangeCourseIcon(__instance.gameObject);
                 //DaniDojoAssetUtility.ChangeSprite(__instance.gameObject, Path.Combine(baseImageFilePath, "Enso", "icon_course_danidojo.png"));
@@ -499,9 +472,9 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool ComboNumber_setAnimationComboNumber_Prefix(ComboNumbers.ComboNumber __instance, ref uint cmbNum)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
-                cmbNum = (uint)result.currentCombo;
+                cmbNum = (uint)DaniPlayManager.GetCurrentCombo(); 
             }
             return true;
         }
@@ -518,7 +491,7 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool BGFever_IsPrepareFinished_Prefix(BGFever __instance, ref bool __result)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 __result = true;
                 return false;
@@ -532,7 +505,7 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool FeverEffect_Update_Prefix(FeverEffect __instance)
         {
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
                 __instance.setup = true;
                 return false;
@@ -547,14 +520,13 @@ namespace DaniDojo.Patches
         public static void EnsoPauseMenu_OnRestartClicked_Prefix(EnsoPauseMenu __instance)
         {
             // Restart the dan
-            if (DaniDojoSelectManager.isInDan)
+            if (DaniPlayManager.CheckIsInDan())
             {
-                DaniDojoSelectManager.isInDan = true;
-                DaniDojoSelectManager.currentDanSongIndex = 0;
+                DaniPlayManager.RestartDanPlay();
 
-                result = new DaniDojoCurrentPlay(DaniDojoSelectManager.currentCourse);
+                var songData = DaniPlayManager.GetSongData();
 
-                BeginSong(DaniDojoSelectManager.currentCourse.Songs[0].SongId, DaniDojoSelectManager.currentCourse.Songs[0].Level);
+                BeginSong(songData.SongId, songData.Level);
             }
         }
 
@@ -565,7 +537,7 @@ namespace DaniDojo.Patches
         public static void EnsoPauseMenu_OnReturnClicked_Postfix(EnsoPauseMenu __instance)
         {
             // Exit the dan
-            DaniDojoSelectManager.isInDan = false;
+            DaniPlayManager.LeaveDanPlay();
         }
 
         [HarmonyPatch(typeof(EnsoPauseMenu))]
@@ -575,7 +547,7 @@ namespace DaniDojo.Patches
         public static void EnsoPauseMenu_OnButtonModeClicked_Postfix(EnsoPauseMenu __instance)
         {
             // Exit the dan
-            DaniDojoSelectManager.isInDan = false;
+            DaniPlayManager.LeaveDanPlay();
         }
 
     }
