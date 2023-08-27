@@ -388,34 +388,40 @@ namespace DaniDojo.Patches
 
                 Plugin.Log.LogInfo("Panels created");
 
-
-                if (DaniPlayManager.GetCurrentCourse() != null)
+                var currentCourse = DaniPlayManager.GetCurrentCourse();
+                if (currentCourse != null)
                 {
+                    var courseId = currentCourse.Id;
+                    if (int.TryParse(courseId, out int _))
+                    {
+                        courseId = currentCourse.Title;
+                    }
+
                     (string bgImage, string textImage) imageNames;
 
-                    switch (DaniPlayManager.GetCurrentCourse().Id)
+                    imageNames = courseId switch
                     {
-                        case "5kyuu": imageNames = ("WoodBg.png", "kyuu5.png"); break;
-                        case "4kyuu": imageNames = ("WoodBg.png", "kyuu4.png"); break;
-                        case "3kyuu": imageNames =  ("WoodBg.png", "kyuu3.png"); break;
-                        case "2kyuu": imageNames =  ("WoodBg.png", "kyuu2.png"); break;
-                        case "1kyuu": imageNames = ("WoodBg.png", "kyuu1.png"); break;
-                        case "1dan": imageNames =  ("BlueBg.png", "dan1.png"); break;
-                        case "2dan": imageNames =  ("BlueBg.png", "dan2.png"); break;
-                        case "3dan": imageNames =  ("BlueBg.png", "dan3.png"); break;
-                        case "4dan": imageNames =  ("BlueBg.png", "dan4.png"); break;
-                        case "5dan": imageNames =  ("BlueBg.png", "dan5.png"); break;
-                        case "6dan": imageNames =  ("RedBg.png", "dan6.png"); break;
-                        case "7dan": imageNames =  ("RedBg.png", "dan7.png"); break;
-                        case "8dan": imageNames =  ("RedBg.png", "dan8.png"); break;
-                        case "9dan": imageNames = ("RedBg.png", "dan9.png"); break;
-                        case "10dan": imageNames =  ("RedBg.png", "dan10.png"); break;
-                        case "11dan": imageNames =  ("SilverBg.png", "kuroto.png"); break;
-                        case "12dan": imageNames =  ("SilverBg.png", "meijin.png"); break;
-                        case "13dan": imageNames =  ("SilverBg.png", "chojin.png"); break;
-                        case "14dan": imageNames = ("GoldBg.png", "tatsujin.png"); break;
-                        default: imageNames = ("TanBg.png", "gaiden.png"); break;
-                    }
+                        "5kyuu" or "五級 5th Kyu" => ("WoodBg.png", "kyuu5.png"),
+                        "4kyuu" or "四級 4th Kyu" => ("WoodBg.png", "kyuu4.png"),
+                        "3kyuu" or "三級 3rd Kyu" => ("WoodBg.png", "kyuu3.png"),
+                        "2kyuu" or "二級 2nd Kyu" => ("WoodBg.png", "kyuu2.png"),
+                        "1kyuu" or "一級 1st Kyu" => ("WoodBg.png", "kyuu1.png"),
+                        "1dan" or "初段 1st Dan" => ("BlueBg.png", "dan1.png"),
+                        "2dan" or "二段 2nd Dan" => ("BlueBg.png", "dan2.png"),
+                        "3dan" or "三段 3rd Dan" => ("BlueBg.png", "dan3.png"),
+                        "4dan" or "四段 4th Dan" => ("BlueBg.png", "dan4.png"),
+                        "5dan" or "五段 5th Dan" => ("BlueBg.png", "dan5.png"),
+                        "6dan" or "六段 6th Dan" => ("RedBg.png", "dan6.png"),
+                        "7dan" or "七段 7th Dan" => ("RedBg.png", "dan7.png"),
+                        "8dan" or "八段 8th Dan" => ("RedBg.png", "dan8.png"),
+                        "9dan" or "九段 9th Dan" => ("RedBg.png", "dan9.png"),
+                        "10dan" or "十段 10th Dan" => ("RedBg.png", "dan10.png"),
+                        "11dan" or "玄人 Kuroto" => ("SilverBg.png", "kuroto.png"),
+                        "12dan" or "名人 Meijin" => ("SilverBg.png", "meijin.png"),
+                        "13dan" or "超人 Chojin" => ("SilverBg.png", "chojin.png"),
+                        "14dan" or "達人 Tatsujin" => ("GoldBg.png", "tatsujin.png"),
+                        _ => ("TanBg.png", "gaiden.png"),
+                    };
 
                     string bgImageName = imageNames.bgImage;
                     string textImageName = imageNames.textImage;

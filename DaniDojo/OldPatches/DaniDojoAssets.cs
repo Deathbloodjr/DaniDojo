@@ -229,14 +229,15 @@ namespace DaniDojo.Patches
 
             public static void UpdateRequirementBar(BorderType borderType)
             {
+                Plugin.LogInfo("UpdateRequirementBar Start", 2);
                 var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
-                var values = DaniPlayManager.GetCurrentBorderValue(borderType);
                 var borders = DaniPlayManager.GetCurrentBorderOfType(borderType);
                 var currentValue = DaniPlayManager.GetCurrentBorderValue(borderType);
 
                 for (int j = 0; j < indexes.Count; j++)
                 {
-                    GameObject panel = GameObject.Find("Panel" + j);
+                    Plugin.LogInfo("UpdateRequirementBar: Index: " + j, 2);
+                    GameObject panel = GameObject.Find("Panel" + indexes[j]);
                     if (panel != null)
                     {
                         //var bar = panel.transform.Find("CurReqBarFill");
@@ -250,14 +251,20 @@ namespace DaniDojo.Patches
                             if (image != null && emptyImage != null)
                             {
                                 int requirementValue = DaniPlayManager.GetCurrentBorderRequirement(borders[j]);
-                                bool isGold = false;
 
-                                isGold = DaniPlayManager.CalculateBorder(borders[j]) == DaniRank.GoldClear;
 
-                                if (isGold && colorLerp != null)
+                                bool isGold = DaniPlayManager.CalculateBorder(borders[j]) == DaniRank.GoldClear;
+
+                                if (!borders[j].IsTotal && borders[j].BorderType != BorderType.Oks && borders[j].BorderType != BorderType.Bads)
                                 {
-                                    colorLerp.BeginRainbow(borders[j].IsTotal);
+                                    var goldRequirement = DaniPlayManager.GetCurrentGoldBorderRequirement(borders[j]);
+                                    isGold = currentValue[j] >= goldRequirement;
                                 }
+
+                                Plugin.LogInfo("UpdateRequirementBar: requirementValue: " + requirementValue, 2);
+                                Plugin.LogInfo("UpdateRequirementBar: currentValue[j]: " + currentValue[j], 2);
+
+
 
                                 var newScale = emptyImage.transform.localScale;
                                 if (borderType == BorderType.Oks ||
@@ -265,7 +272,17 @@ namespace DaniDojo.Patches
                                 {
                                     currentValue[j] = requirementValue - currentValue[j];
                                     currentValue[j] = Math.Max(currentValue[j], 0);
+
+                                    // Sorta hardcoded, but it'll basically not be gold ever
+                                    isGold = false;
                                 }
+
+                                if (isGold && colorLerp != null)
+                                {
+                                    colorLerp.BeginRainbow(borders[j].IsTotal);
+                                }
+
+                                Plugin.LogInfo("ChangeReqCurrentValue: currentValue[j]: " + currentValue[j], 2);
 
                                 ChangeReqCurrentValue(panel, currentValue[j], isGold);
 
@@ -910,38 +927,39 @@ namespace DaniDojo.Patches
                     DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Text", GetAssetSprite(textName), new Vector2(19, 24), topCourseObject.transform);
 
                     bool skip = false;
-                    SelectAssetName recordName;
-                    // I don't like that I'm calling new for each of these, seems very inefficient
-                    if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Rainbow))
+                    SelectAssetName recordName = SelectAssetName.CourseNormal;
+                    if (highScore.RankCombo.Rank == DaniRank.GoldClear)
                     {
-                        recordName = SelectAssetName.SmallGoldDFC;
+                        if (highScore.RankCombo.Combo == DaniCombo.Rainbow)
+                        {
+                            recordName = SelectAssetName.SmallGoldDFC;
+                        }
+                        else if (highScore.RankCombo.Combo == DaniCombo.Gold)
+                        {
+                            recordName = SelectAssetName.SmallGoldFC;
+                        }
+                        else if (highScore.RankCombo.Combo == DaniCombo.Silver)
+                        {
+                            recordName = SelectAssetName.SmallGoldClear;
+                        }
                     }
-                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Gold))
+                    else if (highScore.RankCombo.Rank == DaniRank.RedClear)
                     {
-                        recordName = SelectAssetName.SmallGoldFC;
+                        if (highScore.RankCombo.Combo == DaniCombo.Rainbow)
+                        {
+                            recordName = SelectAssetName.SmallRedDFC;
+                        }
+                        else if (highScore.RankCombo.Combo == DaniCombo.Gold)
+                        {
+                            recordName = SelectAssetName.SmallRedFC;
+                        }
+                        else if (highScore.RankCombo.Combo == DaniCombo.Silver)
+                        {
+                            recordName = SelectAssetName.SmallRedClear;
+                        }
                     }
-                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.GoldClear, DaniCombo.Silver))
-                    {
-                        recordName = SelectAssetName.SmallGoldClear;
-                    }
-                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Rainbow))
-                    {
-                        recordName = SelectAssetName.SmallRedDFC;
-                    }
-                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Gold))
-                    {
-                        recordName = SelectAssetName.SmallRedFC;
-                    }
-                    else if (highScore.RankCombo == new DaniRankCombo(DaniRank.RedClear, DaniCombo.Silver))
-                    {
-                        recordName = SelectAssetName.SmallRedClear;
-                    }
-                    else
-                    {
-                        recordName = SelectAssetName.CourseNormal; // This line is just here so it won't yell at me for being uninitialized;
-                        skip = true;
-                    }
-                    if (!skip)
+
+                    if (recordName != SelectAssetName.CourseNormal)
                     {
                         DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Record", GetAssetSprite(recordName), new Vector2(0, 98), topCourseObject.transform);
                     }
@@ -1065,7 +1083,19 @@ namespace DaniDojo.Patches
                     DaniDojoAssetUtility.CreateImage("SongIndicator", GetAssetSprite(songIndicator), new Vector2(10, 10), songParent.transform);
 
                     var song = musicInfoAccessers.Find((x) => x.Id == courseInfo.Songs[i].SongId);
-                    string songTitle = "Song not found: " + courseInfo.Songs[i].SongId;
+                    string songTitle = "Song not found: ";
+                    if (Plugin.Instance.ConfigSongTitleLanguage.Value == "Jp")
+                    {
+                        songTitle += courseInfo.Songs[i].TitleJp;
+                    }
+                    else if (Plugin.Instance.ConfigSongTitleLanguage.Value == "Eng")
+                    {
+                        songTitle += courseInfo.Songs[i].TitleEng;
+                    }
+                    else
+                    {
+                        songTitle += courseInfo.Songs[i].SongId;
+                    }
                     string songDetail = "";
                     if (song != null)
                     {

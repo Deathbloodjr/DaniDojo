@@ -320,7 +320,7 @@ namespace DaniDojo.Managers
             // Or do I return an empty SaveCourse?
             var course = new SaveCourse(hash);
             SaveData.Courses.Add(course);
-            return course;
+            return SaveData.Courses[SaveData.Courses.Count - 1];
         }
 
         /// <summary>
@@ -330,6 +330,7 @@ namespace DaniDojo.Managers
         /// <returns>The next highest course.</returns>
         static public DaniCourse GetDefaultCourse(DaniSeries series)
         {
+            Plugin.LogInfo("GetDefaultCourse Start", 2);
             // First find the first dan, which is generally the starting point
             // Then move up from there to find the highest cleared dan
             int highestClearedIndex = 0;
@@ -342,16 +343,19 @@ namespace DaniDojo.Managers
                 }
             }
 
+            Plugin.LogInfo("GetDefaultCourse Middle", 2);
+
             for (int i = highestClearedIndex; i < series.Courses.Count - 1; i++)
             {
                 var saveCourse = GetCourseRecord(series.Courses[i].Hash);
-                if (saveCourse != null && saveCourse.RankCombo.Rank >= DaniRank.RedClear)
+                if (saveCourse.RankCombo.Rank >= DaniRank.RedClear)
                 {
-                    highestClearedIndex = i;
+                    highestClearedIndex = i + 1;
                 }
             }
 
-            return series.Courses[highestClearedIndex + 1];
+            Plugin.LogInfo("GetDefaultCourse End", 2);
+            return series.Courses[highestClearedIndex];
         }
 
         static public bool IsCourseLocked(DaniSeries series, DaniCourse course)

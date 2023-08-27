@@ -37,6 +37,10 @@ namespace DaniDojo.Patches
                 Plugin.Log.LogInfo("DaniDojoDaniCourseSelect Start");
 
                 currentSeries = CourseDataManager.AllSeriesData.Find((x) => x.IsActive);
+                if (currentSeries == null)
+                {
+                    currentSeries = CourseDataManager.AllSeriesData[0];
+                }
                 // Default to 1st dan
 
                 currentCourse = SaveDataManager.GetDefaultCourse(currentSeries);

@@ -35,7 +35,10 @@ namespace DaniDojo
         public  ConfigEntry<string> ConfigDaniDojoDataLocation;
         public  ConfigEntry<string> ConfigDaniDojoAssetLocation;
         public  ConfigEntry<string> ConfigDaniDojoSaveLocation;
-               
+
+
+        public ConfigEntry<string> ConfigSongTitleLanguage;
+
         public  ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
                
         public  ConfigEntry<bool> ConfigLoggingEnabled;
@@ -82,20 +85,25 @@ namespace DaniDojo
                 true,
                 "Enables the mod.");
 
-            ConfigDaniDojoDataLocation = Config.Bind("DaniDojo",
+            ConfigDaniDojoDataLocation = Config.Bind("Data",
                 "DaniDojoDataLocation",
                 "BepInEx\\data\\DaniDojo",
                 "The file location for all dani dojo course data.");
 
-            ConfigDaniDojoAssetLocation = Config.Bind("DaniDojo",
+            ConfigDaniDojoAssetLocation = Config.Bind("Data",
                 "DaniDojoAssetLocation",
                 "BepInEx\\data\\DaniDojoAssets",
                 "The file location for all dani dojo asset data.");
 
-            ConfigDaniDojoSaveLocation = Config.Bind("DaniDojo",
+            ConfigDaniDojoSaveLocation = Config.Bind("Data",
                 "DaniDojoSaveLocation",
                 "BepInEx\\data\\DaniDojoSaves",
                 "The file location for dani dojo save data.");
+
+            ConfigSongTitleLanguage = Config.Bind("General",
+                "SongTitleLanguage",
+                "Eng",
+                "The language for any song titles that could not be found. (Eng or Jp)");
 
             ConfigNamePlateDanRankEnabled = Config.Bind("NamePlate",
                 "DanRankEnabled",
@@ -341,7 +349,7 @@ namespace DaniDojo
             // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
             if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
-                Log.LogInfo(value);
+                Log.LogInfo("[" + detailLevel + "] " + value);
             }
         }
         public static void LogInfo(string value, int detailLevel = 0)
@@ -354,7 +362,7 @@ namespace DaniDojo
         {
             if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
-                Log.LogWarning(value);
+                Log.LogWarning("[" + detailLevel + "] " + value);
             }
         }
         public static void LogWarning(string value, int detailLevel = 0)
@@ -367,7 +375,7 @@ namespace DaniDojo
         {
             if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
-                Log.LogError(value);
+                Log.LogError("[" + detailLevel + "] " + value);
             }
         }
         public static void LogError(string value, int detailLevel = 0)

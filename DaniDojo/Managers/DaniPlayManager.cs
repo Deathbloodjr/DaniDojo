@@ -126,7 +126,7 @@ namespace DaniDojo.Managers
             {
                 if (currentCourse.Borders[i].BorderType == borderType)
                 {
-                    indexes.Add(i); ;
+                    indexes.Add(i);
                 }
             }
             return indexes;
@@ -142,13 +142,17 @@ namespace DaniDojo.Managers
             for (int i = 0; i < borders.Count; i++)
             {
                 var allResults = GetBorderPlayResults(borders[i], currentPlay.PlayData);
-                if (borders[i].IsTotal)
+                if (borders[i].IsTotal && allResults.Count > 0)
                 {
                     results.Add(allResults[0]);
                 }
-                else
+                else if (allResults.Count > currentPlay.CurrentSongIndex)
                 {
                     results.Add(allResults[currentPlay.CurrentSongIndex]);
+                }
+                else
+                {
+                    results.Add(0);
                 }
             }
             return results;
@@ -163,6 +167,18 @@ namespace DaniDojo.Managers
             else
             {
                 return border.RedReqs[currentPlay.CurrentSongIndex];
+            }
+        }
+
+        static public int GetCurrentGoldBorderRequirement(DaniBorder border)
+        {
+            if (border.IsTotal)
+            {
+                return border.GoldReqs[0];
+            }
+            else
+            {
+                return border.GoldReqs[currentPlay.CurrentSongIndex];
             }
         }
 
@@ -259,10 +275,13 @@ namespace DaniDojo.Managers
         // To tell how many notes are remaining in the song/course, that can be a way to fail
         static public DaniRank CalculateRankBorders(DaniCourse course, PlayData play)
         {
+            Plugin.LogInfo("CalculateRankBorders Start", 2);
             if (course == null)
             {
                 return DaniRank.None;
             }
+            Plugin.LogInfo("CalculateRankBorders: Series: " + course.Parent.Title, 2);
+            Plugin.LogInfo("CalculateRankBorders: Course: " + course.Title, 2);
             DaniRank minRank = DaniRank.GoldClear;
             bool isCheckTotal = play.SongReached == course.Songs.Count;
             for (int i = 0; i < course.Borders.Count; i++)
@@ -274,6 +293,7 @@ namespace DaniDojo.Managers
                     continue;
                 }
                 minRank = (DaniRank)Math.Min((int)minRank, (int)CalculateBorder(course.Borders[i], play));
+                Plugin.LogInfo("CalculateRankBorders: Border " + i + " (" + course.Borders[i].BorderType.ToString() + "): " + minRank.ToString(), 2);
                 if (minRank == DaniRank.None)
                 {
                     return DaniRank.None;
@@ -309,9 +329,13 @@ namespace DaniDojo.Managers
 
             DaniRank tmpRank = DaniRank.GoldClear;
 
+            Plugin.LogInfo("CalculateBorder: BorderType: " + border.BorderType.ToString(), 2);
             for (int i = 0; i < playValues.Count; i++)
             {
-                if (border.BorderType == BorderType.Oks || 
+                Plugin.LogInfo("CalculateBorder: playValues[i]: " + playValues[i].ToString(), 2);
+                Plugin.LogInfo("CalculateBorder: border.RedReqs[i]: " + border.RedReqs[i].ToString(), 2);
+                Plugin.LogInfo("CalculateBorder: border.GoldReqs[i]: " + border.GoldReqs[i].ToString(), 2);
+                if (border.BorderType == BorderType.Oks ||
                     border.BorderType == BorderType.Bads)
                 {
                     if (playValues[i] < border.GoldReqs[i])
@@ -325,7 +349,6 @@ namespace DaniDojo.Managers
                     else
                     {
                         return DaniRank.None;
-                        //tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.None);
                     }
                 }
                 else
@@ -341,7 +364,6 @@ namespace DaniDojo.Managers
                     else
                     {
                         return DaniRank.None;
-                        //tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.None);
                     }
                 }
             }
@@ -368,7 +390,7 @@ namespace DaniDojo.Managers
             }
             else
             {
-                for (int i = 0; i < play.SongReached - 1; i++)
+                for (int i = 0; i < play.SongPlayData.Count; i++)
                 {
                     switch (border.BorderType)
                     {
