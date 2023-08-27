@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DaniDojo.Managers;
+using DaniDojo.Data;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +14,16 @@ namespace DaniDojo.Patches
     {
         public class DaniDojoSelectManager : MonoBehaviour
         {
-            public static DaniSeriesData currentSeries;
-            public static DaniData currentCourse;
-            public DaniCourse currentCourseLevel;
+            static DaniSeries currentSeries;
+            static DaniCourse currentCourse;
+            DaniCourse currentCourseLevel;
 
             private GameObject currentCourseObject;
             private GameObject previousCourseObject;
             float courseMoveTime = 0.1f;
 
-            public static bool isInDan = false; // Only set to true for testing, set to false for the real thing
-            public static int currentDanSongIndex;
+            //public static bool isInDan = false; // Only set to true for testing, set to false for the real thing
+            //public static int currentDanSongIndex;
 
             public DonCommon donCommon;
             public PlayerName playerName;
@@ -34,35 +36,41 @@ namespace DaniDojo.Patches
             {
                 Plugin.Log.LogInfo("DaniDojoDaniCourseSelect Start");
 
-                currentSeries = Plugin.AllDaniData.Find((x) => x.isActiveDan);
+                currentSeries = CourseDataManager.AllSeriesData.Find((x) => x.IsActive);
+                if (currentSeries == null)
+                {
+                    currentSeries = CourseDataManager.AllSeriesData[0];
+                }
                 // Default to 1st dan
 
-                currentCourse = currentSeries.courseData[5];
-                // Check to see if there's any higher clears, and set the current dan to the one after the highest cleared
+                currentCourse = SaveDataManager.GetDefaultCourse(currentSeries);
 
-                for (int j = 0; j < currentSeries.courseData.Count; j++)
-                {
-                    for (int i = 0; i < Plugin.AllDaniScores.Count; i++)
-                    {
-                        var course = currentSeries.courseData[j];
-                        if (course.hash == Plugin.AllDaniScores[i].hash)
-                        {
-                            if (course.danId >= currentCourse.danId && Plugin.AllDaniScores[i].danResult >= DanResult.RedClear)
-                            {
-                                if (currentSeries.courseData.Count > j + 1)
-                                {
-                                    currentCourse = currentSeries.courseData[j + 1];
-                                }
-                                else
-                                {
-                                    currentCourse = course;
-                                }
-                            }
-                        }
-                    }
-                }
+                //currentCourse = currentSeries.Courses[5];
+                //// Check to see if there's any higher clears, and set the current dan to the one after the highest cleared
 
-                currentCourseLevel = currentCourse.course;
+                //for (int j = 0; j < currentSeries.Courses.Count; j++)
+                //{
+                //    for (int i = 0; i < Plugin.AllDaniScores.Count; i++)
+                //    {
+                //        var course = currentSeries.Courses[j];
+                //        if (course.Hash == Plugin.AllDaniScores[i].hash)
+                //        {
+                //            if (course.Order >= currentCourse.Order && Plugin.AllDaniScores[i].danResult >= DanResult.RedClear)
+                //            {
+                //                if (currentSeries.Courses.Count > j + 1)
+                //                {
+                //                    currentCourse = currentSeries.Courses[j + 1];
+                //                }
+                //                else
+                //                {
+                //                    currentCourse = course;
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
+
+                //currentCourseLevel = currentCourse.Course;
 
                 CenterCourseParent = new GameObject("CourseParent");
                 LeftCourseParent = new GameObject("LeftCourseParent");
@@ -86,8 +94,6 @@ namespace DaniDojo.Patches
 
                 //donCommon = donObject.AddComponent<DonCommon>();
                 //playerName = playerObject.AddComponent<PlayerName>();
-
-                isInDan = false;
             }
 
             IEnumerator InitializeScene()
@@ -128,7 +134,7 @@ namespace DaniDojo.Patches
                     currentBuffer -= Time.deltaTime;
                     currentBuffer = Math.Max(currentBuffer, 0);
                 }
-                if (!isInDan)
+                if (!DaniPlayManager.CheckIsInDan())
                 {
                     ControllerManager.Dir dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
                     if (dir == ControllerManager.Dir.None)
@@ -161,12 +167,10 @@ namespace DaniDojo.Patches
                     }
                     else if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetOkDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
                     {
-                        isInDan = true;
-                        currentDanSongIndex = 0;
+                        DaniPlayManager.StartDanPlay(currentCourse);
+                        var songData = DaniPlayManager.GetSongData();
 
-                        DaniDojoTempEnso.result = new DaniDojoCurrentPlay(currentCourse);
-
-                        DaniDojoTempEnso.BeginSong(currentCourse.songs[0].songId, currentCourse.songs[0].level);
+                        DaniDojoTempEnso.BeginSong(songData.SongId, songData.Level);
                         TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
                     }
                     else if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetCancelDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
@@ -184,18 +188,9 @@ namespace DaniDojo.Patches
             private void NextCourse()
             {
                 ReturnTopCourse(currentCourse);
-                var index = currentSeries.courseData.FindIndex((x) => x == currentCourse);
 
-                do
-                {
-                    index++;
-                    if (index >= currentSeries.courseData.Count)
-                    {
-                        index = 0;
-                    }
-                } while (!CheckIfCourseUnlocked(currentSeries, currentSeries.courseData[index]));
+                currentCourse = CourseDataManager.GetNextUnlockedCourse(currentSeries, currentCourse);
 
-                currentCourse = currentSeries.courseData[index];
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Left);
 
@@ -203,76 +198,51 @@ namespace DaniDojo.Patches
                 StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
-                currentCourseLevel = currentCourse.course;
-
-                Plugin.Log.LogInfo("locked: " + currentCourse.locked);
             }
 
             private void PrevCourse()
             {
                 ReturnTopCourse(currentCourse);
-                var index = currentSeries.courseData.FindIndex((x) => x == currentCourse);
-                index--;
-                if (index < 0)
-                {
-                    index = currentSeries.courseData.Count - 1;
-                }
 
-                while (!CheckIfCourseUnlocked(currentSeries, currentSeries.courseData[index]))
-                {
-                    index--;
-                    if (index < 0)
-                    {
-                        index = currentSeries.courseData.Count - 1;
-                    }
-                }
+                currentCourse = CourseDataManager.GetPreviousUnlockedCourse(currentSeries, currentCourse);
 
-                currentCourse = currentSeries.courseData[index];
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Right);
 
                 StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(1920, 0, 0), courseMoveTime, true));
                 StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
-                SelectTopCourse(currentCourse);
-                currentCourseLevel = currentCourse.course;
 
-                Plugin.Log.LogInfo("locked: " + currentCourse.locked);
+                SelectTopCourse(currentCourse);
             }
 
             private void NextSeries()
             {
                 //ReturnTopCourse(currentCourse);
-                var courseIndex = currentSeries.courseData.FindIndex((x) => x == currentCourse);
-                var seriesIndex = Plugin.AllDaniData.FindIndex((x) => x == currentSeries);
+                var courseIndex = CourseDataManager.GetCourseIndex(currentSeries, currentCourse);
+                var seriesIndex = CourseDataManager.AllSeriesData.FindIndex((x) => x == currentSeries);
                 seriesIndex++;
-                if (seriesIndex >= Plugin.AllDaniData.Count)
+                if (seriesIndex >= CourseDataManager.AllSeriesData.Count)
                 {
                     seriesIndex = 0;
                 }
-                currentSeries = Plugin.AllDaniData[seriesIndex];
-                currentCourse = currentSeries.courseData.Find((x) => x.course == currentCourseLevel);
+                var previousCourse = currentCourse;
+                currentSeries = CourseDataManager.AllSeriesData[seriesIndex];
+                currentCourse = currentSeries.Courses.Find((x) => x.Id == previousCourse.Id);
 
                 if (currentCourse == null)
                 {
-                    courseIndex = Math.Min(courseIndex, currentSeries.courseData.Count - 1);
-                    currentCourse = currentSeries.courseData[courseIndex];
+                    courseIndex = Math.Min(courseIndex, currentSeries.Courses.Count - 1);
+                    currentCourse = currentSeries.Courses[courseIndex];
                 }
                 else
                 {
-                    courseIndex = currentSeries.courseData.FindIndex((x) => x == currentCourse);
+                    courseIndex = currentSeries.Courses.FindIndex((x) => x == currentCourse);
                 }
 
-                while (!CheckIfCourseUnlocked(currentSeries, currentSeries.courseData[courseIndex]))
+                if (SaveDataManager.IsCourseLocked(currentSeries, currentCourse))
                 {
-                    // I question this logic, as I didn't think it through at all
-                    courseIndex--;
-                    if (courseIndex < 0)
-                    {
-                        courseIndex = currentSeries.courseData.Count;
-                    }
+                    currentCourse = CourseDataManager.GetPreviousUnlockedCourse(currentSeries, currentCourse);
                 }
-
-                currentCourse = currentSeries.courseData[courseIndex];
 
                 previousCourseObject = currentCourseObject;
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
@@ -281,45 +251,37 @@ namespace DaniDojo.Patches
                 StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, 1080, 0), courseMoveTime, true));
                 StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
                 SelectTopCourse(currentCourse);
-
-                Plugin.Log.LogInfo("locked: " + currentCourse.locked);
             }
 
             private void PrevSeries()
             {
                 //ReturnTopCourse(currentCourse);
-                var courseIndex = currentSeries.courseData.FindIndex((x) => x == currentCourse);
-                var seriesIndex = Plugin.AllDaniData.FindIndex((x) => x == currentSeries);
+                var courseIndex = CourseDataManager.GetCourseIndex(currentSeries, currentCourse);
+                var seriesIndex = CourseDataManager.AllSeriesData.FindIndex((x) => x == currentSeries);
                 seriesIndex--;
                 if (seriesIndex < 0)
                 {
-                    seriesIndex = Plugin.AllDaniData.Count - 1;
+                    seriesIndex = CourseDataManager.AllSeriesData.Count - 1;
                 }
 
-                currentSeries = Plugin.AllDaniData[seriesIndex];
-                currentCourse = currentSeries.courseData.Find((x) => x.course == currentCourseLevel);
+                var previousCourse = currentCourse;
+                currentSeries = CourseDataManager.AllSeriesData[seriesIndex];
+                currentCourse = currentSeries.Courses.Find((x) => x.Id == previousCourse.Id);
 
                 if (currentCourse == null)
                 {
-                    courseIndex = Math.Min(courseIndex, currentSeries.courseData.Count - 1);
-                    currentCourse = currentSeries.courseData[courseIndex];
+                    courseIndex = Math.Min(courseIndex, currentSeries.Courses.Count - 1);
+                    currentCourse = currentSeries.Courses[courseIndex];
                 }
                 else
                 {
-                    courseIndex = currentSeries.courseData.FindIndex((x) => x == currentCourse);
+                    courseIndex = currentSeries.Courses.FindIndex((x) => x == currentCourse);
                 }
 
-                while (!CheckIfCourseUnlocked(currentSeries, currentSeries.courseData[courseIndex]))
+                if (SaveDataManager.IsCourseLocked(currentSeries, currentCourse))
                 {
-                    // I question this logic, as I didn't think it through at all
-                    courseIndex--;
-                    if (courseIndex < 0)
-                    {
-                        courseIndex = currentSeries.courseData.Count;
-                    }
+                    currentCourse = CourseDataManager.GetPreviousUnlockedCourse(currentSeries, currentCourse);
                 }
-
-                currentCourse = currentSeries.courseData[courseIndex];
 
                 previousCourseObject = currentCourseObject;
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
@@ -328,24 +290,28 @@ namespace DaniDojo.Patches
                 StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, -1080, 0), courseMoveTime, true));
                 StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
                 SelectTopCourse(currentCourse);
-
-                Plugin.Log.LogInfo("locked: " + currentCourse.locked);
             }
 
-            private void SelectTopCourse(DaniData course)
+            private void SelectTopCourse(DaniCourse course)
             {
-                GameObject currentCourse = GameObject.Find(course.title);
-                var curPosition = currentCourse.transform.position;
-                curPosition.y -= 40;
-                currentCourse.transform.position = curPosition;
+                GameObject currentCourse = GameObject.Find(course.Title);
+                if (currentCourse != null)
+                {
+                    var curPosition = currentCourse.transform.position;
+                    curPosition.y -= 40;
+                    currentCourse.transform.position = curPosition;
+                }
             }
 
-            private void ReturnTopCourse(DaniData course)
+            private void ReturnTopCourse(DaniCourse course)
             {
-                GameObject currentCourse = GameObject.Find(course.title);
-                var curPosition = currentCourse.transform.position;
-                curPosition.y = 884;
-                currentCourse.transform.position = curPosition;
+                GameObject currentCourse = GameObject.Find(course.Title);
+                if (currentCourse != null)
+                {
+                    var curPosition = currentCourse.transform.position;
+                    curPosition.y = 884;
+                    currentCourse.transform.position = curPosition;
+                }
             }
 
             public IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds, bool deleteAfter = false)
@@ -363,42 +329,6 @@ namespace DaniDojo.Patches
                 {
                     GameObject.Destroy(objectToMove);
                 }
-            }
-
-            private bool CheckIfCourseUnlocked(DaniSeriesData series, DaniData course)
-            {
-                Plugin.Log.LogInfo("seriesName: " + series.seriesTitle);
-                Plugin.Log.LogInfo("courseName: " + course.title);
-                if (!course.locked)
-                {
-                    return true;
-                }
-
-                // course is in fact, locked
-
-                // Get the index of the current course
-                var currentIndex = series.courseData.FindIndex((x) => x == course);
-                if (currentIndex == 0)
-                {
-                    // If it is the first course in the list, it cannot be locked
-                    // I feel like this is a safe rule to have hardcoded
-                    return true;
-                }
-
-                // Get the courseData for the previous course
-                var previousCourse = series.courseData[currentIndex - 1];
-
-                // Get the high score for the previous course to see if it was cleared
-
-                var highScore = Plugin.AllDaniScores.Find((x) => x.hash == previousCourse.hash);
-                if (highScore == null)
-                {
-                    return false;
-                }
-
-                // Check to see if the prevous course was cleared
-                // If the danResult is RedClear or greater (which would just be GoldClear), then this course is unlocked
-                return highScore.danResult >= DanResult.RedClear;
             }
         }
 
