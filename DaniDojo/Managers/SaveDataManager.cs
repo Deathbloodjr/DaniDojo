@@ -49,6 +49,7 @@ namespace DaniDojo.Managers
                 var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
                 data = LoadOldSaveFile(node);
                 SaveDaniSaveData(data);
+                return LoadSaveData(folderLocation);
             }
 
 
