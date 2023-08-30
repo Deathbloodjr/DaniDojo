@@ -253,18 +253,9 @@ namespace DaniDojo.Patches
                                 int requirementValue = DaniPlayManager.GetCurrentBorderRequirement(borders[j]);
 
 
-                                bool isGold = DaniPlayManager.CalculateBorder(borders[j]) == DaniRank.GoldClear;
+                                bool isGold = false;
 
-                                if (!borders[j].IsTotal && borders[j].BorderType != BorderType.Oks && borders[j].BorderType != BorderType.Bads)
-                                {
-                                    var goldRequirement = DaniPlayManager.GetCurrentGoldBorderRequirement(borders[j]);
-                                    isGold = currentValue[j] >= goldRequirement;
-                                }
-
-                                Plugin.LogInfo("UpdateRequirementBar: requirementValue: " + requirementValue, 2);
-                                Plugin.LogInfo("UpdateRequirementBar: currentValue[j]: " + currentValue[j], 2);
-
-
+                                isGold = DaniPlayManager.CalculateBorderMidSong(borders[j]) == DaniRank.GoldClear;
 
                                 var newScale = emptyImage.transform.localScale;
                                 if (borderType == BorderType.Oks ||
