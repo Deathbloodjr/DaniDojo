@@ -310,6 +310,7 @@ namespace DaniDojo.Patches
                         // This is instead being updated any time the main bar is updated for that border, when nothing here should change
                         if (DaniPlayManager.GetCurrentSongNumber() > 0)
                         {
+                            var songValues = DaniPlayManager.GetBorderPlayResults(borders[j]);
                             var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill");
                             if (prevSongBar1 != null)
                             {
@@ -321,11 +322,11 @@ namespace DaniDojo.Patches
                                     if (borderType == BorderType.Oks ||
                                         borderType == BorderType.Bads)
                                     {
-                                        newScale.x = (requirementValue - currentValue[j]) / (float)requirementValue;
+                                        newScale.x = (requirementValue - songValues[0]) / (float)requirementValue;
                                     }
                                     else
                                     {
-                                        newScale.x = currentValue[j] / (float)requirementValue;
+                                        newScale.x = songValues[0] / (float)requirementValue;
                                     }
                                     newScale.x = Math.Max(newScale.x, 0);
                                     newScale.x = Math.Min(newScale.x, 1);
@@ -357,11 +358,11 @@ namespace DaniDojo.Patches
                                         if (borderType == BorderType.Oks ||
                                             borderType == BorderType.Bads)
                                         {
-                                            newScale.x = (requirementValue - currentValue[j]) / (float)requirementValue;
+                                            newScale.x = (requirementValue - songValues[1]) / (float)requirementValue;
                                         }
                                         else
                                         {
-                                            newScale.x = currentValue[j] / (float)requirementValue;
+                                            newScale.x = songValues[1] / (float)requirementValue;
                                         }
                                         newScale.x = Math.Max(newScale.x, 0);
                                         newScale.x = Math.Min(newScale.x, 1);
@@ -1096,7 +1097,8 @@ namespace DaniDojo.Patches
 
                     if (courseInfo.Songs[i].IsHidden)
                     {
-                        if (highScore == null || highScore.SongReached < i)
+                        // SongReached is 0 indexed
+                        if (highScore.SongReached <= i)
                         {
                             songTitle = "? ? ?";
                             songDetail = "";

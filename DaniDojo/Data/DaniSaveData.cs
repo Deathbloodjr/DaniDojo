@@ -31,7 +31,7 @@ namespace DaniDojo.Data
         Rainbow,
     }
 
-    public struct DaniRankCombo : IEquatable<DaniRankCombo>
+    public struct DaniRankCombo : IEquatable<DaniRankCombo>, IComparable<DaniRankCombo>
     {
         public DaniRank Rank;
         public DaniCombo Combo;
@@ -54,6 +54,22 @@ namespace DaniDojo.Data
                 hash = hash * 23 + Rank.GetHashCode();
                 hash = hash * 23 + Combo.GetHashCode();
                 return hash;
+            }
+        }
+
+        public int CompareTo(DaniRankCombo other)
+        {
+            if (this > other)
+            {
+                return 1;
+            }
+            else if (this < other)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
             }
         }
 

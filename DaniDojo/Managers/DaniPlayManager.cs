@@ -496,6 +496,10 @@ namespace DaniDojo.Managers
             return tmpRank;
         }
 
+        static public List<int> GetBorderPlayResults(DaniBorder border)
+        {
+            return GetBorderPlayResults(border, currentPlay.PlayData);
+        }
 
         static public List<int> GetBorderPlayResults(DaniBorder border, PlayData play)
         {
@@ -538,8 +542,10 @@ namespace DaniDojo.Managers
 
         static public DaniCombo CalculateComboRank(PlayData play)
         {
+            Plugin.LogInfo("CalculateComboRank Start", 2);
             if (play.SongReached != play.SongPlayData.Count)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.None", 2);
                 return DaniCombo.None;
             }
             int numOks = 0;
@@ -552,14 +558,17 @@ namespace DaniDojo.Managers
 
             if (numOks == 0 && numBads == 0)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Rainbow", 2);
                 return DaniCombo.Rainbow;
             }
             else if (numBads == 0)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Gold", 2);
                 return DaniCombo.Gold;
             }
             else
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Silver", 2);
                 return DaniCombo.Silver;
             }
         }
