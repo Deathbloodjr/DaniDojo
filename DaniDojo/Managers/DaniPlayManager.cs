@@ -1,5 +1,6 @@
 ﻿using Blittables;
 using DaniDojo.Data;
+using DaniDojo.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -288,7 +289,7 @@ namespace DaniDojo.Managers
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Goods++;
             AddCombo();
-            AddScore(100); // I need to figure out how to store score data like this, or how to even find it.
+            //AddScore(100); // I need to figure out how to store score data like this, or how to even find it.
         }
 
         static void AddOk()
@@ -296,7 +297,7 @@ namespace DaniDojo.Managers
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Oks++;
             AddCombo();
-            AddScore(100 / 2); // I need to figure out how to store score data like this, or how to even find it.
+            //AddScore(100 / 2); // I need to figure out how to store score data like this, or how to even find it.
         }
 
         static void AddCombo()
@@ -308,10 +309,13 @@ namespace DaniDojo.Managers
             songPlayData.Combo = Math.Max(currentPlay.CurrentSongCombo, songPlayData.Combo);
         }
 
-        static void AddScore(int points)
+        static public void AddScore(int points)
         {
+            Plugin.LogInfo("Score added: " + points);
+
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Score += points;
+            DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Score);
         }
 
         static void UpdateSoulGauge(int soulPoints)
@@ -332,7 +336,7 @@ namespace DaniDojo.Managers
         {
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Drumroll++;
-            AddScore(100); // This won't change
+            //AddScore(100); // This won't change
         }
 
 

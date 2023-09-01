@@ -12,6 +12,7 @@ using System.Text.Json.Nodes;
 using System.Linq;
 using System.Text.Json;
 using DaniDojo.Managers;
+using DaniDojo.Hooks;
 
 #if TAIKO_IL2CPP
 using BepInEx.Unity.IL2CPP.Utils;
@@ -323,6 +324,7 @@ namespace DaniDojo
                 //_harmony.PatchAll(typeof(DaniDojoTempSelect));
                 _harmony.PatchAll(typeof(DaniDojoSongSelect));
                 _harmony.PatchAll(typeof(PlayerNameDaniRank));
+                _harmony.PatchAll(typeof(ScoreUpdateHook));
                 //_harmony.PatchAll(typeof(testing));
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");
             }
