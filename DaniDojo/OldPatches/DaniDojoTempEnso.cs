@@ -137,12 +137,14 @@ namespace DaniDojo.Patches
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Oks);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
+                        //DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Score);
                     }
                     else if (hitResult == (int)HitResultTypes.Ryo)
                     {
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Goods);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Combo);
+                        //DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Score);
                     }
                 }
                 else if (info.onpuType == (int)OnpuTypes.Renda || info.onpuType == (int)OnpuTypes.DaiRenda || info.onpuType == (int)OnpuTypes.Imo || info.onpuType == (int)OnpuTypes.GekiRenda)
@@ -151,6 +153,7 @@ namespace DaniDojo.Patches
                     {
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.TotalHits);
                         DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Drumroll);
+                        //DaniDojoAssets.EnsoAssets.UpdateRequirementBar(Data.BorderType.Score);
                     }
                 }
             }

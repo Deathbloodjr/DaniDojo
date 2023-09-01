@@ -1,5 +1,6 @@
 ﻿using Blittables;
 using DaniDojo.Data;
+using DaniDojo.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +19,82 @@ namespace DaniDojo.Managers
         static public bool HasFailed()
         {
             // Various border checks here, still not sure how I want to do that
-            var currentRank = CalculateRankBorders(currentCourse, currentPlay.PlayData);
-            return currentRank == DaniRank.None;
+            //var currentRank = CalculateRankBorders(currentCourse, currentPlay.PlayData);
+
+            var songNum = GetCurrentSongNumber();
+            Plugin.LogInfo("HasFailed: songZNum " + songNum, 2);
+
+            for (int i = 0; i < currentCourse.Borders.Count; i++)
+            {
+                var border = currentCourse.Borders[i];
+                Plugin.LogInfo("HasFailed: Border " + border.BorderType.ToString(), 2);
+                var values = GetBorderPlayResults(border, currentPlay.PlayData);
+                if (border.IsTotal)
+                {
+                    if (border.BorderType == BorderType.Oks ||
+                        border.BorderType == BorderType.Bads)
+                    {
+                        Plugin.LogInfo("HasFailed: ReqReqs.Sum(): " + border.RedReqs.Sum(), 2);
+                        Plugin.LogInfo("HasFailed: Value.Sum(): " + values.Sum(), 2);
+                        if (values.Sum() >= border.RedReqs.Sum())
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else // Per song requirements
+                {
+                    Plugin.LogInfo("HasFailed: RedReqs[songNum]: " + border.RedReqs[songNum], 2);
+                    Plugin.LogInfo("HasFailed: values[songNum]: " + values[songNum], 2);
+                    if (border.BorderType == BorderType.Oks ||
+                        border.BorderType == BorderType.Bads)
+                    {
+                        if (values[songNum] >= border.RedReqs[songNum])
+                        {
+                            return true;
+                        }
+                    }
+                    else // goods, drumroll, totalhit, etc
+                    {
+                        if (values[songNum] < border.RedReqs[songNum])
+                        {
+                            return true;
+                        }
+                    }
+                    // Only want to check through the current song
+                    //for (int j = 0; j < songNum + 1; j++)
+                    //{
+                    //    if (border.BorderType == BorderType.Oks ||
+                    //        border.BorderType == BorderType.Bads)
+                    //    {
+                    //        if (values[i] >= border.RedReqs[i])
+                    //        {
+                    //            return true;
+                    //        }
+                    //    }
+                    //    else // goods, drumroll, totalhit, etc
+                    //    {
+                    //        if (values[i] < border.RedReqs[i])
+                    //        {
+                    //            return true;
+                    //        }
+                    //    }
+                    //}
+                }
+            }
+
+            return false;
         }
 
         static public bool CheckIsInDan()
         {
+            Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
             return IsInDan;
         }
 
         static public void StartDanPlay(DaniCourse course)
         {
+            Plugin.LogInfo("Start Course " + course.Parent.Title + " - " + course.Title, 0);
             IsInDan = true;
 
             currentCourse = course;
@@ -41,21 +107,26 @@ namespace DaniDojo.Managers
         {
             if (IsInDan)
             {
+                Plugin.LogInfo("Restart Course", 1);
                 currentPlay = new CurrentPlayData(currentCourse);
             }
         }
 
         static public void LeaveDanPlay()
         {
+            Plugin.LogInfo("Leave Course", 1);
             IsInDan = false;
             // I don't know if I need to reset anything for currentPlay
         }
 
         static public void EndDanPlay()
         {
+            Plugin.LogInfo("End Course", 1);
             IsInDan = false;
             currentPlay.PlayData.SoulGauge = currentPlay.CurrentSoulGauge;
             SaveDataManager.AddPlayData(currentCourse.Hash, currentPlay.PlayData);
+            SaveDataManager.SaveDaniSaveData();
+            SaveDataManager.LoadSaveData();
         }
 
         static public DaniSongData GetSongData()
@@ -69,6 +140,7 @@ namespace DaniDojo.Managers
         /// <returns>Whether it advanced or not.</returns>
         static public bool AdvanceSong()
         {
+            Plugin.LogInfo("Advance Song", 1);
             if (HasFailed() || currentPlay.CurrentSongIndex == currentCourse.Songs.Count - 1)
             {
                 EndDanPlay();
@@ -217,7 +289,7 @@ namespace DaniDojo.Managers
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Goods++;
             AddCombo();
-            AddScore(100); // I need to figure out how to store score data like this, or how to even find it.
+            //AddScore(100); // I need to figure out how to store score data like this, or how to even find it.
         }
 
         static void AddOk()
@@ -225,7 +297,7 @@ namespace DaniDojo.Managers
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Oks++;
             AddCombo();
-            AddScore(100 / 2); // I need to figure out how to store score data like this, or how to even find it.
+            //AddScore(100 / 2); // I need to figure out how to store score data like this, or how to even find it.
         }
 
         static void AddCombo()
@@ -237,10 +309,13 @@ namespace DaniDojo.Managers
             songPlayData.Combo = Math.Max(currentPlay.CurrentSongCombo, songPlayData.Combo);
         }
 
-        static void AddScore(int points)
+        static public void AddScore(int points)
         {
+            Plugin.LogInfo("Score added: " + points);
+
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Score += points;
+            DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Score);
         }
 
         static void UpdateSoulGauge(int soulPoints)
@@ -261,7 +336,7 @@ namespace DaniDojo.Managers
         {
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Drumroll++;
-            AddScore(100); // This won't change
+            //AddScore(100); // This won't change
         }
 
 
@@ -312,6 +387,61 @@ namespace DaniDojo.Managers
             return CalculateBorder(border, currentPlay.PlayData);
         }
 
+        static public DaniRank CalculateBorderMidSong(DaniBorder border)
+        {
+            var playValues = GetBorderPlayResults(border, currentPlay.PlayData);
+            if (playValues.Count > border.RedReqs.Count ||
+                playValues.Count > border.GoldReqs.Count)
+            {
+                Plugin.LogError("CalculateBorder Error: Too many values in PlayValues compared to Border Requirements.");
+                return DaniRank.None;
+            }
+
+            DaniRank tmpRank = DaniRank.GoldClear;
+
+            int songNum = GetCurrentSongNumber();
+
+            if (border.IsTotal)
+            {
+                songNum = 0;
+            }
+
+            if (border.BorderType == BorderType.Oks ||
+                border.BorderType == BorderType.Bads)
+            {
+                if (playValues[songNum] < border.GoldReqs[songNum])
+                {
+                    tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.GoldClear);
+                }
+                else if (playValues[songNum] < border.RedReqs[songNum])
+                {
+                    tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.RedClear);
+                }
+                else
+                {
+                    return DaniRank.None;
+                    //tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.None);
+                }
+            }
+            else
+            {
+                if (playValues[songNum] >= border.GoldReqs[songNum])
+                {
+                    tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.GoldClear);
+                }
+                else if (playValues[songNum] >= border.RedReqs[songNum])
+                {
+                    tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.RedClear);
+                }
+                else
+                {
+                    return DaniRank.None;
+                    //tmpRank = (DaniRank)Math.Min((int)tmpRank, (int)DaniRank.None);
+                }
+            }
+            return tmpRank;
+        }
+
         static public DaniRank CalculateBorder(DaniBorder border)
         {
             return CalculateBorder(border, currentPlay.PlayData);
@@ -332,9 +462,9 @@ namespace DaniDojo.Managers
             Plugin.LogInfo("CalculateBorder: BorderType: " + border.BorderType.ToString(), 2);
             for (int i = 0; i < playValues.Count; i++)
             {
-                Plugin.LogInfo("CalculateBorder: playValues[i]: " + playValues[i].ToString(), 2);
-                Plugin.LogInfo("CalculateBorder: border.RedReqs[i]: " + border.RedReqs[i].ToString(), 2);
-                Plugin.LogInfo("CalculateBorder: border.GoldReqs[i]: " + border.GoldReqs[i].ToString(), 2);
+                Plugin.LogInfo("CalculateBorder: playValues[" + i + "]: " + playValues[i].ToString(), 2);
+                Plugin.LogInfo("CalculateBorder: border.RedReqs[" + i + "]: " + border.RedReqs[i].ToString(), 2);
+                Plugin.LogInfo("CalculateBorder: border.GoldReqs[" + i + "]: " + border.GoldReqs[i].ToString(), 2);
                 if (border.BorderType == BorderType.Oks ||
                     border.BorderType == BorderType.Bads)
                 {
@@ -370,6 +500,10 @@ namespace DaniDojo.Managers
             return tmpRank;
         }
 
+        static public List<int> GetBorderPlayResults(DaniBorder border)
+        {
+            return GetBorderPlayResults(border, currentPlay.PlayData);
+        }
 
         static public List<int> GetBorderPlayResults(DaniBorder border, PlayData play)
         {
@@ -412,8 +546,10 @@ namespace DaniDojo.Managers
 
         static public DaniCombo CalculateComboRank(PlayData play)
         {
+            Plugin.LogInfo("CalculateComboRank Start", 2);
             if (play.SongReached != play.SongPlayData.Count)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.None", 2);
                 return DaniCombo.None;
             }
             int numOks = 0;
@@ -426,14 +562,17 @@ namespace DaniDojo.Managers
 
             if (numOks == 0 && numBads == 0)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Rainbow", 2);
                 return DaniCombo.Rainbow;
             }
             else if (numBads == 0)
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Gold", 2);
                 return DaniCombo.Gold;
             }
             else
             {
+                Plugin.LogInfo("CalculateComboRank DaniCombo.Silver", 2);
                 return DaniCombo.Silver;
             }
         }

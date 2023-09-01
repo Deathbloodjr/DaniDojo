@@ -49,6 +49,7 @@ namespace DaniDojo.Managers
                 var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
                 data = LoadOldSaveFile(node);
                 SaveDaniSaveData(data);
+                return LoadSaveData(folderLocation);
             }
 
 
@@ -216,6 +217,10 @@ namespace DaniDojo.Managers
 
             for (int i = 0; i < saveData.Courses.Count; i++)
             {
+                if (saveData.Courses[i].PlayData.Count == 0)
+                {
+                    continue;
+                }
                 var courseObject = SaveCourseObject(saveData.Courses[i]);
                 saveJsonObject["Courses"].AsArray().Add(courseObject);
             }
@@ -236,6 +241,7 @@ namespace DaniDojo.Managers
             {
                 // I hope this overwrites the current SaveFile
                 // Otherwise I'd need to delete the current SaveFile, then move it
+                File.Delete(Path.Combine(folderLocation, SaveFileName));
                 File.Move(Path.Combine(folderLocation, TmpSaveFileName), Path.Combine(folderLocation, SaveFileName));
             }
 
@@ -303,8 +309,20 @@ namespace DaniDojo.Managers
 
 		static public void AddPlayData(uint hash, PlayData play)
         {
-            var course = GetCourseRecord(hash);
+            Plugin.LogInfo("AddPlayData", 1);
+            for (int i = 0; i < SaveData.Courses.Count; i++)
+            {
+                if (SaveData.Courses[i].Hash == hash)
+                {
+                    SaveData.Courses[i].PlayData.Add(play);
+                    return;
+                }
+            }
+            // Do I return null?
+            // Or do I return an empty SaveCourse?
+            var course = new SaveCourse(hash);
             course.PlayData.Add(play);
+            SaveData.Courses.Add(course);
         }
 
         static public SaveCourse GetCourseRecord(uint hash)
