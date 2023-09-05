@@ -88,7 +88,7 @@ namespace DaniDojo.Managers
 
         static public bool CheckIsInDan()
         {
-            Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
+            //Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
             return IsInDan;
         }
 
@@ -311,7 +311,7 @@ namespace DaniDojo.Managers
 
         static public void AddScore(int points)
         {
-            Plugin.LogInfo("Score added: " + points);
+            Plugin.LogInfo("Score added: " + points, 2);
 
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Score += points;

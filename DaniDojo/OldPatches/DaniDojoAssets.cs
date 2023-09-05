@@ -41,8 +41,13 @@ namespace DaniDojo.Patches
         {
             public static void CreateBottomAssets(GameObject parent)
             {
-                DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
-                DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
+                //DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
+                
+                //DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
+                var topBg = Assets.EnsoAssets.CreateTopBg(parent);
+                Assets.EnsoAssets.CreateBottomBg(parent);
+
+                Assets.EnsoAssets.CreateTopAnimatedParts(topBg);
 
                 var borders = DaniPlayManager.GetCurrentCourseBorders();
                 int numPanels = 0;

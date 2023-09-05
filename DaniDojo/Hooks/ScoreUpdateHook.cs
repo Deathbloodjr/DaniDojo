@@ -16,7 +16,10 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool ScorePlayer_SetAddScorePool_Prefix(ScorePlayer __instance, int score)
         {
-            DaniPlayManager.AddScore(score);
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                DaniPlayManager.AddScore(score);
+            }
             
             return true;
         }
