@@ -54,9 +54,38 @@ namespace DaniDojo.Assets
         static public GameObject CreateEmptyObject(GameObject parent, string name, Rect rect)
         {
             GameObject newObject = new GameObject(name);
-            newObject.transform.SetParent(parent.transform);
+            if (parent != null)
+            {
+                newObject.transform.SetParent(parent.transform);
+            }
             SetRect(newObject, rect);
             return newObject;
+        }
+
+        static public Canvas AddCanvasComponent(GameObject gameObject)
+        {
+            var canvasObject = gameObject.GetComponent<Canvas>();
+            if (canvasObject == null)
+            {
+                canvasObject = gameObject.AddComponent<Canvas>();
+            }
+            canvasObject.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObject.worldCamera = null;
+            canvasObject.overrideSorting = true;
+
+            var canvasScalerObject = gameObject.GetComponent<CanvasScaler>();
+            if (canvasScalerObject == null)
+            {
+                canvasScalerObject = gameObject.AddComponent<CanvasScaler>();
+            }
+            canvasScalerObject.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasScalerObject.referenceResolution = new Vector2(1920, 1080);
+            canvasScalerObject.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            canvasScalerObject.matchWidthOrHeight = 0;
+
+            return canvasObject;
+
+
         }
 
 
@@ -157,13 +186,13 @@ namespace DaniDojo.Assets
 
         static public Image GetOrAddImageComponent(GameObject gameObject)
         {
-            var textObject = gameObject.GetComponent<Image>();
-            if (textObject == null)
+            var imageObject = gameObject.GetComponent<Image>();
+            if (imageObject == null)
             {
-                textObject = gameObject.AddComponent<Image>();
+                imageObject = gameObject.AddComponent<Image>();
             }
 
-            return textObject;
+            return imageObject;
         }
 
         static private Sprite LoadSpriteFromFile(string spriteFilePath)

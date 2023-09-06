@@ -30,29 +30,12 @@ namespace DaniDojo.Assets
         {
             CreateTopAnimatedBlueBack(parent);
 
-            //var blueBack = AssetUtility.AddImageChild(parent, "BlueBack", new Vector2(0, 0), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueBack.png"));
-            //var blueMid = AssetUtility.AddImageChild(parent, "BlueMid", new Vector2(0, 0), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueMid.png"));
-            //var blueFrontSmall = AssetUtility.AddImageChild(parent, "BlueFrontSmall", new Vector2(0, 0), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueFrontSmall.png"));
-            //var blueFrontBig = AssetUtility.AddImageChild(parent, "BlueFrontBig", new Vector2(0, 0), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueFrontBig.png"));
-
             CreateTopAnimatedBlueMid(parent);
             CreateTopAnimatedBlueFront(parent);
             
             CreateTopAnimatedPetals(parent);
             CreateTopAnimatedFlowers(parent);
 
-            //IEnumerator blueBackCoroutine = TopBgAnimation(blueBack, 20f);
-            //IEnumerator blueMinCoroutine = TopBgAnimation(blueMid, 18f);
-            //IEnumerator blueFrontSmallCoroutine = TopBgAnimation(blueFrontSmall, 22f);
-            //IEnumerator blueFrontBigCoroutine = TopBgAnimation(blueFrontBig, 16f);
-
-            // I don't know which of these I should use
-            // I think the StartCustomCoroutine might work better with IL2CPP if/when I get that working
-            //Plugin.Instance.StartCustomCoroutine(blueBackCoroutine);
-            //Plugin.Instance.StartCustomCoroutine(blueMinCoroutine);
-            //Plugin.Instance.StartCustomCoroutine(blueFrontSmallCoroutine);
-            //Plugin.Instance.StartCustomCoroutine(blueFrontBigCoroutine);
-            //Plugin.Instance.StartCoroutine(blueBackCoroutine);
         }
 
         static private void CreateTopAnimatedFlowers(GameObject parent)

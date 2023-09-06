@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace DaniDojo.Patches
 {
@@ -332,5 +333,35 @@ namespace DaniDojo.Patches
             }
         }
 
+        static public void ChangeSceneDaniDojo()
+        {
+            if (Plugin.Assets != null)
+            {
+                TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("DaniDojo", true);
+
+                Plugin.Instance.StartCoroutine(AddCourseSelectManager());
+            }
+            else
+            {
+                var daniDojoScene = SceneManager.CreateScene("DaniDojo");
+
+                var currentScene = SceneManager.GetActiveScene();
+                SceneManager.UnloadSceneAsync(currentScene);
+                SceneManager.SetActiveScene(daniDojoScene);
+
+                var CourseSelectManager = new GameObject("CourseSelectManager");
+                CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+            }
+        }
+
+        private static IEnumerator AddCourseSelectManager()
+        {
+            while (!TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.IsSceneChanged || TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName != "DaniDojo")
+            {
+                yield return null;
+            }
+            var CourseSelectManager = new GameObject("CourseSelectManager");
+            CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+        }
     }
 }
