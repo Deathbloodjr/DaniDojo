@@ -12,7 +12,7 @@ namespace DaniDojo.Managers
 {
     internal class DaniPlayManager
     {
-	static CurrentPlayData currentPlay;
+        static CurrentPlayData currentPlay;
         static DaniCourse currentCourse;
         static bool IsInDan;
 
@@ -124,6 +124,7 @@ namespace DaniDojo.Managers
             Plugin.LogInfo("End Course", 1);
             IsInDan = false;
             currentPlay.PlayData.SoulGauge = currentPlay.CurrentSoulGauge;
+            currentPlay.PlayData.RankCombo = new DaniRankCombo(CalculateRankBorders(currentCourse, currentPlay.PlayData), CalculateComboRank(currentPlay.PlayData));
             SaveDataManager.AddPlayData(currentCourse.Hash, currentPlay.PlayData);
             SaveDataManager.SaveDaniSaveData();
             SaveDataManager.LoadSaveData();
@@ -141,6 +142,7 @@ namespace DaniDojo.Managers
         static public bool AdvanceSong()
         {
             Plugin.LogInfo("Advance Song", 1);
+            currentPlay.PlayData.SongReached = currentPlay.CurrentSongIndex + 1;
             if (HasFailed() || currentPlay.CurrentSongIndex == currentCourse.Songs.Count - 1)
             {
                 EndDanPlay();
@@ -149,7 +151,6 @@ namespace DaniDojo.Managers
             else
             {
                 currentPlay.CurrentSongIndex++;
-                currentPlay.PlayData.SongReached = currentPlay.CurrentSongIndex;
                 currentPlay.CurrentSongCombo = 0;
                 return true;
             }
@@ -172,6 +173,11 @@ namespace DaniDojo.Managers
         static public DaniCourse GetCurrentCourse()
         {
             return currentCourse;
+        }
+
+        static public PlayData GetCurrentPlay()
+        {
+            return currentPlay.PlayData;
         }
 
         static public List<DaniBorder> GetCurrentBorderOfType(BorderType borderType)

@@ -62,84 +62,120 @@ namespace DaniDojo.Assets
             return newObject;
         }
 
-        static public Canvas AddCanvasComponent(GameObject gameObject)
+        static public Canvas GetOrAddCanvasComponent(GameObject gameObject)
         {
             var canvasObject = gameObject.GetComponent<Canvas>();
             if (canvasObject == null)
             {
                 canvasObject = gameObject.AddComponent<Canvas>();
             }
-            canvasObject.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObject.worldCamera = null;
-            canvasObject.overrideSorting = true;
+            return canvasObject;
+        }
 
+        static public CanvasScaler GetOrAddCanvasScalerComponent(GameObject gameObject)
+        {
             var canvasScalerObject = gameObject.GetComponent<CanvasScaler>();
             if (canvasScalerObject == null)
             {
                 canvasScalerObject = gameObject.AddComponent<CanvasScaler>();
             }
+            return canvasScalerObject;
+        }
+
+        static public Canvas AddCanvasComponent(GameObject gameObject)
+        {
+            var canvasObject = GetOrAddCanvasComponent(gameObject);
+            canvasObject.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObject.worldCamera = null;
+            canvasObject.overrideSorting = true;
+
+            var canvasScalerObject = GetOrAddCanvasScalerComponent(gameObject);
             canvasScalerObject.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasScalerObject.referenceResolution = new Vector2(1920, 1080);
             canvasScalerObject.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             canvasScalerObject.matchWidthOrHeight = 0;
 
             return canvasObject;
-
-
         }
 
 
 
         #region Text
 
-        static public GameObject AddTextChild(GameObject parent, string name, Rect rect, string text)
+        static public GameObject CreateTextChild(GameObject parent, string name, Rect rect, string text)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
-            var textComponent = AddTextComponent(newObject, text);
+            var textComponent = GetOrAddTextComponent(newObject);
+            ChangeText(newObject, text);
+            textComponent.enableAutoSizing = true;
+            textComponent.fontSizeMax = 1000;
+            textComponent.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             return newObject;
         }
 
-        static public TextMeshProUGUI AddTextComponent(GameObject gameObject, string text)
+        static public TextMeshProUGUI GetOrAddTextComponent(GameObject gameObject)
         {
             var textObject = gameObject.GetComponent<TextMeshProUGUI>();
             if (textObject == null)
             {
                 textObject = gameObject.AddComponent<TextMeshProUGUI>();
             }
-
-            textObject.text = text;
-
             return textObject;
         }
-
-        static public TextMeshProUGUI SetTextFontAndMaterial(TextMeshProUGUI text, TMP_FontAsset font, Material material)
+        static public void ChangeText(TextMeshProUGUI textComponent, string text)
         {
-            if (text == null)
+            if (textComponent == null)
             {
-                return text;
+                return;
             }
-            else
+            textComponent.text = text;
+        }
+
+        static public void ChangeText(GameObject gameObject, string text)
+        {
+            var textComponent = GetOrAddTextComponent(gameObject);
+
+            ChangeText(textComponent, text);
+
+            return;
+        }
+        static public void SetTextFontAndMaterial(GameObject gameObject, TMP_FontAsset font, Material material)
+        {
+            var textComponent = GetOrAddTextComponent(gameObject);
+            SetTextFontAndMaterial(textComponent, font, material);
+        }
+
+        static public void SetTextFontAndMaterial(TextMeshProUGUI text, TMP_FontAsset font, Material material)
+        {
+            if (text != null)
             {
                 text.font = font;
                 text.fontSharedMaterial = material;
-                return text;
             }
         }
 
-        static public TextMeshProUGUI SetTextAlignment(TextMeshProUGUI text, HorizontalAlignmentOptions horizAlignment = HorizontalAlignmentOptions.Left, 
+        static public void SetTextAlignment(GameObject gameObject, HorizontalAlignmentOptions horizAlignment = HorizontalAlignmentOptions.Left,
+                                                                     VerticalAlignmentOptions vertAlignment = VerticalAlignmentOptions.Top)
+        {
+            var textComponent = GetOrAddTextComponent(gameObject);
+            SetTextAlignment(textComponent, horizAlignment, vertAlignment);
+        }
+
+        static public void SetTextAlignment(TextMeshProUGUI text, HorizontalAlignmentOptions horizAlignment = HorizontalAlignmentOptions.Left,
                                                                              VerticalAlignmentOptions vertAlignment = VerticalAlignmentOptions.Top)
         {
-            if (text == null)
-            {
-                return text;
-            }
-            else
+            if (text != null)
             {
                 text.horizontalAlignment = horizAlignment;
                 text.verticalAlignment = vertAlignment;
-                return text;
             }
+        }
+
+        static public void SetTextColor(GameObject gameObject, Color color)
+        {
+            var textComponent = GetOrAddTextComponent(gameObject);
+            textComponent.color = color;
         }
 
         #endregion
@@ -147,7 +183,7 @@ namespace DaniDojo.Assets
 
         #region Image
 
-        static public GameObject AddImageChild(GameObject parent, string name, Rect rect, Color32 color)
+        static public GameObject CreateImageChild(GameObject parent, string name, Rect rect, Color32 color)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
             var image = GetOrAddImageComponent(newObject);
@@ -156,25 +192,25 @@ namespace DaniDojo.Assets
             return newObject;
         }
 
-        static public GameObject AddImageChild(GameObject parent, string name, Vector2 position, string spriteFilePath)
+        static public GameObject CreateImageChild(GameObject parent, string name, Vector2 position, string spriteFilePath)
         {
             var sprite = LoadSprite(spriteFilePath);
-            return AddImageChild(parent, name, position, sprite);
+            return CreateImageChild(parent, name, position, sprite);
         }
 
-        static public GameObject AddImageChild(GameObject parent, string name, Rect rect, string spriteFilePath)
+        static public GameObject CreateImageChild(GameObject parent, string name, Rect rect, string spriteFilePath)
         {
             var sprite = LoadSprite(spriteFilePath);
-            return AddImageChild(parent, name, rect, sprite);
+            return CreateImageChild(parent, name, rect, sprite);
         }
 
-        static public GameObject AddImageChild(GameObject parent, string name, Vector2 position, Sprite sprite)
+        static public GameObject CreateImageChild(GameObject parent, string name, Vector2 position, Sprite sprite)
         {
             Rect rect = new Rect(position, new Vector2(sprite.rect.width, sprite.rect.height));
-            return AddImageChild(parent, name, rect, sprite);
+            return CreateImageChild(parent, name, rect, sprite);
         }
 
-        static public GameObject AddImageChild(GameObject parent, string name, Rect rect, Sprite sprite)
+        static public GameObject CreateImageChild(GameObject parent, string name, Rect rect, Sprite sprite)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
             var image = GetOrAddImageComponent(newObject);
@@ -183,6 +219,11 @@ namespace DaniDojo.Assets
             return newObject;
         }
 
+        static public void ChangeImageColor(GameObject gameObject, Color32 color)
+        {
+            var image = GetOrAddImageComponent(gameObject);
+            image.color = color;
+        }
 
         static public Image GetOrAddImageComponent(GameObject gameObject)
         {
@@ -197,14 +238,17 @@ namespace DaniDojo.Assets
 
         static private Sprite LoadSpriteFromFile(string spriteFilePath)
         {
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
             if (!File.Exists(spriteFilePath))
             {
                 Plugin.Log.LogError("Could not find file: " + spriteFilePath);
-                return null;
+                //return null;
+            }
+            else
+            {
+                tex.LoadImage(File.ReadAllBytes(spriteFilePath));
             }
 
-            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-            tex.LoadImage(File.ReadAllBytes(spriteFilePath));
 
             Rect rect = new Rect(0, 0, tex.width, tex.height);
             return Sprite.Create(tex, rect, new Vector2(0, 0));
