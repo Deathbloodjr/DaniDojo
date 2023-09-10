@@ -22,7 +22,8 @@ namespace DaniDojo.Assets
 
         static public GameObject CreateCourseIcon(GameObject parent, DaniCourse course)
         {
-            return CommonAssets.CreateDaniCourse(parent, new Vector2(50, 400 + 1920), course);
+            // TODO: Animate this by having it start 1080 y higher, then moving it down after initialization
+            return CommonAssets.CreateDaniCourse(parent, new Vector2(77, 472), course);
         }
 
         static public GameObject CreateSongPanel(GameObject parent)
@@ -99,12 +100,12 @@ namespace DaniDojo.Assets
         {
             var scoreBg = AssetUtility.CreateImageChild(parent, "ScoreBg", new Vector2(128, 752), Path.Combine(AssetFilePath, "Results", "PlayScoreBg.png"));
 
-            var textObject = AssetUtility.CreateTextChild(scoreBg, "ScoreBgText", new Rect(300, 200, 300, 50), "Score");
+            var textObject = AssetUtility.CreateTextChild(scoreBg, "ScoreBgText", new Rect(74, 102, 300, 40), "Score");
             AssetUtility.SetTextAlignment(textObject, HorizontalAlignmentOptions.Center);
 
             FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
             TMP_FontAsset scoreFont = fontTMPMgr.GetDefaultFontAsset(DataConst.FontType.EFIGS);
-            Material scoreFontMaterial = fontTMPMgr.GetDefaultFontMaterial(DataConst.FontType.EFIGS, DataConst.DefaultFontMaterialType.OutlineBrown03);
+            Material scoreFontMaterial = fontTMPMgr.GetDefaultFontMaterial(DataConst.FontType.EFIGS, DataConst.DefaultFontMaterialType.KanbanPops);
             AssetUtility.SetTextFontAndMaterial(textObject, scoreFont, scoreFontMaterial);
 
 
@@ -184,15 +185,15 @@ namespace DaniDojo.Assets
 
         static public GameObject CreateDanResult(GameObject parent, PlayData play)
         {
-            var danResultParent = AssetUtility.CreateEmptyObject(parent, "DanResult", new Vector2(20, 300));
+            var danResultParent = AssetUtility.CreateEmptyObject(parent, "DanResult", new Vector2(7, 350));
 
             string comboAsset;
             switch (play.RankCombo.Combo)
             {
                 case DaniCombo.None: return danResultParent;
-                case DaniCombo.Silver: comboAsset = "SilverBg.png"; break;
-                case DaniCombo.Gold: comboAsset = "GoldBg.png"; break;
-                case DaniCombo.Rainbow: comboAsset = "RainbowBg.png"; break;
+                case DaniCombo.Silver: comboAsset = "ClearBg.png"; break;
+                case DaniCombo.Gold: comboAsset = "FcBg.png"; break;
+                case DaniCombo.Rainbow: comboAsset = "DfcBg.png"; break;
                 default: return danResultParent;
             }
 
@@ -200,13 +201,13 @@ namespace DaniDojo.Assets
             switch (play.RankCombo.Rank)
             {
                 case DaniRank.None: return danResultParent;
-                case DaniRank.RedClear: resultAsset = "RedClear.png"; break;
-                case DaniRank.GoldClear: resultAsset = "GoldClear.png"; break;
+                case DaniRank.RedClear: resultAsset = "RedClearText.png"; break;
+                case DaniRank.GoldClear: resultAsset = "GoldClearText.png"; break;
                 default: return danResultParent;
             }
 
-            AssetUtility.CreateImageChild(danResultParent, "ComboBg", new Vector2(0, 0), Path.Combine(AssetFilePath, "Results", comboAsset));
-            AssetUtility.CreateImageChild(danResultParent, "Rank", new Vector2(0, 0), Path.Combine(AssetFilePath, "Results", resultAsset));
+            AssetUtility.CreateImageChild(danResultParent, "ComboBg", new Vector2(0, 0), Path.Combine(AssetFilePath, "Results", "DaniResult", comboAsset));
+            AssetUtility.CreateImageChild(danResultParent, "Rank", new Vector2(21, 39), Path.Combine(AssetFilePath, "Results", "DaniResult", resultAsset));
             return danResultParent;
         }
     }

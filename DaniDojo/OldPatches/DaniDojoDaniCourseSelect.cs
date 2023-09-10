@@ -37,41 +37,24 @@ namespace DaniDojo.Patches
             {
                 Plugin.Log.LogInfo("DaniDojoDaniCourseSelect Start");
 
-                currentSeries = CourseDataManager.AllSeriesData.Find((x) => x.IsActive);
-                if (currentSeries == null)
+                var previousCourse = DaniPlayManager.GetCurrentCourse();
+                if (previousCourse != null)
                 {
-                    currentSeries = CourseDataManager.AllSeriesData[0];
+                    currentSeries = previousCourse.Parent;
+                    currentCourse = previousCourse;
                 }
-                // Default to 1st dan
+                else
+                {
 
-                currentCourse = SaveDataManager.GetDefaultCourse(currentSeries);
+                    currentSeries = CourseDataManager.AllSeriesData.Find((x) => x.IsActive);
+                    if (currentSeries == null)
+                    {
+                        currentSeries = CourseDataManager.AllSeriesData[0];
+                    }
 
-                //currentCourse = currentSeries.Courses[5];
-                //// Check to see if there's any higher clears, and set the current dan to the one after the highest cleared
+                    currentCourse = SaveDataManager.GetDefaultCourse(currentSeries);
+                }
 
-                //for (int j = 0; j < currentSeries.Courses.Count; j++)
-                //{
-                //    for (int i = 0; i < Plugin.AllDaniScores.Count; i++)
-                //    {
-                //        var course = currentSeries.Courses[j];
-                //        if (course.Hash == Plugin.AllDaniScores[i].hash)
-                //        {
-                //            if (course.Order >= currentCourse.Order && Plugin.AllDaniScores[i].danResult >= DanResult.RedClear)
-                //            {
-                //                if (currentSeries.Courses.Count > j + 1)
-                //                {
-                //                    currentCourse = currentSeries.Courses[j + 1];
-                //                }
-                //                else
-                //                {
-                //                    currentCourse = course;
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-
-                //currentCourseLevel = currentCourse.Course;
 
                 CenterCourseParent = new GameObject("CourseParent");
                 LeftCourseParent = new GameObject("LeftCourseParent");

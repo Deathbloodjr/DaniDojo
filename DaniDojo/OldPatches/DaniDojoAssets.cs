@@ -1391,11 +1391,9 @@ namespace DaniDojo.Patches
                     {
                         switch (highScore.RankCombo.Combo)
                         {
-                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigRedDFC; break;
+                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigRedClear; break;
                             case DaniCombo.Gold: resultAsset = SelectAssetName.BigRedFC; break;
-
-
-                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigRedClear; break;
+                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigRedDFC; break;
                         }
                     }
 

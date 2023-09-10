@@ -15,6 +15,7 @@ namespace DaniDojo.Managers
         static CurrentPlayData currentPlay;
         static DaniCourse currentCourse;
         static bool IsInDan;
+        static bool StartResult;
 
         static public bool HasFailed()
         {
@@ -86,6 +87,11 @@ namespace DaniDojo.Managers
             return false;
         }
 
+        internal static bool CheckStartResult()
+        {
+            return StartResult;
+        }
+
         static public bool CheckIsInDan()
         {
             //Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
@@ -96,6 +102,7 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("Start Course " + course.Parent.Title + " - " + course.Title, 0);
             IsInDan = true;
+            StartResult = false;
 
             currentCourse = course;
             currentPlay = new CurrentPlayData(course);
@@ -116,6 +123,7 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("Leave Course", 1);
             IsInDan = false;
+            StartResult = false;
             // I don't know if I need to reset anything for currentPlay
         }
 
@@ -123,6 +131,7 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("End Course", 1);
             IsInDan = false;
+            StartResult = true;
             currentPlay.PlayData.SoulGauge = currentPlay.CurrentSoulGauge;
             currentPlay.PlayData.RankCombo = new DaniRankCombo(CalculateRankBorders(currentCourse, currentPlay.PlayData), CalculateComboRank(currentPlay.PlayData));
             SaveDataManager.AddPlayData(currentCourse.Hash, currentPlay.PlayData);

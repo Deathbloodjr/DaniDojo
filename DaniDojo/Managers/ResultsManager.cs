@@ -67,21 +67,23 @@ namespace DaniDojo.Managers
 
             private void InitializeAssets()
             {
-                ResultsAssets.CreateBg(ResultsParent);
+                var bg = ResultsAssets.CreateBg(ResultsParent);
 
-                var songPanel = ResultsAssets.CreateSongPanel(ResultsParent);
+                var songPanel = ResultsAssets.CreateSongPanel(bg);
 
                 var currentCourse = DaniPlayManager.GetCurrentCourse();
                 var currentPlay = DaniPlayManager.GetCurrentPlay();
 
                 ResultsAssets.CreateEachSongBg(songPanel, currentCourse, currentPlay, SaveDataManager.GetCourseRecord(currentCourse.Hash));
 
-                PlayRecordParent = ResultsAssets.CreatePlayRecordBg(ResultsParent);
+                PlayRecordParent = ResultsAssets.CreatePlayRecordBg(bg);
                 var scoreBg = ResultsAssets.CreatePlayRecordScoreBg(PlayRecordParent, currentPlay);
                 var playRecord1Bg = ResultsAssets.CreatePlayRecordGoodOkBad(PlayRecordParent, currentPlay);
                 var playRecord2Bg = ResultsAssets.CreatePlayRecordDrumrollComboTotalHits(PlayRecordParent, currentPlay);
 
-                var danResultAsset = ResultsAssets.CreateDanResult(PlayRecordParent, currentPlay);
+                var danCourseIcon = ResultsAssets.CreateCourseIcon(bg, currentCourse);
+                var danResultAsset = ResultsAssets.CreateDanResult(bg, currentPlay);
+
             }
 
             public IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds, bool deleteAfter = false)

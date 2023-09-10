@@ -1,4 +1,5 @@
 ﻿using DaniDojo.Assets;
+using DaniDojo.Managers;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool EnsoGameManager_ProcResult_Prefix(EnsoGameManager __instance)
         {
-            if (__instance.stateTimer == 1)
+            if (__instance.stateTimer == 1 && (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult()))
             {
                 GameObject ResultsParent = GameObject.Find("DaniResults");
                 if (ResultsParent == null)
