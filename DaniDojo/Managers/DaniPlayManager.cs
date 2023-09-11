@@ -92,6 +92,11 @@ namespace DaniDojo.Managers
             return StartResult;
         }
 
+        static public void SetStartResult(bool value)
+        {
+            StartResult = value;
+        }
+
         static public bool CheckIsInDan()
         {
             //Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);

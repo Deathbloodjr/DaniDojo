@@ -61,6 +61,7 @@ namespace DaniDojo.Managers
                 else if ((okDown) && CurrentScreen == DaniResultScreen.PlayResults)
                 {
                     TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
+                    DaniPlayManager.SetStartResult(false);
                     DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
                 }
             }
