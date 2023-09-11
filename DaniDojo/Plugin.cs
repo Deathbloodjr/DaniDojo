@@ -324,8 +324,15 @@ namespace DaniDojo
                 //_harmony.PatchAll(typeof(DaniDojoTempSelect));
                 _harmony.PatchAll(typeof(DaniDojoSongSelect));
                 _harmony.PatchAll(typeof(PlayerNameDaniRank));
+
                 _harmony.PatchAll(typeof(ScoreUpdateHook));
-                //_harmony.PatchAll(typeof(testing));
+                _harmony.PatchAll(typeof(EnsoPauseHook));
+
+                _harmony.PatchAll(typeof(ResultsHook));
+
+
+
+                _harmony.PatchAll(typeof(TestingHooks));
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");
             }
             else

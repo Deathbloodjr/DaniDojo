@@ -31,6 +31,8 @@ namespace DaniDojo.Data
         Red,
         Silver,
         Gold,
+        Gaiden,
+        Sousaku,
     }
 
     // I'm not sure if I'll end up using this, but I'd like to keep it for now just in case.
@@ -57,6 +59,7 @@ namespace DaniDojo.Data
         chojin,
         tatsujin,
         gaiden,
+        sousaku,
     }
 
     public class DaniCourse

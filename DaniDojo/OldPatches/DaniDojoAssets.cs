@@ -41,8 +41,13 @@ namespace DaniDojo.Patches
         {
             public static void CreateBottomAssets(GameObject parent)
             {
-                DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
-                DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
+                //DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
+                
+                //DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
+                var topBg = Assets.EnsoAssets.CreateTopBg(parent);
+                Assets.EnsoAssets.CreateBottomBg(parent);
+
+                Assets.EnsoAssets.CreateTopAnimatedParts(topBg);
 
                 var borders = DaniPlayManager.GetCurrentCourseBorders();
                 int numPanels = 0;
@@ -1386,11 +1391,9 @@ namespace DaniDojo.Patches
                     {
                         switch (highScore.RankCombo.Combo)
                         {
-                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigRedDFC; break;
+                            case DaniCombo.Silver: resultAsset = SelectAssetName.BigRedClear; break;
                             case DaniCombo.Gold: resultAsset = SelectAssetName.BigRedFC; break;
-
-
-                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigRedClear; break;
+                            case DaniCombo.Rainbow: resultAsset = SelectAssetName.BigRedDFC; break;
                         }
                     }
 

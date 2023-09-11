@@ -12,9 +12,10 @@ namespace DaniDojo.Managers
 {
     internal class DaniPlayManager
     {
-	static CurrentPlayData currentPlay;
+        static CurrentPlayData currentPlay;
         static DaniCourse currentCourse;
         static bool IsInDan;
+        static bool StartResult;
 
         static public bool HasFailed()
         {
@@ -86,9 +87,19 @@ namespace DaniDojo.Managers
             return false;
         }
 
+        internal static bool CheckStartResult()
+        {
+            return StartResult;
+        }
+
+        static public void SetStartResult(bool value)
+        {
+            StartResult = value;
+        }
+
         static public bool CheckIsInDan()
         {
-            Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
+            //Plugin.LogInfo("CheckIsInDan: " + IsInDan, 5);
             return IsInDan;
         }
 
@@ -96,6 +107,7 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("Start Course " + course.Parent.Title + " - " + course.Title, 0);
             IsInDan = true;
+            StartResult = false;
 
             currentCourse = course;
             currentPlay = new CurrentPlayData(course);
@@ -116,6 +128,7 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("Leave Course", 1);
             IsInDan = false;
+            StartResult = false;
             // I don't know if I need to reset anything for currentPlay
         }
 
@@ -123,7 +136,9 @@ namespace DaniDojo.Managers
         {
             Plugin.LogInfo("End Course", 1);
             IsInDan = false;
+            StartResult = true;
             currentPlay.PlayData.SoulGauge = currentPlay.CurrentSoulGauge;
+            currentPlay.PlayData.RankCombo = new DaniRankCombo(CalculateRankBorders(currentCourse, currentPlay.PlayData), CalculateComboRank(currentPlay.PlayData));
             SaveDataManager.AddPlayData(currentCourse.Hash, currentPlay.PlayData);
             SaveDataManager.SaveDaniSaveData();
             SaveDataManager.LoadSaveData();
@@ -141,6 +156,7 @@ namespace DaniDojo.Managers
         static public bool AdvanceSong()
         {
             Plugin.LogInfo("Advance Song", 1);
+            currentPlay.PlayData.SongReached = currentPlay.CurrentSongIndex + 1;
             if (HasFailed() || currentPlay.CurrentSongIndex == currentCourse.Songs.Count - 1)
             {
                 EndDanPlay();
@@ -149,7 +165,6 @@ namespace DaniDojo.Managers
             else
             {
                 currentPlay.CurrentSongIndex++;
-                currentPlay.PlayData.SongReached = currentPlay.CurrentSongIndex;
                 currentPlay.CurrentSongCombo = 0;
                 return true;
             }
@@ -172,6 +187,11 @@ namespace DaniDojo.Managers
         static public DaniCourse GetCurrentCourse()
         {
             return currentCourse;
+        }
+
+        static public PlayData GetCurrentPlay()
+        {
+            return currentPlay.PlayData;
         }
 
         static public List<DaniBorder> GetCurrentBorderOfType(BorderType borderType)
@@ -311,7 +331,7 @@ namespace DaniDojo.Managers
 
         static public void AddScore(int points)
         {
-            Plugin.LogInfo("Score added: " + points);
+            Plugin.LogInfo("Score added: " + points, 2);
 
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
             songPlayData.Score += points;

@@ -86,38 +86,12 @@ namespace DaniDojo.Patches
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.ModeSelectLastSceneName = source;
 
-                //CreateAndLoadDaniDojoScene();
 
-
-                if (Plugin.Assets != null)
-                {
-                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("DaniDojo", true);
-
-                    Plugin.Instance.StartCoroutine(AddCourseSelectManager());
-                }
-                else
-                {
-                    var daniDojoScene = SceneManager.CreateScene("DaniDojo");
-
-                    var currentScene = SceneManager.GetActiveScene();
-                    SceneManager.UnloadSceneAsync(currentScene);
-                    SceneManager.SetActiveScene(daniDojoScene);
-
-                    var CourseSelectManager = new GameObject("CourseSelectManager");
-                    CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
-                }
+                DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
+               
             }
         }
 
-        private static System.Collections.IEnumerator AddCourseSelectManager()
-        {
-            while (!TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.IsSceneChanged || TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName != "DaniDojo")
-            {
-                yield return null;
-            }
-            var CourseSelectManager = new GameObject("CourseSelectManager");
-            CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
-        }
 
         private static void CreateAndLoadDaniDojoScene()
         {

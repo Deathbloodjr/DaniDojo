@@ -28,8 +28,13 @@ namespace DaniDojo.Patches
             {
                 TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
 
+                //Plugin.LogInfo("frameResults.isAllOnpuEnd: " + frameResults.isAllOnpuEnd, 1);
+                //Plugin.LogInfo("frameResults.isPastLastOnpuJustTime: " + frameResults.isPastLastOnpuJustTime, 1);
                 if (__instance.ensoParam.EnsoEndType == EnsoPlayingParameter.EnsoEndTypes.None && frameResults.isPastLastOnpuJustTime)
                 {
+                    //Plugin.LogInfo("frameResults.totalTime: " + frameResults.totalTime, 1);
+                    //Plugin.LogInfo("__instance.songTime: " + __instance.songTime, 1);
+                    //Plugin.LogInfo("frameResults.fumenLength: " + frameResults.fumenLength, 1);
                     if (frameResults.totalTime < frameResults.fumenLength || frameResults.totalTime < __instance.songTime)
                     {
                         //Plugin.Log.LogInfo("CheckEnsoEnd: totalTime less than fumen Length and song Time");
