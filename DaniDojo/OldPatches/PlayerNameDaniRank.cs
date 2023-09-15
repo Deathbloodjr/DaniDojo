@@ -1,4 +1,5 @@
-﻿using DaniDojo.Managers;
+﻿using DaniDojo.Data;
+using DaniDojo.Managers;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -15,190 +16,99 @@ namespace DaniDojo.Patches
         static string BaseImageFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
 
 
-        //[HarmonyPatch(typeof(PlayerName))]
-        //[HarmonyPatch(nameof(PlayerName.Start))]
-        //[HarmonyPatch(MethodType.Normal)]
-        //[HarmonyPostfix]
-        //public static void PlayerName_Start_Postfix(PlayerName __instance)
-        //{
-        //    if (!Plugin.Instance.ConfigNamePlateDanRankEnabled.Value)
-        //    {
-        //        return;
-        //    }
+        [HarmonyPatch(typeof(PlayerName))]
+        [HarmonyPatch(nameof(PlayerName.Start))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPostfix]
+        public static void PlayerName_Start_Postfix(PlayerName __instance)
+        {
+            if (!Plugin.Instance.ConfigNamePlateDanRankEnabled.Value)
+            {
+                return;
+            }
 
-        //    Plugin.Log.LogInfo("PlayerName Start Postfix");
-        //    var rect = __instance.gameObject.transform.FindChild("TextName").GetComponent<RectTransform>();
+            var highScore = SaveDataManager.GetHighestActiveClear();
+            if (highScore == null)
+            {
+                return;
+            }
 
-
-        //    GameObject danRankObject = new GameObject("DanRank");
-        //    danRankObject.transform.SetParent(__instance.gameObject.transform);
-
-        //    Plugin.Log.LogInfo("CurrentSceneName: " + TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName);
-        //    var newPos = rect.position;
-        //    newPos.x -= 163;
-        //    newPos.y -= 18;
-        //    danRankObject.transform.position = newPos;
-        //    //if (TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName == "Enso")
-        //    //{
-        //    //    danRankObject.transform.position = new Vector3(60, 160, 0);
-        //    //}
-        //    //else if (TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName == "SongSelect")
-        //    //{
-        //    //    danRankObject.transform.position = new Vector3(60, 160, 0);
-        //    //}
-        //    //else
-        //    //{
-        //    //    danRankObject.transform.position = new Vector3(0, 0, 0);
-        //    //}
-
-        //    Vector2 bgRect = new Vector2(0, 0);
-        //    Vector2 rankRect = new Vector2(3, 0);
-
-        //    var rank = GetHighestRank();
-        //    if (rank.danResult != DanResult.NotClear)
-        //    {
+            if (highScore.RankCombo.Rank == DaniRank.None)
+            {
+                return;
+            }
 
 
-        //        string bgImage = string.Empty;
-        //        string courseImage = string.Empty;
-        //        #region Rank if/else
-        //        switch (rank.comboResult)
-        //        {
-        //            case DanComboResult.Clear:
-        //                bgImage = "ClearBg.png";
-        //                break;
-        //            case DanComboResult.FC:
-        //                bgImage = "FcBg.png";
-        //                break;
-        //            case DanComboResult.DFC:
-        //                bgImage = "DfcBg.png";
-        //                break;
-        //        }
-        //        switch (rank.course)
-        //        {
-        //            case DaniCourse.kyuu5:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kyuu5.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKyuu5.png";
-        //                break;
-        //            case DaniCourse.kyuu4:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kyuu4.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKyuu4.png";
-        //                break;
-        //            case DaniCourse.kyuu3:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kyuu3.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKyuu3.png";
-        //                break;
-        //            case DaniCourse.kyuu2:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kyuu2.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKyuu2.png";
-        //                break;
-        //            case DaniCourse.kyuu1:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kyuu1.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKyuu1.png";
-        //                break;
-        //            case DaniCourse.dan1:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan1.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan1.png";
-        //                break;
-        //            case DaniCourse.dan2:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan2.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan2.png";
-        //                break;
-        //            case DaniCourse.dan3:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan3.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan3.png";
-        //                break;
-        //            case DaniCourse.dan4:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan4.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan4.png";
-        //                break;
-        //            case DaniCourse.dan5:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan5.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan5.png";
-        //                break;
-        //            case DaniCourse.dan6:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan6.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan6.png";
-        //                break;
-        //            case DaniCourse.dan7:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan7.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan7.png";
-        //                break;
-        //            case DaniCourse.dan8:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan8.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan8.png";
-        //                break;
-        //            case DaniCourse.dan9:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan9.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan9.png";
-        //                break;
-        //            case DaniCourse.dan10:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "dan10.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldDan10.png";
-        //                break;
-        //            case DaniCourse.kuroto:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "kuroto.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldKuroto.png";
-        //                break;
-        //            case DaniCourse.meijin:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "meijin.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldMeijin.png";
-        //                break;
-        //            case DaniCourse.chojin:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "chojin.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldChojin.png";
-        //                break;
-        //            case DaniCourse.tatsujin:
-        //                if (rank.danResult == DanResult.RedClear)
-        //                    courseImage = "tatsujin.png";
-        //                else if (rank.danResult == DanResult.GoldClear)
-        //                    courseImage = "goldTatsujin.png";
-        //                break;
-        //        }
-        //        #endregion
+            var rect = __instance.gameObject.transform.FindChild("TextName").GetComponent<RectTransform>();
 
-        //        DaniDojoAssetUtility.CreateImage("DanRankBg", Path.Combine(BaseImageFilePath, "NamePlate", bgImage), bgRect, danRankObject.transform);
-        //        DaniDojoAssetUtility.CreateImage("DanRankName", Path.Combine(BaseImageFilePath, "NamePlate", courseImage), rankRect, danRankObject.transform);
 
-        //        //__instance.uiTextName.text = "PeePeePooPoo";
-        //    }
-        //}
+            GameObject danRankObject = new GameObject("DanRank");
+            danRankObject.transform.SetParent(__instance.gameObject.transform);
+
+            var newPos = rect.position;
+            newPos.x -= 163;
+            newPos.y -= 18;
+            danRankObject.transform.position = newPos;
+            //if (TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName == "Enso")
+            //{
+            //    danRankObject.transform.position = new Vector3(60, 160, 0);
+            //}
+            //else if (TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName == "SongSelect")
+            //{
+            //    danRankObject.transform.position = new Vector3(60, 160, 0);
+            //}
+            //else
+            //{
+            //    danRankObject.transform.position = new Vector3(0, 0, 0);
+            //}
+
+            Vector2 bgRect = new Vector2(0, 0);
+            Vector2 rankRect = new Vector2(3, 0);
+
+            string bgImage = string.Empty;
+            string courseImage = string.Empty;
+            switch (highScore.RankCombo.Combo)
+            {
+                case DaniCombo.Silver:
+                    bgImage = "ClearBg.png";
+                    break;
+                case DaniCombo.Gold:
+                    bgImage = "FcBg.png";
+                    break;
+                case DaniCombo.Rainbow:
+                    bgImage = "DfcBg.png";
+                    break;
+            }
+
+            var rank = highScore.RankCombo.Rank;
+   
+            switch (highScore.Course.CourseLevel)
+            {
+                case DaniCourseLevel.kyuu5: courseImage = (rank == DaniRank.RedClear ? "kyuu5.png" : "goldKyuu5.png"); break;
+                case DaniCourseLevel.kyuu4: courseImage = (rank == DaniRank.RedClear ? "kyuu4.png" : "goldKyuu4.png"); break;
+                case DaniCourseLevel.kyuu3: courseImage = (rank == DaniRank.RedClear ? "kyuu3.png" : "goldKyuu3.png"); break;
+                case DaniCourseLevel.kyuu2: courseImage = (rank == DaniRank.RedClear ? "kyuu2.png" : "goldKyuu2.png"); break;
+                case DaniCourseLevel.kyuu1: courseImage = (rank == DaniRank.RedClear ? "kyuu1.png" : "goldKyuu1.png"); break;
+                case DaniCourseLevel.dan1: courseImage = (rank == DaniRank.RedClear ? "dan1.png" : "goldDan1.png"); break;
+                case DaniCourseLevel.dan2: courseImage = (rank == DaniRank.RedClear ? "dan2.png" : "goldDan2.png"); break;
+                case DaniCourseLevel.dan3: courseImage = (rank == DaniRank.RedClear ? "dan3.png" : "goldDan3.png"); break;
+                case DaniCourseLevel.dan4: courseImage = (rank == DaniRank.RedClear ? "dan4.png" : "goldDan4.png"); break;
+                case DaniCourseLevel.dan5: courseImage = (rank == DaniRank.RedClear ? "dan5.png" : "goldDan5.png"); break;
+                case DaniCourseLevel.dan6: courseImage = (rank == DaniRank.RedClear ? "dan6.png" : "goldDan6.png"); break;
+                case DaniCourseLevel.dan7: courseImage = (rank == DaniRank.RedClear ? "dan7.png" : "goldDan7.png"); break;
+                case DaniCourseLevel.dan8: courseImage = (rank == DaniRank.RedClear ? "dan8.png" : "goldDan8.png"); break;
+                case DaniCourseLevel.dan9: courseImage = (rank == DaniRank.RedClear ? "dan9.png" : "goldDan9.png"); break;
+                case DaniCourseLevel.dan10: courseImage = (rank == DaniRank.RedClear ? "dan10.png" : "goldDan10.png"); break;
+                case DaniCourseLevel.kuroto: courseImage = (rank == DaniRank.RedClear ? "kuroto.png" : "goldKuroto.png"); break;
+                case DaniCourseLevel.meijin: courseImage = (rank == DaniRank.RedClear ? "meijin.png" : "goldMeijin.png"); break;
+                case DaniCourseLevel.chojin: courseImage = (rank == DaniRank.RedClear ? "chojin.png" : "goldChojin.png"); break;
+                case DaniCourseLevel.tatsujin: courseImage = (rank == DaniRank.RedClear ? "tatsujin.png" : "goldTatsujin.png"); break;
+                default: return;
+            }
+
+            DaniDojoAssetUtility.CreateImage("DanRankBg", Path.Combine(BaseImageFilePath, "NamePlate", bgImage), bgRect, danRankObject.transform);
+            DaniDojoAssetUtility.CreateImage("DanRankName", Path.Combine(BaseImageFilePath, "NamePlate", courseImage), rankRect, danRankObject.transform);
+        }
 
         //private static (DaniCourse course, DanResult danResult, DanComboResult comboResult) GetHighestRank()
         //{

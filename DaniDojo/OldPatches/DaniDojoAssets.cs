@@ -1,4 +1,5 @@
-﻿using DaniDojo.Data;
+﻿using DaniDojo.Assets;
+using DaniDojo.Data;
 using DaniDojo.Managers;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace DaniDojo.Patches
         static Color32 PinkBarColor = new Color32(254, 161, 183, 255);
         static Color32 YellowBarColor = new Color32(249, 254, 55, 255);
         static Color32 RedBarColor = new Color32(250, 124, 78, 255);
-        static Color32 GreyBarColor = new Color32(68, 69, 68, 255);
+        static Color32 GreyBarColor = new Color32(69, 69, 69, 255);
 
         static Color32 GoldReqTextBorderColor = new Color32(221, 89, 56, 255);
         static Color32 GoldReqTextFillColor = new Color32(255, 93, 127, 255);
@@ -77,7 +78,7 @@ namespace DaniDojo.Patches
                 {
                     gameObject = GameObject.Find("icon_course");
                 }
-                DaniDojoAssetUtility.ChangeSprite(gameObject, Path.Combine(BaseImageFilePath, "Course", "DifficultyIcons", "DaniDojo.png"));
+                DaniDojoAssetUtility.ChangeSprite(gameObject, Path.Combine(BaseImageFilePath, "Course", "DifficultyIcons", "DaniDojoResized.png"));
                 gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Dan-i dojo";
             }
 
@@ -255,35 +256,33 @@ namespace DaniDojo.Patches
                             var colorLerp = bar.GetComponent<ColorLerp>();
                             if (image != null && emptyImage != null)
                             {
-                                int requirementValue = DaniPlayManager.GetCurrentBorderRequirement(borders[j]);
+                                BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber());
+                                
 
+                                bool isGold = data.State == BorderBarState.Rainbow;
 
-                                bool isGold = false;
-
-                                isGold = DaniPlayManager.CalculateBorderMidSong(borders[j]) == DaniRank.GoldClear;
 
                                 var newScale = emptyImage.transform.localScale;
-                                if (borderType == BorderType.Oks ||
-                                    borderType == BorderType.Bads)
-                                {
-                                    currentValue[j] = requirementValue - currentValue[j];
-                                    currentValue[j] = Math.Max(currentValue[j], 0);
-
-                                    // Sorta hardcoded, but it'll basically not be gold ever
-                                    isGold = false;
-                                }
 
                                 if (isGold && colorLerp != null)
                                 {
                                     colorLerp.BeginRainbow(borders[j].IsTotal);
                                 }
 
-                                Plugin.LogInfo("ChangeReqCurrentValue: currentValue[j]: " + currentValue[j], 2);
+                                if (data.StateChanged)
+                                {
+                                    colorLerp.UpdateState(data);
+                                }
 
-                                ChangeReqCurrentValue(panel, currentValue[j], isGold);
 
-                                newScale.x = currentValue[j] / (float)requirementValue;
+                                //Plugin.LogInfo("ChangeReqCurrentValue: currentValue[j]: " + currentValue[j], 2);
+                                //Plugin.LogInfo("ChangeReqCurrentValue: data.PlayValue: " + data.PlayValue, 2);
 
+                                ChangeReqCurrentValue(panel, data.PlayValue, isGold);
+
+                                newScale.x = data.FillRatio / 100f;
+
+                                // Probably don't need this clamp anymore, but it shouldn't hurt to have it.
                                 newScale.x = Math.Max(newScale.x, 0);
                                 newScale.x = Math.Min(newScale.x, 1);
 
@@ -294,18 +293,7 @@ namespace DaniDojo.Patches
                                 emptyImage.transform.localScale = newScale;
                                 if (!isGold)
                                 {
-                                    if (newScale.x + 1 > 0.66)
-                                    {
-                                        image.color = PinkBarColor;
-                                    }
-                                    else if (newScale.x + 1 > 0.33)
-                                    {
-                                        image.color = YellowBarColor;
-                                    }
-                                    else
-                                    {
-                                        image.color = RedBarColor;
-                                    }
+                                    image.color = data.Color;
                                 }
                             }
                         }
@@ -315,6 +303,7 @@ namespace DaniDojo.Patches
                         // This is instead being updated any time the main bar is updated for that border, when nothing here should change
                         if (DaniPlayManager.GetCurrentSongNumber() > 0)
                         {
+
                             var songValues = DaniPlayManager.GetBorderPlayResults(borders[j]);
                             var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill");
                             if (prevSongBar1 != null)
@@ -322,31 +311,19 @@ namespace DaniDojo.Patches
                                 var image = prevSongBar1.GetComponent<Image>();
                                 if (image != null)
                                 {
-                                    int requirementValue = borders[j].RedReqs[0];
+                                    BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 0);
+                                
                                     var newScale = image.transform.localScale;
-                                    if (borderType == BorderType.Oks ||
-                                        borderType == BorderType.Bads)
-                                    {
-                                        newScale.x = (requirementValue - songValues[0]) / (float)requirementValue;
-                                    }
-                                    else
-                                    {
-                                        newScale.x = songValues[0] / (float)requirementValue;
-                                    }
+                                    newScale.x = songData1.FillRatio / 100f;
+                                   
                                     newScale.x = Math.Max(newScale.x, 0);
                                     newScale.x = Math.Min(newScale.x, 1);
                                     image.transform.localScale = newScale;
-                                    if (newScale.x > 0.66)
+                                    image.color = songData1.Color;
+
+                                    if (songData1.State == BorderBarState.Rainbow)
                                     {
-                                        image.color = PinkBarColor;
-                                    }
-                                    else if (newScale.x > 0.33)
-                                    {
-                                        image.color = YellowBarColor;
-                                    }
-                                    else
-                                    {
-                                        image.color = RedBarColor;
+                                        AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
                                     }
                                 }
                             }
@@ -358,31 +335,21 @@ namespace DaniDojo.Patches
                                     var image = prevSongBar2.GetComponent<Image>();
                                     if (image != null)
                                     {
-                                        int requirementValue = borders[j].RedReqs[1];
+                                        BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 1);
                                         var newScale = image.transform.localScale;
-                                        if (borderType == BorderType.Oks ||
-                                            borderType == BorderType.Bads)
-                                        {
-                                            newScale.x = (requirementValue - songValues[1]) / (float)requirementValue;
-                                        }
-                                        else
-                                        {
-                                            newScale.x = songValues[1] / (float)requirementValue;
-                                        }
+                                        newScale.x = songData1.FillRatio / 100f;
+
+                                        //int requirementValue = borders[j].RedReqs[1];
+                                        //var newScale = image.transform.localScale;
+
                                         newScale.x = Math.Max(newScale.x, 0);
                                         newScale.x = Math.Min(newScale.x, 1);
                                         image.transform.localScale = newScale;
-                                        if (newScale.x > 0.66)
+                                        image.color = songData1.Color;
+
+                                        if (songData1.State == BorderBarState.Rainbow)
                                         {
-                                            image.color = PinkBarColor;
-                                        }
-                                        else if (newScale.x > 0.33)
-                                        {
-                                            image.color = YellowBarColor;
-                                        }
-                                        else
-                                        {
-                                            image.color = RedBarColor;
+                                            AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
                                         }
                                     }
                                 }

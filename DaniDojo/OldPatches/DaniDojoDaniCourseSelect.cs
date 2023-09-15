@@ -203,14 +203,8 @@ namespace DaniDojo.Patches
             {
                 //ReturnTopCourse(currentCourse);
                 var courseIndex = CourseDataManager.GetCourseIndex(currentSeries, currentCourse);
-                var seriesIndex = CourseDataManager.AllSeriesData.FindIndex((x) => x == currentSeries);
-                seriesIndex++;
-                if (seriesIndex >= CourseDataManager.AllSeriesData.Count)
-                {
-                    seriesIndex = 0;
-                }
                 var previousCourse = currentCourse;
-                currentSeries = CourseDataManager.AllSeriesData[seriesIndex];
+                currentSeries = CourseDataManager.GetNextSeries(currentSeries);
                 currentCourse = currentSeries.Courses.Find((x) => x.Id == previousCourse.Id);
 
                 if (currentCourse == null)
@@ -241,17 +235,11 @@ namespace DaniDojo.Patches
             {
                 //ReturnTopCourse(currentCourse);
                 var courseIndex = CourseDataManager.GetCourseIndex(currentSeries, currentCourse);
-                var seriesIndex = CourseDataManager.AllSeriesData.FindIndex((x) => x == currentSeries);
-                seriesIndex--;
-                if (seriesIndex < 0)
-                {
-                    seriesIndex = CourseDataManager.AllSeriesData.Count - 1;
-                }
 
                 var previousCourse = currentCourse;
-                currentSeries = CourseDataManager.AllSeriesData[seriesIndex];
-                currentCourse = currentSeries.Courses.Find((x) => x.Id == previousCourse.Id);
+                currentSeries = CourseDataManager.GetPreviousSeries(currentSeries);
 
+                currentCourse = currentSeries.Courses.Find((x) => x.Id == previousCourse.Id);
                 if (currentCourse == null)
                 {
                     courseIndex = Math.Min(courseIndex, currentSeries.Courses.Count - 1);

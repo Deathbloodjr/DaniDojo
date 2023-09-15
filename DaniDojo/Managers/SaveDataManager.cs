@@ -388,5 +388,20 @@ namespace DaniDojo.Managers
             // This course is locked if it is not red or higher
             return !(saveData.RankCombo.Rank >= DaniRank.RedClear);
         }
+
+        static public SaveCourse GetHighestActiveClear()
+        {
+            var series = CourseDataManager.GetActiveSeries();
+            SaveCourse highestCourseRecord = null;
+            for (int i = 0; i < series.Courses.Count - 1; i++)
+            {
+                var saveCourse = GetCourseRecord(series.Courses[i].Hash);
+                if (saveCourse.RankCombo.Rank >= DaniRank.RedClear)
+                {
+                    highestCourseRecord = saveCourse;
+                }
+            }
+            return highestCourseRecord;
+        }
     }
 }

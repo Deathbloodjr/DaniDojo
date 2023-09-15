@@ -110,6 +110,9 @@ namespace DaniDojo.Assets
 
 
             // Slightly difficult, looks like the score is centered
+            // UPDATE: Score is not fully centered
+            // It is centered as if the score is 7 digits, even if it is not 7 digits
+            // I will update this later if I don't forget which I probably will unless I don't
             var score = play.SongPlayData.Sum((x) => x.Score).ToString();
             int bgWidth = 434;
             int digitWidth = 47;

@@ -1,4 +1,5 @@
 ﻿using Blittables;
+using DaniDojo.Assets;
 using DaniDojo.Data;
 using DaniDojo.Patches;
 using System;
@@ -111,6 +112,9 @@ namespace DaniDojo.Managers
 
             currentCourse = course;
             currentPlay = new CurrentPlayData(course);
+
+            EnsoAssets.SetRainbowStartTime();
+
             // I'm not sure if I'd want to actually begin the song here
             // Probably wouldn't want to do that
         }
@@ -130,6 +134,7 @@ namespace DaniDojo.Managers
             IsInDan = false;
             StartResult = false;
             // I don't know if I need to reset anything for currentPlay
+            DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
         }
 
         static public void EndDanPlay()
@@ -562,7 +567,142 @@ namespace DaniDojo.Managers
         }
 
         #endregion
-   
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="border"></param>
+        /// <param name="play"></param>
+        /// <param name="songNumber">The song number, 0 indexed</param>
+        /// <param name="remainingNotes"></param>
+        /// <param name="remainingDrumrollTime"></param>
+        /// <returns></returns>
+        static public BorderBarData GetBorderBarData(DaniBorder border, PlayData play, int songNumber = -1, int remainingNotes = -1, float remainingDrumrollTime = -1f)
+        {
+            if (border.BorderType == BorderType.SoulGauge)
+            {
+                return null;
+            }
+
+            if (!border.IsTotal && songNumber == -1)
+            {
+                return null;
+            }
+
+            BorderBarData data = new BorderBarData();
+
+            int redReq = (border.IsTotal ? border.RedReqs[0] : border.RedReqs[songNumber]);
+            int goldReq = (border.IsTotal ? border.GoldReqs[0] : border.GoldReqs[songNumber]);
+            var playValues = GetBorderPlayResults(border, play);
+            int playValue = (border.IsTotal ? playValues[0] : playValues[songNumber]);
+
+            float ratio = (float)playValue / (float)redReq;
+            float ratioMinusOne = (float)(playValue - 1) / (float)redReq;
+            float goldRatio = 0;
+            float goldRatioMinusOne = 0;
+            if (ratio > 1)
+            {
+                goldRatio = (playValue - redReq) / (float)(goldReq - redReq);
+                goldRatioMinusOne = ((playValue - 1) - redReq) / (float)(goldReq - redReq);
+            }
+
+            data.State = BorderBarState.Grey;
+
+            if (border.BorderType != BorderType.Oks && border.BorderType != BorderType.Bads)
+            {
+                data.FillRatio = (int)(ratio * 100);
+                if (data.FillRatio == 0 && playValue > 0)
+                {
+                    data.FillRatio = 1;
+                }
+
+                data.PlayValue = playValue;
+
+                List<(float threshold, BorderBarState state, BorderBarFlashState flashState)> GoldThresholds = new List<(float threshold, BorderBarState state, BorderBarFlashState flashState)>()
+                {
+                    (1f, BorderBarState.Rainbow, BorderBarFlashState.None),
+                    (0.66f, BorderBarState.Pink, BorderBarFlashState.WhiteFast),
+                    (0.33f, BorderBarState.Pink, BorderBarFlashState.WhiteSlow),
+                    (0f, BorderBarState.Pink, BorderBarFlashState.None),
+                };
+
+                List<(float threshold, BorderBarState state, BorderBarFlashState flashState)> Thresholds = new List<(float threshold, BorderBarState state, BorderBarFlashState flashState)>()
+                {
+                    (1f, BorderBarState.Pink, BorderBarFlashState.None),
+                    (0.95f, BorderBarState.Yellow, BorderBarFlashState.WhiteSlow),
+                    (0.5f, BorderBarState.Yellow, BorderBarFlashState.None),
+                    (0.00001f, BorderBarState.DarkYellow, BorderBarFlashState.None) // Anything greater than 0, but these checks are for greater than or equal to, so that sucks
+                };
+
+                if (goldRatio > 0)
+                {
+                    for (int i = 0; i < GoldThresholds.Count; i++)
+                    {
+                        if (goldRatio >= GoldThresholds[i].threshold)
+                        {
+                            data.State = GoldThresholds[i].state;
+                            data.FlashState = GoldThresholds[i].flashState;
+                            if (goldRatioMinusOne < GoldThresholds[i].threshold)
+                            {
+                                data.StateChanged = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < Thresholds.Count; i++)
+                    {
+                        if (ratio >= Thresholds[i].threshold)
+                        {
+                            data.State = Thresholds[i].state;
+                            data.FlashState = Thresholds[i].flashState;
+                            if (ratioMinusOne < Thresholds[i].threshold)
+                            {
+                                data.StateChanged = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                data.FillRatio = (int)((1 - ratio) * 100);
+                if (data.FillRatio == 0 && playValue > 0)
+                {
+                    data.FillRatio = 1;
+                }
+
+                data.PlayValue = Math.Max((redReq - playValue), 0); // Don't want it to go negative
+
+                List<(float threshold, BorderBarState state, BorderBarFlashState flashState)> Thresholds = new List<(float threshold, BorderBarState state, BorderBarFlashState flashState)>()
+                {
+                    (1f, BorderBarState.Grey, BorderBarFlashState.None),
+                    (0.8f, BorderBarState.Orange, BorderBarFlashState.BlackSlow),
+                    (0.7f, BorderBarState.Orange, BorderBarFlashState.None),
+                    (0.5f, BorderBarState.Yellow, BorderBarFlashState.None),
+                    (0f, BorderBarState.Pink, BorderBarFlashState.None),
+                };
+
+                for (int i = 0; i < Thresholds.Count; i++)
+                {
+                    if (ratio >= Thresholds[i].threshold)
+                    {
+                        data.State = Thresholds[i].state;
+                        data.FlashState = Thresholds[i].flashState;
+                        if (ratioMinusOne < Thresholds[i].threshold)
+                        {
+                            data.StateChanged = true;
+                        }
+                        break;
+                    }
+                }
+
+            }
+            return data;
+        }
 
         static public DaniCombo CalculateComboRank(PlayData play)
         {
