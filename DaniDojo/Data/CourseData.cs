@@ -39,6 +39,11 @@ namespace DaniDojo.Data
     public enum DaniCourseLevel
     {
         None,
+        kyuu10,
+        kyuu9,
+        kyuu8,
+        kyuu7,
+        kyuu6,
         kyuu5,
         kyuu4,
         kyuu3,
@@ -70,6 +75,7 @@ namespace DaniDojo.Data
         public int Order { get; set; }
         public bool IsLocked { get; set; }
         public CourseBackground Background { get; set; }
+        public DaniCourseLevel CourseLevel { get; set; }
         public List<DaniSongData> Songs { get; set; }
         public List<DaniBorder> Borders { get; set; }
         public uint Hash { get; set; }
@@ -86,6 +92,8 @@ namespace DaniDojo.Data
 
             IsLocked = false;
             Hash = 0;
+
+            CourseLevel = DaniCourseLevel.None;
         }
     }
 

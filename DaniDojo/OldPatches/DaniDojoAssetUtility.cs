@@ -150,11 +150,15 @@ namespace DaniDojo.Patches
             {
                 var laneImage = gameObject.GetComponentInChildren<Image>();
 
+                var newSprite = CreateSprite(newImageFilePath);
+
                 if (laneImage != null && laneImage.sprite != null)
                 {
-                    Texture2D tex = laneImage.sprite.texture;
-                    ImageConversion.LoadImage(tex, File.ReadAllBytes(newImageFilePath));
-                    laneImage.sprite = Sprite.Create(tex, new Rect(laneImage.sprite.rect.x, laneImage.sprite.rect.y, tex.width, tex.height), laneImage.sprite.pivot);
+
+                    laneImage.sprite = newSprite;
+                    //Texture2D tex = laneImage.sprite.texture;
+                    //ImageConversion.LoadImage(tex, File.ReadAllBytes(newImageFilePath));
+                    //laneImage.sprite = Sprite.Create(tex, new Rect(laneImage.sprite.rect.x, laneImage.sprite.rect.y, tex.width, tex.height), laneImage.sprite.pivot);
                 }
                 else
                 {
@@ -164,9 +168,10 @@ namespace DaniDojo.Patches
                         var canvasImage = canvas.GetComponentInChildren<Image>();
                         if (canvasImage != null && canvasImage.sprite != null)
                         {
-                            Texture2D tex = canvasImage.sprite.texture;
-                            ImageConversion.LoadImage(tex, File.ReadAllBytes(newImageFilePath));
-                            canvasImage.sprite = Sprite.Create(tex, new Rect(canvasImage.sprite.rect.x, canvasImage.sprite.rect.y, tex.width, tex.height), canvasImage.sprite.pivot);
+                            //Texture2D tex = canvasImage.sprite.texture;
+                            //ImageConversion.LoadImage(tex, File.ReadAllBytes(newImageFilePath));
+                            //canvasImage.sprite = Sprite.Create(tex, new Rect(canvasImage.sprite.rect.x, canvasImage.sprite.rect.y, tex.width, tex.height), canvasImage.sprite.pivot);
+                            canvasImage.sprite = newSprite;
                         }
                     }
                 }

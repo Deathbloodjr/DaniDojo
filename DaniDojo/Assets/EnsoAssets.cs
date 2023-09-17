@@ -15,6 +15,9 @@ namespace DaniDojo.Assets
     internal class EnsoAssets
     {
         static string AssetFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
+
+        static float RainbowStartTime = 0.0f;
+
         static public void ChangeCourseIcon(GameObject gameObject)
         {
         }
@@ -318,7 +321,15 @@ namespace DaniDojo.Assets
 
         }
 
+        static public void SetRainbowStartTime()
+        {
+            RainbowStartTime = Time.time;
+        }
 
+        static public float GetRainbowStartTime()
+        {
+            return RainbowStartTime;
+        }
 
     }
 }

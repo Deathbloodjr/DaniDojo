@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DaniDojo.Managers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -115,7 +116,20 @@ namespace DaniDojo.Data
     public class SaveCourse
     {
         public uint Hash { get; set; }
-        public DaniCourse Course { get; set; }
+        private DaniCourse _course;
+        public DaniCourse Course { 
+            get
+            {
+                if (_course == null)
+                {
+                    _course = CourseDataManager.GetCourseFromHash(Hash);
+                }
+                return _course;
+            } 
+            set
+            {
+                _course = value;
+            } }
         public DaniRankCombo RankCombo { get; set; }
         public List<PlayData> PlayData { get; set; }
         public int SongReached { get; set; } // 1 indexed, where 0 means no song played
