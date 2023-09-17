@@ -271,12 +271,9 @@ namespace DaniDojo.Patches
 
                                 if (data.StateChanged)
                                 {
-                                    colorLerp.UpdateState(data);
+                                    colorLerp.UpdateState(data, borders[j].IsTotal);
                                 }
 
-
-                                //Plugin.LogInfo("ChangeReqCurrentValue: currentValue[j]: " + currentValue[j], 2);
-                                //Plugin.LogInfo("ChangeReqCurrentValue: data.PlayValue: " + data.PlayValue, 2);
 
                                 ChangeReqCurrentValue(panel, data.PlayValue, isGold);
 

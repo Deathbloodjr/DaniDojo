@@ -38,7 +38,7 @@ namespace DaniDojo.Managers
                 GetInput();
             }
 
-
+                
             public void GetInput()
             {
                 ControllerManager.Dir dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
@@ -81,9 +81,12 @@ namespace DaniDojo.Managers
                 var scoreBg = ResultsAssets.CreatePlayRecordScoreBg(PlayRecordParent, currentPlay);
                 var playRecord1Bg = ResultsAssets.CreatePlayRecordGoodOkBad(PlayRecordParent, currentPlay);
                 var playRecord2Bg = ResultsAssets.CreatePlayRecordDrumrollComboTotalHits(PlayRecordParent, currentPlay);
+                var borders = ResultsAssets.CreateBorderPanels(PlayRecordParent, currentCourse, currentPlay);
 
                 var danCourseIcon = ResultsAssets.CreateCourseIcon(bg, currentCourse);
                 var danResultAsset = ResultsAssets.CreateDanResult(bg, currentPlay);
+
+
 
             }
 

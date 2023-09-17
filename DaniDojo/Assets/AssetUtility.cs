@@ -14,7 +14,7 @@ namespace DaniDojo.Assets
     {
         static Dictionary<string, Sprite> LoadedSprites;
 
-        static Sprite LoadSprite(string spriteFilePath)
+        static public Sprite LoadSprite(string spriteFilePath)
         {
             if (LoadedSprites == null)
             {

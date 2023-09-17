@@ -130,11 +130,14 @@ namespace DaniDojo.Managers
 
         static public void LeaveDanPlay()
         {
-            Plugin.LogInfo("Leave Course", 1);
-            IsInDan = false;
-            StartResult = false;
-            // I don't know if I need to reset anything for currentPlay
-            DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
+            if (IsInDan)
+            {
+                Plugin.LogInfo("Leave Course", 1);
+                IsInDan = false;
+                StartResult = false;
+                // I don't know if I need to reset anything for currentPlay
+                DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
+            }
         }
 
         static public void EndDanPlay()

@@ -11,11 +11,16 @@ using UnityEngine.UI;
 
 namespace DaniDojo.Patches
 {
+    // This entire class sucks, but it works for now
     internal class ColorLerp : MonoBehaviour
     {
         bool isEnabled = false;
         bool isRainbow = false;
         bool isSmallRainbow = false;
+        bool isSmallResultRainbow = false;
+
+        bool isResult = false;
+
         Color32 mainColor;
         Color32 endColor;
         float interval;
@@ -27,8 +32,9 @@ namespace DaniDojo.Patches
         Image image;
         List<Sprite> rainbowSprites = new List<Sprite>();
         List<Sprite> smallRainbowSprites = new List<Sprite>();
+        List<Sprite> smallResultRainbowSprites = new List<Sprite>();
+
         int currentSprite = 0;
-        string rainbowSpriteLocation = Path.Combine(Plugin.Instance.ConfigDaniDojoAssetLocation.Value, "Enso");
 
         float intervalOneTime = 0.3f;
         float intervalSlow = 0.6f;
@@ -45,71 +51,104 @@ namespace DaniDojo.Patches
             image = GetComponent<Image>();
             mainColor = image.color;
 
-            DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(rainbowSpriteLocation, "LargeRainbow"));
+            InitializeSprites();
+        }
+
+        private void InitializeSprites()
+        {
+            rainbowSprites = new List<Sprite>();
+            DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(Plugin.Instance.ConfigDaniDojoAssetLocation.Value, "Enso", "LargeRainbow"));
             if (dirInfo.Exists)
             {
                 var files = dirInfo.GetFiles("*.*");
                 for (int i = 0; i < files.Length; i++)
                 {
-                    rainbowSprites.Add(DaniDojoAssetUtility.CreateSprite(files[i].FullName));
+                    rainbowSprites.Add(AssetUtility.LoadSprite(files[i].FullName));
                 }
             }
 
-            dirInfo = new DirectoryInfo(Path.Combine(rainbowSpriteLocation, "SmallRainbow"));
+            smallRainbowSprites = new List<Sprite>();
+            dirInfo = new DirectoryInfo(Path.Combine(Plugin.Instance.ConfigDaniDojoAssetLocation.Value, "Enso", "SmallRainbow"));
             if (dirInfo.Exists)
             {
                 var files = dirInfo.GetFiles("*.*");
                 for (int i = 0; i < files.Length; i++)
                 {
-                    smallRainbowSprites.Add(DaniDojoAssetUtility.CreateSprite(files[i].FullName));
+                    smallRainbowSprites.Add(AssetUtility.LoadSprite(files[i].FullName));
                 }
             }
 
-            //timeStarted = Time.time;
+            smallResultRainbowSprites = new List<Sprite>();
+            dirInfo = new DirectoryInfo(Path.Combine(Plugin.Instance.ConfigDaniDojoAssetLocation.Value, "Results", "SmallRainbow"));
+            if (dirInfo.Exists)
+            {
+                var files = dirInfo.GetFiles("*.*");
+                for (int i = 0; i < files.Length; i++)
+                {
+                    smallResultRainbowSprites.Add(AssetUtility.LoadSprite(files[i].FullName));
+                }
+            }
         }
 
         private void Update()
         {
             if (image != null)
             {
-                if (data.StateChanged)
+                if (data != null && !isResult)
                 {
-                    image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time - oneTimeFlashStart / intervalOneTime, intervalOneTime));
-                    if (Time.time - oneTimeFlashStart > intervalFast)
+                    if (data.StateChanged)
                     {
-                        data.StateChanged = false;
-                        image.color = data.Color;
+                        image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time - oneTimeFlashStart / intervalOneTime, intervalOneTime));
+                        if (Time.time - oneTimeFlashStart > intervalFast)
+                        {
+                            data.StateChanged = false;
+                            image.color = data.Color;
+                        }
+                    }
+                    if (data.FlashState == BorderBarFlashState.WhiteSlow)
+                    {
+                        image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time / intervalSlow, intervalSlow));
+                    }
+                    else if (data.FlashState == BorderBarFlashState.BlackSlow)
+                    {
+                        image.color = Color32.Lerp(data.Color, new Color32(0, 0, 0, 255), Mathf.PingPong(Time.time / intervalSlow, intervalSlow));
+                    }
+                    else if (data.FlashState == BorderBarFlashState.WhiteFast)
+                    {
+                        image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time / intervalFast, intervalFast));
                     }
                 }
-                if (data.FlashState == BorderBarFlashState.WhiteSlow)
-                {
-                    image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time / intervalSlow, intervalSlow));
-                }
-                else if (data.FlashState == BorderBarFlashState.BlackSlow)
-                {
-                    image.color = Color32.Lerp(data.Color, new Color32(0, 0, 0, 255), Mathf.PingPong(Time.time / intervalSlow, intervalSlow));
-                }
-                else if (data.FlashState == BorderBarFlashState.WhiteFast)
-                {
-                    image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time / intervalFast, intervalFast));
-                }
+               
 
-                if (isRainbow || isSmallRainbow)
+                if (isRainbow || isSmallRainbow || isSmallResultRainbow)
                 {
-                    int spriteCount = isRainbow ? rainbowSprites.Count : smallRainbowSprites.Count;
-                    int newSpriteIndex = ((int)((Time.time - EnsoAssets.GetRainbowStartTime()) / rainbowInterval) % (int)spriteCount);
+                    List<Sprite> spriteList = null;
+                    if (isRainbow)
+                    {
+                        spriteList = rainbowSprites;
+                    }
+                    else if (isSmallRainbow)
+                    {
+                        spriteList = smallRainbowSprites;
+                    }
+                    else if (isSmallResultRainbow)
+                    {
+                        spriteList = smallResultRainbowSprites;
+                    }
+                    int newSpriteIndex = ((int)((Time.time - EnsoAssets.GetRainbowStartTime()) / rainbowInterval) % (int)spriteList.Count);
                     if (newSpriteIndex != currentSprite)
                     {
                         currentSprite = newSpriteIndex;
-                        image.sprite = isRainbow ? rainbowSprites[currentSprite] : smallRainbowSprites[currentSprite];
+                        image.sprite = spriteList[currentSprite];
                     }
                 }
             }
         }
 
-        public void UpdateState(BorderBarData newData)
+        public void UpdateState(BorderBarData newData, bool isTotal, bool isResult = false)
         {
             data = newData;
+            this.isResult = isResult;
 
             if (data.StateChanged)
             {
@@ -121,13 +160,14 @@ namespace DaniDojo.Patches
             {
                 flashStart = Time.time;
             }
-
+            if (data.State == BorderBarState.Rainbow)
+            {
+                BeginRainbow(isTotal, isResult);
+            }
         }
 
         public void Begin(Color32 newStartColor, Color32 newEndColor, float newInterval)
         {
-            //timeStarted = Time.time;
-
             mainColor = newStartColor;
             endColor = newEndColor;
             interval = newInterval;
@@ -135,29 +175,40 @@ namespace DaniDojo.Patches
             isEnabled = true;
         }
 
-        public void BeginRainbow(bool isLargeRainbow)
+        public void BeginRainbow(bool isLargeRainbow, bool isResult = false)
         {
-            if (isLargeRainbow && !isRainbow && rainbowSprites.Count != 0)
+            image = GetComponent<Image>();
+            image.color = new Color32(255, 255, 255, 255);
+            isEnabled = false;
+
+            if (rainbowSprites.Count == 0 || smallRainbowSprites.Count == 0)
             {
-                //timeStarted = Time.time;
+                InitializeSprites();
+            }
 
-                image.sprite = rainbowSprites[0];
-                image.color = new Color32(255, 255, 255, 255);
+            if (isLargeRainbow)
+            {
+                //image.sprite = rainbowSprites[0];
 
-                isEnabled = false;
                 isRainbow = true;
                 isSmallRainbow = false;
+                isSmallResultRainbow = false;
             }
-            else if (!isLargeRainbow && !isSmallRainbow && smallRainbowSprites.Count != 0)
+            else if (!isLargeRainbow && !isResult)
             {
-                //timeStarted = Time.time;
+                //image.sprite = smallRainbowSprites[0];
 
-                image.sprite = smallRainbowSprites[0];
-                image.color = new Color32(255, 255, 255, 255);
-
-                isEnabled = false;
                 isRainbow = false;
                 isSmallRainbow = true;
+                isSmallResultRainbow = false;
+            }
+            else if (!isLargeRainbow && isResult)
+            {
+                //image.sprite = smallResultRainbowSprites[0];
+
+                isRainbow = false;
+                isSmallRainbow = false;
+                isSmallResultRainbow = true;
             }
         }
 
