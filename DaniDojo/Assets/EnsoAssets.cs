@@ -261,48 +261,48 @@ namespace DaniDojo.Assets
         }
 
 
-        static private IEnumerator TopBgAnimation(GameObject gameObject, float speed)
-        {
-            var image = gameObject.GetComponent<Image>();
-            while (gameObject != null)
-            {
-                if (EnsoPauseHook.IsPaused)
-                {
-                    yield return new WaitForEndOfFrame();
-                    continue;
-                }
-                var position = gameObject.transform.localPosition;
-                position.x -= Time.deltaTime * speed;
-                if (position.x < 0 - image.mainTexture.width)
-                {
-                    position.x = 1920 + image.mainTexture.width;
-                }
-                gameObject.transform.localPosition = position;
-                yield return new WaitForEndOfFrame();
-            }
-        }
+        //static private IEnumerator TopBgAnimation(GameObject gameObject, float speed)
+        //{
+        //    var image = gameObject.GetComponent<Image>();
+        //    while (gameObject != null)
+        //    {
+        //        if (EnsoPauseHook.IsPaused)
+        //        {
+        //            yield return new WaitForEndOfFrame();
+        //            continue;
+        //        }
+        //        var position = gameObject.transform.localPosition;
+        //        position.x -= Time.deltaTime * speed;
+        //        if (position.x < 0 - image.mainTexture.width)
+        //        {
+        //            position.x = 1920 + image.mainTexture.width;
+        //        }
+        //        gameObject.transform.localPosition = position;
+        //        yield return new WaitForEndOfFrame();
+        //    }
+        //}
 
-        static private IEnumerator TopBgAnimationAndDown(GameObject gameObject, float speed)
-        {
-            var image = gameObject.GetComponent<Image>();
-            while (gameObject != null)
-            {
-                if (EnsoPauseHook.IsPaused)
-                {
-                    yield return new WaitForEndOfFrame();
-                    continue;
-                }
-                var position = gameObject.transform.localPosition;
-                position.x -= Time.deltaTime * speed;
-                position.y -= Time.deltaTime * speed;
-                if (position.x < 0 - image.mainTexture.width)
-                {
-                    position.x = 1920 + image.mainTexture.width;
-                }
-                gameObject.transform.localPosition = position;
-                yield return new WaitForEndOfFrame();
-            }
-        }
+        //static private IEnumerator TopBgAnimationAndDown(GameObject gameObject, float speed)
+        //{
+        //    var image = gameObject.GetComponent<Image>();
+        //    while (gameObject != null)
+        //    {
+        //        if (EnsoPauseHook.IsPaused)
+        //        {
+        //            yield return new WaitForEndOfFrame();
+        //            continue;
+        //        }
+        //        var position = gameObject.transform.localPosition;
+        //        position.x -= Time.deltaTime * speed;
+        //        position.y -= Time.deltaTime * speed;
+        //        if (position.x < 0 - image.mainTexture.width)
+        //        {
+        //            position.x = 1920 + image.mainTexture.width;
+        //        }
+        //        gameObject.transform.localPosition = position;
+        //        yield return new WaitForEndOfFrame();
+        //    }
+        //}
 
         #endregion
 

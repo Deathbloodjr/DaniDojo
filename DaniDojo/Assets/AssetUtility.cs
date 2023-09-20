@@ -31,6 +31,16 @@ namespace DaniDojo.Assets
             }
         }
 
+        static public GameObject GetOrCreateEmptyChild(GameObject parent, string name, Vector2 position)
+        {
+            var child = GetChildByName(parent, name);
+            if (child == null)
+            {
+                child = CreateEmptyObject(parent, name, position);
+            }
+            return child;
+        }
+
         static public GameObject CreateEmptyObject(GameObject parent, string name, Vector2 position)
         {
             Rect rect = new Rect(position, Vector2.zero);
@@ -62,34 +72,15 @@ namespace DaniDojo.Assets
             return newObject;
         }
 
-        static public Canvas GetOrAddCanvasComponent(GameObject gameObject)
-        {
-            var canvasObject = gameObject.GetComponent<Canvas>();
-            if (canvasObject == null)
-            {
-                canvasObject = gameObject.AddComponent<Canvas>();
-            }
-            return canvasObject;
-        }
-
-        static public CanvasScaler GetOrAddCanvasScalerComponent(GameObject gameObject)
-        {
-            var canvasScalerObject = gameObject.GetComponent<CanvasScaler>();
-            if (canvasScalerObject == null)
-            {
-                canvasScalerObject = gameObject.AddComponent<CanvasScaler>();
-            }
-            return canvasScalerObject;
-        }
 
         static public Canvas AddCanvasComponent(GameObject gameObject)
         {
-            var canvasObject = GetOrAddCanvasComponent(gameObject);
+            var canvasObject = gameObject.GetOrAddComponent<Canvas>();
             canvasObject.renderMode = RenderMode.ScreenSpaceOverlay;
             canvasObject.worldCamera = null;
             canvasObject.overrideSorting = true;
 
-            var canvasScalerObject = GetOrAddCanvasScalerComponent(gameObject);
+            var canvasScalerObject = gameObject.GetOrAddComponent<CanvasScaler>();
             canvasScalerObject.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasScalerObject.referenceResolution = new Vector2(1920, 1080);
             canvasScalerObject.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
@@ -105,7 +96,7 @@ namespace DaniDojo.Assets
         static public GameObject CreateTextChild(GameObject parent, string name, Rect rect, string text)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
-            var textComponent = GetOrAddTextComponent(newObject);
+            var textComponent = newObject.GetOrAddComponent<TextMeshProUGUI>();
             ChangeText(newObject, text);
             textComponent.enableAutoSizing = true;
             textComponent.fontSizeMax = 1000;
@@ -114,15 +105,6 @@ namespace DaniDojo.Assets
             return newObject;
         }
 
-        static public TextMeshProUGUI GetOrAddTextComponent(GameObject gameObject)
-        {
-            var textObject = gameObject.GetComponent<TextMeshProUGUI>();
-            if (textObject == null)
-            {
-                textObject = gameObject.AddComponent<TextMeshProUGUI>();
-            }
-            return textObject;
-        }
         static public void ChangeText(TextMeshProUGUI textComponent, string text)
         {
             if (textComponent == null)
@@ -134,7 +116,7 @@ namespace DaniDojo.Assets
 
         static public void ChangeText(GameObject gameObject, string text)
         {
-            var textComponent = GetOrAddTextComponent(gameObject);
+            var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
 
             ChangeText(textComponent, text);
 
@@ -142,7 +124,7 @@ namespace DaniDojo.Assets
         }
         static public void SetTextFontAndMaterial(GameObject gameObject, TMP_FontAsset font, Material material)
         {
-            var textComponent = GetOrAddTextComponent(gameObject);
+            var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
             SetTextFontAndMaterial(textComponent, font, material);
         }
 
@@ -158,7 +140,7 @@ namespace DaniDojo.Assets
         static public void SetTextAlignment(GameObject gameObject, HorizontalAlignmentOptions horizAlignment = HorizontalAlignmentOptions.Left,
                                                                      VerticalAlignmentOptions vertAlignment = VerticalAlignmentOptions.Top)
         {
-            var textComponent = GetOrAddTextComponent(gameObject);
+            var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
             SetTextAlignment(textComponent, horizAlignment, vertAlignment);
         }
 
@@ -174,7 +156,7 @@ namespace DaniDojo.Assets
 
         static public void SetTextColor(GameObject gameObject, Color color)
         {
-            var textComponent = GetOrAddTextComponent(gameObject);
+            var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
             textComponent.color = color;
         }
 
@@ -183,10 +165,24 @@ namespace DaniDojo.Assets
 
         #region Image
 
+        static public GameObject GetOrCreateImageChild(GameObject parent, string name, Vector2 position, string spriteFilePath)
+        {
+            var imageChild = GetChildByName(parent, name);
+            if (imageChild == null)
+            {
+                imageChild = CreateImageChild(parent, name, position, spriteFilePath);
+            }
+            else
+            {
+                imageChild.GetOrAddComponent<Image>().sprite = LoadSprite(spriteFilePath);
+            }
+            return imageChild;
+        }
+
         static public GameObject CreateImageChild(GameObject parent, string name, Rect rect, Color32 color)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
-            var image = GetOrAddImageComponent(newObject);
+            var image = newObject.GetOrAddComponent<Image>();
             image.color = color;
 
             return newObject;
@@ -213,7 +209,7 @@ namespace DaniDojo.Assets
         static public GameObject CreateImageChild(GameObject parent, string name, Rect rect, Sprite sprite)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);
-            var image = GetOrAddImageComponent(newObject);
+            var image = newObject.GetOrAddComponent<Image>();
             image.sprite = sprite;
 
             return newObject;
@@ -288,20 +284,11 @@ namespace DaniDojo.Assets
 
 
         #region RectTransform
-        static public RectTransform GetRectTransform(GameObject gameObject)
-        {
-            var rectTransform = gameObject.GetComponent<RectTransform>();
-            if (rectTransform != null)
-            {
-                return rectTransform;
-            }
-            return gameObject.AddComponent<RectTransform>();
-        }
 
         // This feels kinda repetitive, but I think it's fine
         static public RectTransform SetRect(GameObject gameObject, Rect rect)
         {
-            var rectTransform = GetRectTransform(gameObject);
+            var rectTransform = gameObject.GetOrAddComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(rect.width, rect.height);
             rectTransform.anchoredPosition = new Vector2(rect.x, rect.y);
             rectTransform.anchorMin = Vector2.zero;
@@ -328,5 +315,20 @@ namespace DaniDojo.Assets
         }
 
         #endregion
+    }
+
+    public static class Extensions
+    {
+        public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
+        {
+            if (gameObject.TryGetComponent<T>(out T t))
+            {
+                return t;
+            }
+            else
+            {
+                return gameObject.AddComponent<T>();
+            }
+        }
     }
 }
