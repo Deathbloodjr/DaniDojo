@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 namespace DaniDojo.Patches
 {
@@ -15,6 +16,7 @@ namespace DaniDojo.Patches
     {
         public class DaniDojoSelectManager : MonoBehaviour
         {
+
             static DaniSeries currentSeries;
             static DaniCourse currentCourse;
             DaniCourse currentCourseLevel;
@@ -62,7 +64,16 @@ namespace DaniDojo.Patches
 
                 StartCoroutine(InitializeScene());
 
+                // This doesn't work how I planned
+                // I thought having multiple CriPlayers would allow for multiple sounds to be played at the same time
+                // However, the last sound will always be played
+                // I thought the issue may have been from making the cue names all the same ("song_trance", which happens to be angel dream)
+                // However, the same issue was popping up, even with separate cue names.
+                // The important part is that the BGM plays properly. Just need to cut the audio so that it loops properly
+                //DaniSoundManager.PlaySound("intro.bin", false);
 
+                DaniSoundManager.SetupBgm("odai_primal_loop.bin", true);
+                DaniSoundManager.PlayBgm();
 
                 // My attempt at getting animations to work. IDK what I'm doing.
                 //var outDonAnimation = donCommon.gameObject.GetComponent<OutDonAnimation>();
@@ -302,6 +313,8 @@ namespace DaniDojo.Patches
                     GameObject.Destroy(objectToMove);
                 }
             }
+
+            
         }
 
         static public void ChangeSceneDaniDojo()
@@ -334,5 +347,7 @@ namespace DaniDojo.Patches
             var CourseSelectManager = new GameObject("CourseSelectManager");
             CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
         }
+
+
     }
 }

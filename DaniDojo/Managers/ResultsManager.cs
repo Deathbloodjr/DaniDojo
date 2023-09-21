@@ -31,6 +31,9 @@ namespace DaniDojo.Managers
                 ResultsParent = this.gameObject;
                 InitializeAssets();
                 CurrentScreen = DaniResultScreen.Songs;
+
+                DaniSoundManager.SetupBgm("results_primal_loop.bin", true);
+                DaniSoundManager.PlayBgm();
             }
 
             public void Update()

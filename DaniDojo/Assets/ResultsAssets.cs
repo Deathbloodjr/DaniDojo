@@ -391,7 +391,7 @@ namespace DaniDojo.Assets
             // TODO: Fix this
             // For some reason, the digits aren't as spaced out in the Results screen compared to Enso mode
             var barState = DigitAssets.GetRequirementBarState(barData, border);
-            DigitAssets.CreateRequirementBarNumber(bar, new Vector2(397, 29), barData.PlayValue, RequirementBarType.Large, barState);
+            DigitAssets.CreateRequirementBarNumber(bar, new Vector2(403, 44), barData.PlayValue, RequirementBarType.Large, barState);
 
             //var value = barData.PlayValue.ToString();
             //for (int i = 0; i < value.Length; i++)
