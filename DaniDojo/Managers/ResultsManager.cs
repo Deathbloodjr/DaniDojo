@@ -26,11 +26,21 @@ namespace DaniDojo.Managers
 
             GameObject ResultsParent;
             GameObject PlayRecordParent;
+
+            GameObject donCommon;
+            GameObject playerName;
+
             public void Start()
             {
                 ResultsParent = this.gameObject;
                 InitializeAssets();
                 CurrentScreen = DaniResultScreen.Songs;
+
+                DaniSoundManager.SetupBgm("results_primal_loop.bin", true);
+                DaniSoundManager.PlayBgm();
+
+
+
             }
 
             public void Update()
@@ -84,6 +94,15 @@ namespace DaniDojo.Managers
                 var borders = ResultsAssets.CreateBorderPanels(PlayRecordParent, currentCourse, currentPlay);
 
                 var danCourseIcon = ResultsAssets.CreateCourseIcon(bg, currentCourse);
+
+                donCommon = Instantiate(DaniDojoSongSelect.donCommonObject);
+                playerName = Instantiate(DaniDojoSongSelect.playerNameObject);
+                donCommon.transform.SetParent(bg.transform);
+                playerName.transform.SetParent(bg.transform);
+
+                donCommon.transform.localPosition = new Vector3(202, 289, 0);
+                playerName.transform.localPosition = new Vector3(194, 120, 0);
+
                 var danResultAsset = ResultsAssets.CreateDanResult(bg, currentPlay);
 
 

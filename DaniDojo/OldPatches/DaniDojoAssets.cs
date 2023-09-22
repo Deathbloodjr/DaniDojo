@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static DaniDojo.Patches.DaniDojoDaniCourseSelect;
+using Image = UnityEngine.UI.Image;
 
 namespace DaniDojo.Patches
 {
@@ -43,7 +45,7 @@ namespace DaniDojo.Patches
             public static void CreateBottomAssets(GameObject parent)
             {
                 //DaniDojoAssetUtility.CreateImage("DaniBottomBg", Path.Combine(BaseImageFilePath, "Enso", "bottomBg.png"), new Vector2(0, 0), parent.transform);
-                
+
                 //DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(BaseImageFilePath, "Enso", "topBg.png"), new Vector2(0, 800), parent.transform);
                 var topBg = Assets.EnsoAssets.CreateTopBg(parent);
                 Assets.EnsoAssets.CreateBottomBg(parent);
@@ -78,7 +80,8 @@ namespace DaniDojo.Patches
                 {
                     gameObject = GameObject.Find("icon_course");
                 }
-                DaniDojoAssetUtility.ChangeSprite(gameObject, Path.Combine(BaseImageFilePath, "Course", "DifficultyIcons", "DaniDojoResized.png"));
+                AssetUtility.ChangeImageSprite(gameObject, Path.Combine(BaseImageFilePath, "Course", "DifficultyIcons", "DaniDojoResized.png"));
+                //DaniDojoAssetUtility.ChangeSprite(gameObject, Path.Combine(BaseImageFilePath, "Course", "DifficultyIcons", "DaniDojoResized.png"));
                 gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Dan-i dojo";
             }
 
@@ -214,20 +217,65 @@ namespace DaniDojo.Patches
 
                 if (!border.IsTotal)
                 {
-                    DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarTop", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 73), newPanel.transform);
-                    DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarBot", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 23), newPanel.transform);
+                    var prevSongTop = DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarTop", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 73), newPanel.transform);
+                    var prevSongBot = DaniDojoAssetUtility.CreateImage("PrevSongHitReqsBarBot", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongHitReqs.png"), new Vector2(1083, 23), newPanel.transform);
                     if (DaniPlayManager.GetCurrentSongNumber() >= 1)
                     {
-                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator1.png"), new Vector2(1085, 83), newPanel.transform);
-                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(1128, 83), newPanel.transform);
-                        DaniDojoAssetUtility.CreateNewImage("PrevSongHitReqOneBarFill", PinkBarColor, new Rect(1130, 90, 234, 33), newPanel.transform);
-                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBarBorder", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBarBorder.png"), new Vector2(1128, 83), newPanel.transform);
+                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator1.png"), new Vector2(2, 10), prevSongTop.transform);
+                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(44, 4), prevSongTop.transform);
+                        var prevSongBar1 = DaniDojoAssetUtility.CreateNewImage("PrevSongHitReqOneBarFill", PinkBarColor, new Rect(46, 11, 234, 33), prevSongTop.transform);
+                        DaniDojoAssetUtility.CreateImage("PrevSongHitReqOneBarBorder", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBarBorder.png"), new Vector2(44, 4), prevSongTop.transform);
+
+                        var songValues = DaniPlayManager.GetBorderPlayResults(border);
+                        var image = prevSongBar1.GetOrAddComponent<Image>();
+                        if (image != null)
+                        {
+                            BorderBarData songData1 = DaniPlayManager.GetBorderBarData(border, DaniPlayManager.GetCurrentPlay(), 0);
+
+                            var newScale = image.transform.localScale;
+                            newScale.x = songData1.FillRatio / 100f;
+
+                            newScale.x = Math.Max(newScale.x, 0);
+                            newScale.x = Math.Min(newScale.x, 1);
+                            image.transform.localScale = newScale;
+                            image.color = songData1.Color;
+
+                            if (songData1.State == BorderBarState.Rainbow)
+                            {
+                                AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
+                            }
+
+                            var barState = DigitAssets.GetRequirementBarState(songData1, border);
+                            DigitAssets.CreateRequirementBarNumber(prevSongTop, new Vector2(49, 15), songData1.PlayValue, RequirementBarType.Small, barState);
+                        }
+
                         if (DaniPlayManager.GetCurrentSongNumber() >= 2)
                         {
-                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator2.png"), new Vector2(1085, 33), newPanel.transform);
-                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(1128, 33), newPanel.transform);
-                            DaniDojoAssetUtility.CreateNewImage("PrevSongHitReqTwoBarFill", PinkBarColor, new Rect(1130, 40, 234, 33), newPanel.transform);
-                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoBarBorder", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBarBorder.png"), new Vector2(1128, 33), newPanel.transform);
+                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoIndicator", Path.Combine(BaseImageFilePath, "Enso", "PrevSongIndicator2.png"), new Vector2(2, 10), prevSongBot.transform);
+                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoBar", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBar.png"), new Vector2(44, 4), prevSongBot.transform);
+                            var prevSongBar2 = DaniDojoAssetUtility.CreateNewImage("PrevSongHitReqTwoBarFill", PinkBarColor, new Rect(46, 11, 234, 33), prevSongBot.transform);
+                            DaniDojoAssetUtility.CreateImage("PrevSongHitReqTwoBarBorder", Path.Combine(BaseImageFilePath, "Enso", "Bars", "PrevSongBarBorder.png"), new Vector2(44, 4), prevSongBot.transform);
+
+                            var image2 = prevSongBar2.GetOrAddComponent<Image>();
+                            if (image2 != null)
+                            {
+                                BorderBarData songData1 = DaniPlayManager.GetBorderBarData(border, DaniPlayManager.GetCurrentPlay(), 1);
+                                var newScale = image2.transform.localScale;
+                                newScale.x = songData1.FillRatio / 100f;
+
+                                newScale.x = Math.Max(newScale.x, 0);
+                                newScale.x = Math.Min(newScale.x, 1);
+                                image2.transform.localScale = newScale;
+                                image2.color = songData1.Color;
+
+                                if (songData1.State == BorderBarState.Rainbow)
+                                {
+                                    AssetUtility.ChangeImageSprite(image2, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
+                                }
+
+                                var barState = DigitAssets.GetRequirementBarState(songData1, border);
+                                DigitAssets.CreateRequirementBarNumber(prevSongBot, new Vector2(49, 15), songData1.PlayValue, RequirementBarType.Small, barState);
+                            }
                         }
                     }
                 }
@@ -247,112 +295,103 @@ namespace DaniDojo.Patches
                     if (panel != null)
                     {
                         //var bar = panel.transform.Find("CurReqBarFill");
-                        var bar = panel.transform.Find("CurReqBarFill");
-                        var emptyBar = panel.transform.Find("CurReqBarEmpty");
+                        var bar = panel.transform.Find("CurReqBarFill").gameObject;
+                        var emptyBar = panel.transform.Find("CurReqBarEmpty").gameObject;
                         if (bar != null && emptyBar != null)
                         {
-                            var image = bar.GetComponent<Image>();
-                            var emptyImage = emptyBar.GetComponent<Image>();
-                            var colorLerp = bar.GetComponent<ColorLerp>();
-                            if (image != null && emptyImage != null)
+                            var image = bar.GetOrAddComponent<Image>();
+                            var emptyImage = emptyBar.GetOrAddComponent<Image>();
+                            var colorLerp = bar.GetOrAddComponent<ColorLerp>();
+                            BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber());
+
+
+                            bool isGold = data.State == BorderBarState.Rainbow;
+
+
+                            var newScale = emptyImage.transform.localScale;
+
+                            if (isGold)
                             {
-                                BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber());
-                                
-
-                                bool isGold = data.State == BorderBarState.Rainbow;
-
-
-                                var newScale = emptyImage.transform.localScale;
-
-                                if (isGold && colorLerp != null)
-                                {
-                                    colorLerp.BeginRainbow(borders[j].IsTotal);
-                                }
-
-                                if (data.StateChanged)
-                                {
-                                    colorLerp.UpdateState(data, borders[j].IsTotal);
-                                }
-
-
-                                ChangeReqCurrentValue(panel, data.PlayValue, isGold);
-
-                                newScale.x = data.FillRatio / 100f;
-
-                                // Probably don't need this clamp anymore, but it shouldn't hurt to have it.
-                                newScale.x = Math.Max(newScale.x, 0);
-                                newScale.x = Math.Min(newScale.x, 1);
-
-                                // Previously was resizing the filled area
-                                // Currently resizing the empty area
-                                // Hopefully this math is correct
-                                newScale.x -= 1;
-                                emptyImage.transform.localScale = newScale;
-                                if (!isGold)
-                                {
-                                    image.color = data.Color;
-                                }
+                                colorLerp.BeginRainbow(borders[j].IsTotal);
                             }
+
+                            if (data.StateChanged)
+                            {
+                                colorLerp.UpdateState(data, borders[j].IsTotal);
+                            }
+
+
+                            ChangeReqCurrentValue(panel, data.PlayValue, isGold);
+
+                            newScale.x = data.FillRatio / 100f;
+
+                            // Probably don't need this clamp anymore, but it shouldn't hurt to have it.
+                            newScale.x = Math.Max(newScale.x, 0);
+                            newScale.x = Math.Min(newScale.x, 1);
+
+                            // Previously was resizing the filled area
+                            // Currently resizing the empty area
+                            // Hopefully this math is correct
+                            newScale.x -= 1;
+                            emptyImage.transform.localScale = newScale;
+                            image.color = data.Color;
                         }
 
                         // Why is this even here?
                         // This should only be updated once at the start of the 2nd and 3rd song
                         // This is instead being updated any time the main bar is updated for that border, when nothing here should change
-                        if (DaniPlayManager.GetCurrentSongNumber() > 0)
-                        {
+                        //if (DaniPlayManager.GetCurrentSongNumber() > 0)
+                        //{
 
-                            var songValues = DaniPlayManager.GetBorderPlayResults(borders[j]);
-                            var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill");
-                            if (prevSongBar1 != null)
-                            {
-                                var image = prevSongBar1.GetComponent<Image>();
-                                if (image != null)
-                                {
-                                    BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 0);
-                                
-                                    var newScale = image.transform.localScale;
-                                    newScale.x = songData1.FillRatio / 100f;
-                                   
-                                    newScale.x = Math.Max(newScale.x, 0);
-                                    newScale.x = Math.Min(newScale.x, 1);
-                                    image.transform.localScale = newScale;
-                                    image.color = songData1.Color;
+                        //    var songValues = DaniPlayManager.GetBorderPlayResults(borders[j]);
+                        //    var prevSongBar1 = panel.transform.Find("PrevSongHitReqOneBarFill").gameObject;
+                        //    if (prevSongBar1 != null)
+                        //    {
+                        //        var image = prevSongBar1.GetOrAddComponent<Image>();
+                        //        if (image != null)
+                        //        {
+                        //            BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 0);
 
-                                    if (songData1.State == BorderBarState.Rainbow)
-                                    {
-                                        AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
-                                    }
-                                }
-                            }
-                            if (DaniPlayManager.GetCurrentSongNumber() > 1)
-                            {
-                                var prevSongBar2 = panel.transform.Find("PrevSongHitReqTwoBarFill");
-                                if (prevSongBar2 != null)
-                                {
-                                    var image = prevSongBar2.GetComponent<Image>();
-                                    if (image != null)
-                                    {
-                                        BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 1);
-                                        var newScale = image.transform.localScale;
-                                        newScale.x = songData1.FillRatio / 100f;
+                        //            var newScale = image.transform.localScale;
+                        //            newScale.x = songData1.FillRatio / 100f;
 
-                                        //int requirementValue = borders[j].RedReqs[1];
-                                        //var newScale = image.transform.localScale;
+                        //            newScale.x = Math.Max(newScale.x, 0);
+                        //            newScale.x = Math.Min(newScale.x, 1);
+                        //            image.transform.localScale = newScale;
+                        //            image.color = songData1.Color;
 
-                                        newScale.x = Math.Max(newScale.x, 0);
-                                        newScale.x = Math.Min(newScale.x, 1);
-                                        image.transform.localScale = newScale;
-                                        image.color = songData1.Color;
+                        //            if (songData1.State == BorderBarState.Rainbow)
+                        //            {
+                        //                AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
+                        //            }
+                        //        }
+                        //    }
+                        //    if (DaniPlayManager.GetCurrentSongNumber() > 1)
+                        //    {
+                        //        var prevSongBar2 = panel.transform.Find("PrevSongHitReqTwoBarFill").gameObject;
+                        //        if (prevSongBar2 != null)
+                        //        {
+                        //            var image = prevSongBar2.GetOrAddComponent<Image>();
+                        //            if (image != null)
+                        //            {
+                        //                BorderBarData songData1 = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), 1);
+                        //                var newScale = image.transform.localScale;
+                        //                newScale.x = songData1.FillRatio / 100f;
 
-                                        if (songData1.State == BorderBarState.Rainbow)
-                                        {
-                                            AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
-                                        }
-                                    }
-                                }
+                        //                newScale.x = Math.Max(newScale.x, 0);
+                        //                newScale.x = Math.Min(newScale.x, 1);
+                        //                image.transform.localScale = newScale;
+                        //                image.color = songData1.Color;
 
-                            }
-                        }
+                        //                if (songData1.State == BorderBarState.Rainbow)
+                        //                {
+                        //                    AssetUtility.ChangeImageSprite(image, Path.Combine(BaseImageFilePath, "Enso", "PrevSongRainbow", "PrevSongRainbow.png"));
+                        //                }
+                        //            }
+                        //        }
+
+                        //    }
+                        //}
                     }
                 }
             }
@@ -380,6 +419,8 @@ namespace DaniDojo.Patches
             /// <param name="isGold"></param>
             static void ChangeReqCurrentValue(GameObject panel, int value, bool isGold)
             {
+                DigitAssets.CreateRequirementBarNumber(panel, new Vector2(403, 44), value, RequirementBarType.Large, isGold ? RequirementBarState.Gold : RequirementBarState.Normal);
+                return;
                 if (!Directory.Exists(Path.Combine(BaseImageFilePath, "Digits")))
                 {
                     return;

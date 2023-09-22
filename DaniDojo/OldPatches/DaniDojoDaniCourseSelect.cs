@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.IO;
 
 namespace DaniDojo.Patches
 {
@@ -15,6 +16,7 @@ namespace DaniDojo.Patches
     {
         public class DaniDojoSelectManager : MonoBehaviour
         {
+
             static DaniSeries currentSeries;
             static DaniCourse currentCourse;
             DaniCourse currentCourseLevel;
@@ -26,8 +28,11 @@ namespace DaniDojo.Patches
             //public static bool isInDan = false; // Only set to true for testing, set to false for the real thing
             //public static int currentDanSongIndex;
 
-            public DonCommon donCommon;
-            public PlayerName playerName;
+            public static GameObject donCommon;
+            public static GameObject playerName;
+
+            //public DonCommon donCommon;
+            //public PlayerName playerName;
 
             private GameObject TopCourseParent;
             private GameObject CenterCourseParent;
@@ -62,7 +67,16 @@ namespace DaniDojo.Patches
 
                 StartCoroutine(InitializeScene());
 
+                // This doesn't work how I planned
+                // I thought having multiple CriPlayers would allow for multiple sounds to be played at the same time
+                // However, the last sound will always be played
+                // I thought the issue may have been from making the cue names all the same ("song_trance", which happens to be angel dream)
+                // However, the same issue was popping up, even with separate cue names.
+                // The important part is that the BGM plays properly. Just need to cut the audio so that it loops properly
+                //DaniSoundManager.PlaySound("intro.bin", false);
 
+                DaniSoundManager.SetupBgm("odai_primal_loop.bin", true);
+                DaniSoundManager.PlayBgm();
 
                 // My attempt at getting animations to work. IDK what I'm doing.
                 //var outDonAnimation = donCommon.gameObject.GetComponent<OutDonAnimation>();
@@ -82,25 +96,33 @@ namespace DaniDojo.Patches
 
             IEnumerator InitializeScene()
             {
+                // Issue in this function:
+                // I need Don-chan to be above the course assets, but below the play result icon
+                // However, course assets and play result icon are children of the same parent, so I can't split up that layer
+                // I also can't place Don-chan as a child of that parent, as it moves left and right
+
+                // Basic scene assets
                 DaniDojoAssets.SelectAssets.InitializeSceneAssets(this.gameObject);
 
+                // Parent Initialization
                 CenterCourseParent.transform.SetParent(this.transform);
                 LeftCourseParent.transform.SetParent(this.transform);
                 TopCourseParent.transform.SetParent(this.transform);
 
-
-                DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
-                currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Center);
-
-
-                donCommon = GameObject.Instantiate(DaniDojoSongSelect.donCommonObject).GetComponent<DonCommon>();
-                playerName = GameObject.Instantiate(DaniDojoSongSelect.playerNameObject).GetComponent<PlayerName>();
+                // Don Initialization
+                donCommon = GameObject.Instantiate(DaniDojoSongSelect.donCommonObject);
+                playerName = GameObject.Instantiate(DaniDojoSongSelect.playerNameObject);
 
                 donCommon.transform.SetParent(this.transform);
                 playerName.transform.SetParent(this.transform);
 
                 donCommon.transform.position = new Vector3(260, 340, 0);
                 playerName.transform.position = new Vector3(260, 140, 0);
+
+                // Scene data
+                DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
+                currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Center);
+
                 yield return null;
             }
 
@@ -153,6 +175,8 @@ namespace DaniDojo.Patches
                     {
                         DaniPlayManager.StartDanPlay(currentCourse);
                         var songData = DaniPlayManager.GetSongData();
+
+                        DaniSoundManager.StopBgm();
 
                         DaniDojoTempEnso.BeginSong(songData.SongId, songData.Level);
                         TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
@@ -302,12 +326,27 @@ namespace DaniDojo.Patches
                     GameObject.Destroy(objectToMove);
                 }
             }
+
+            
         }
 
-        static public void ChangeSceneDaniDojo()
+        static public void ChangeSceneDaniDojo(GameObject don = null, GameObject playerName = null)
         {
+
+
             if (Plugin.Assets != null)
             {
+                if (don != null)
+                {
+                    DaniDojoSongSelect.donCommonObject = GameObject.Instantiate(don);
+                    GameObject.DontDestroyOnLoad(DaniDojoSongSelect.donCommonObject);
+                }
+                if (playerName != null)
+                {
+                    DaniDojoSongSelect.playerNameObject = GameObject.Instantiate(playerName);
+                    GameObject.DontDestroyOnLoad(DaniDojoSongSelect.playerNameObject);
+                }
+
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("DaniDojo", true);
 
                 Plugin.Instance.StartCoroutine(AddCourseSelectManager());
@@ -334,5 +373,7 @@ namespace DaniDojo.Patches
             var CourseSelectManager = new GameObject("CourseSelectManager");
             CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
         }
+
+
     }
 }

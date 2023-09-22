@@ -205,27 +205,50 @@ namespace DaniDojo.Assets
         {
             var danResultParent = AssetUtility.CreateEmptyObject(parent, "DanResult", new Vector2(7, 350));
 
-            string comboAsset;
+
+            string comboAsset = "";
+            bool isFailed = false;
             switch (play.RankCombo.Combo)
             {
-                case DaniCombo.None: return danResultParent;
+                case DaniCombo.None: isFailed = true; break;
                 case DaniCombo.Silver: comboAsset = "ClearBg.png"; break;
                 case DaniCombo.Gold: comboAsset = "FcBg.png"; break;
                 case DaniCombo.Rainbow: comboAsset = "DfcBg.png"; break;
-                default: return danResultParent;
+                default: isFailed = true; break;
             }
 
-            string resultAsset;
+            string resultAsset = "";
             switch (play.RankCombo.Rank)
             {
-                case DaniRank.None: return danResultParent;
+                case DaniRank.None: isFailed = true; break;
                 case DaniRank.RedClear: resultAsset = "RedClearText.png"; break;
                 case DaniRank.GoldClear: resultAsset = "GoldClearText.png"; break;
-                default: return danResultParent;
+                default: isFailed = true; break;
             }
 
-            AssetUtility.CreateImageChild(danResultParent, "ComboBg", new Vector2(0, 0), Path.Combine(AssetFilePath, "Results", "DaniResult", comboAsset));
-            AssetUtility.CreateImageChild(danResultParent, "Rank", new Vector2(21, 39), Path.Combine(AssetFilePath, "Results", "DaniResult", resultAsset));
+            if (isFailed)
+            {
+                AssetUtility.CreateImageChild(danResultParent, "FailShadow1", new Vector2(3, 55), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailShadow1.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailShadow2", new Vector2(109, -14), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailShadow2.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailShadow3", new Vector2(232, 21), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailShadow3.png"));
+
+                AssetUtility.CreateImageChild(danResultParent, "FailBg1", new Vector2(15, 78), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailBackground1.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailBg2", new Vector2(123, 9), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailBackground2.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailBg3", new Vector2(245, 43), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailBackground3.png"));
+                                              
+                AssetUtility.CreateImageChild(danResultParent, "FailOutline1", new Vector2(19, 76), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailOutline1.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailOutline2", new Vector2(127, 7), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailOutline2.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailOutline3", new Vector2(248, 41), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailOutline3.png"));
+                                              
+                AssetUtility.CreateImageChild(danResultParent, "FailText1", new Vector2(32, 93), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailText1.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailText2", new Vector2(140, 26), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailText2.png"));
+                AssetUtility.CreateImageChild(danResultParent, "FailText3", new Vector2(261, 60), Path.Combine(AssetFilePath, "Results", "DaniResult", "ResultFailText3.png"));
+            }
+            else
+            {
+                AssetUtility.CreateImageChild(danResultParent, "ComboBg", new Vector2(0, 0), Path.Combine(AssetFilePath, "Results", "DaniResult", comboAsset));
+                AssetUtility.CreateImageChild(danResultParent, "Rank", new Vector2(21, 39), Path.Combine(AssetFilePath, "Results", "DaniResult", resultAsset));
+            }
             return danResultParent;
         }
 
@@ -388,60 +411,10 @@ namespace DaniDojo.Assets
 
 
             // Create the Requirement Value Digits
+            var barState = DigitAssets.GetRequirementBarState(barData, border);
+            DigitAssets.CreateRequirementBarNumber(bar, new Vector2(403, 44), barData.PlayValue, RequirementBarType.Large, barState);
 
-            var value = barData.PlayValue.ToString();
-            for (int i = 0; i < value.Length; i++)
-            {
-                var numLocation = new Vector2(403 + (56 * i), 44);
-                var baseNumberPath = Path.Combine(AssetFilePath, "Digits", "Big");
-
-                var digitBorder = AssetUtility.CreateImageChild(bar, "DigitBorder" + i, numLocation, Path.Combine(baseNumberPath, "Border", value[i] + ".png"));
-                var digitFill = AssetUtility.CreateImageChild(bar, "DigitFill" + i, numLocation, Path.Combine(baseNumberPath, "NoBorder", value[i] + ".png"));
-                var digitTransparent = AssetUtility.CreateImageChild(bar, "DigitTransparent" + i, numLocation, Path.Combine(baseNumberPath, "Transparent", value[i] + ".png"));
-
-                var digitBorderImage = AssetUtility.GetOrAddImageComponent(digitBorder);
-                var digitFillImage = AssetUtility.GetOrAddImageComponent(digitFill);
-                var digitTransparentImage = AssetUtility.GetOrAddImageComponent(digitTransparent);
-
-                if (barData.State == BorderBarState.Rainbow)
-                {
-                    digitBorderImage.color = GoldReqTextBorderColor;
-                }
-                else if (value == "0")
-                {
-                    digitBorderImage.color = ZeroTextBorderColor;
-                }
-                else
-                {
-                    digitBorderImage.color = NormalTextBorderColor;
-                }
-
-                if (barData.State == BorderBarState.Rainbow)
-                {
-                    digitFillImage.color = GoldReqTextFillColor;
-                }
-                else if (value == "0")
-                {
-                    digitFillImage.color = ZeroTextFillColor;
-                }
-                else
-                {
-                    digitFillImage.color = NormalTextFillColor;
-                }
-
-                if (barData.State == BorderBarState.Rainbow)
-                {
-                    digitTransparentImage.color = GoldReqTextTransparentColor;
-                }
-                else if (value == "0")
-                {
-                    digitTransparentImage.color = ZeroTextTransparentColor;
-                }
-                else
-                {
-                    digitTransparentImage.color = NormalTextTransparentColor;
-                }
-            }
+           
 
 
 
@@ -508,62 +481,9 @@ namespace DaniDojo.Assets
 
                 colorLerp.UpdateState(barData, false, true);
 
-
-                var value = barData.PlayValue.ToString();
-                for (int j = 0; j < value.Length; j++)
-                {
-                    var numLocation = new Vector2(396 + (26 * j), 30);
-                    var baseNumberPath = Path.Combine(AssetFilePath, "Digits", "Big");
-
-                    var digitParent = AssetUtility.CreateEmptyObject(bar, "Digit" + (j + 1), numLocation);
-
-                    var digitBorder = AssetUtility.CreateImageChild(digitParent, "DigitBorder", Vector2.zero, Path.Combine(AssetFilePath, "Digits", "ResultsPerSongBorder", value[j] + ".png"));
-                    var digitFill = AssetUtility.CreateImageChild(digitParent, "DigitFill", Vector2.zero, Path.Combine(AssetFilePath, "Digits", "ResultsPerSongFill", value[j] + ".png"));
-                    var digitTransparent = AssetUtility.CreateImageChild(digitParent, "DigitTransparent", new Vector2(-1, 3), Path.Combine(AssetFilePath, "Digits", "ResultsPerSongTransparent", value[j] + ".png"));
-
-                    var digitBorderImage = AssetUtility.GetOrAddImageComponent(digitBorder);
-                    var digitFillImage = AssetUtility.GetOrAddImageComponent(digitFill);
-                    var digitTransparentImage = AssetUtility.GetOrAddImageComponent(digitTransparent);
-
-                    if (barData.State == BorderBarState.Rainbow)
-                    {
-                        digitBorderImage.color = GoldReqTextBorderColor;
-                    }
-                    else if (value == "0")
-                    {
-                        digitBorderImage.color = ZeroTextBorderColor;
-                    }
-                    else
-                    {
-                        digitBorderImage.color = NormalTextBorderColor;
-                    }
-
-                    if (barData.State == BorderBarState.Rainbow)
-                    {
-                        digitFillImage.color = GoldReqTextFillColor;
-                    }
-                    else if (value == "0")
-                    {
-                        digitFillImage.color = ZeroTextFillColor;
-                    }
-                    else
-                    {
-                        digitFillImage.color = NormalTextFillColor;
-                    }
-
-                    if (barData.State == BorderBarState.Rainbow)
-                    {
-                        digitTransparentImage.color = GoldReqTextTransparentColor;
-                    }
-                    else if (value == "0")
-                    {
-                        digitTransparentImage.color = ZeroTextTransparentColor;
-                    }
-                    else
-                    {
-                        digitTransparentImage.color = NormalTextTransparentColor;
-                    }
-                }
+                var barState = DigitAssets.GetRequirementBarState(barData, border);
+                DigitAssets.CreateRequirementBarNumber(bar, new Vector2(397, 29), barData.PlayValue, RequirementBarType.Medium, barState);
+                
 
                 // Create the requirement value string
                 var requirementValueString = string.Empty;
