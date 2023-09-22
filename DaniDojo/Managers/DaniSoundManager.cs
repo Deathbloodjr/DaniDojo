@@ -103,7 +103,12 @@ namespace DaniDojo.Managers
             Plugin.Instance.StartCoroutine(PlayProcess(bgmPlayer, "song_trance", TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm)));
         }
 
-        static public void StopBgm(CriPlayer player)
+        static public void StopBgm()
+        {
+            StopSound(bgmPlayer);
+        }
+
+        static public void StopSound(CriPlayer player)
         {
             if (player == null)
             {
@@ -119,7 +124,7 @@ namespace DaniDojo.Managers
         static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
             yield return new WaitWhile(() => player.CheckLoading());
-            StopBgm(player);
+            StopSound(player);
             player.Player.SetVolume(volume);
             player.Player.UpdateAll();
             player.Play(cueKey);

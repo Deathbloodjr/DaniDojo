@@ -43,10 +43,7 @@ namespace DaniDojo.Patches
             var tmpGui = list7.GetComponentInChildren<TextMeshProUGUI>();
             tmpGui.text = "Dan-i Dojo";
 
-            donCommonObject = GameObject.Find("don_select_song");
-            donCommonObject = GameObject.Instantiate(donCommonObject);
-            playerNameObject = GameObject.Find("PlayerName");
-            playerNameObject = GameObject.Instantiate(playerNameObject);
+
         }
 
         [HarmonyPatch(typeof(ModeSelectMenu))]
@@ -86,14 +83,13 @@ namespace DaniDojo.Patches
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.ModeSelectLastSceneName = source;
 
+                DaniDojoDaniCourseSelect.ChangeSceneDaniDojo(GameObject.Find("don_select_song"), GameObject.Find("PlayerName"));
 
-                DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
-               
             }
         }
 
 
-        private static void CreateAndLoadDaniDojoScene()
+        private static void CreateAndLoadDaniDojoScene(GameObject don = null, GameObject playerName = null)
         {
             var daniDojoScene = SceneManager.CreateScene("DaniDojo");
 
@@ -102,7 +98,13 @@ namespace DaniDojo.Patches
             SceneManager.SetActiveScene(daniDojoScene);
 
             var CourseSelectManager = new GameObject("CourseSelectManager");
-            CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+            var selectManager = CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
+
+            //selectManager.donCommon = GameObject.Instantiate(don);
+            //selectManager.playerName = GameObject.Instantiate(playerName);
+
+            //GameObject.DontDestroyOnLoad(selectManager.donCommon);
+            //GameObject.DontDestroyOnLoad(selectManager.playerName);
         }
 
         [HarmonyPatch(typeof(ModeSelectMenu))]

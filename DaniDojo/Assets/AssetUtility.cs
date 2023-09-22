@@ -24,9 +24,30 @@ namespace DaniDojo.Assets
             {
                 return LoadedSprites[spriteFilePath];
             }
-            else
+            else if (File.Exists(spriteFilePath))
             {
                 LoadedSprites.Add(spriteFilePath, LoadSpriteFromFile(spriteFilePath));
+                return LoadedSprites[spriteFilePath];
+            }
+            // otherwise, the file doesn't exist, log an error, and return null (or hopefully a small transparent sprite
+            else
+            {
+                Plugin.LogError("Could not find file: " + spriteFilePath);
+                // Instead of null, could I have this return just a 1x1 transparent sprite or something?
+
+                // Creates a transparent 2x2 texture, and returns that as the sprite
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
+                Color fillColor = Color.clear;
+                Color[] fillPixels = new Color[tex.width * tex.height];
+                for (int i = 0; i < fillPixels.Length; i++)
+                {
+                    fillPixels[i] = fillColor;
+                }
+                tex.SetPixels(fillPixels);
+                tex.Apply();
+
+                Rect rect = new Rect(0, 0, tex.width, tex.height);
+                LoadedSprites.Add(spriteFilePath, Sprite.Create(tex, rect, new Vector2(0, 0)));
                 return LoadedSprites[spriteFilePath];
             }
         }

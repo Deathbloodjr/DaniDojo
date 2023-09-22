@@ -14,7 +14,7 @@ namespace DaniDojo.Assets
     {
         static public Dictionary<RequirementBarState, Color32> RequirementBarBorderColors = new Dictionary<RequirementBarState, Color32>()
         {
-            [RequirementBarState.Failed] = new Color32(0, 0, 0, 0),
+            [RequirementBarState.Failed] = new Color32(177, 177, 177, 255),
             [RequirementBarState.Zero] = new Color32(177, 177, 177, 255),
             [RequirementBarState.Normal] = new Color32(177, 177, 177, 255),
             [RequirementBarState.Gold] = new Color32(221, 89, 56, 255),
