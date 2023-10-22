@@ -40,6 +40,10 @@ namespace DaniDojo.Data
         {
             Rank = newRank;
             Combo = newCombo;
+            if (newCombo == DaniCombo.None)
+            {
+                Rank = DaniRank.None;
+            }
         }
 
         public bool Equals(DaniRankCombo other)
@@ -117,7 +121,8 @@ namespace DaniDojo.Data
     {
         public uint Hash { get; set; }
         private DaniCourse _course;
-        public DaniCourse Course { 
+        public DaniCourse Course
+        {
             get
             {
                 if (_course == null)
@@ -125,11 +130,12 @@ namespace DaniDojo.Data
                     _course = CourseDataManager.GetCourseFromHash(Hash);
                 }
                 return _course;
-            } 
+            }
             set
             {
                 _course = value;
-            } }
+            }
+        }
         public DaniRankCombo RankCombo { get; set; }
         public List<PlayData> PlayData { get; set; }
         public int SongReached { get; set; } // 1 indexed, where 0 means no song played

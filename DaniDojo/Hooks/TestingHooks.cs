@@ -38,5 +38,21 @@ namespace DaniDojo.Hooks
 
         //    return true;
         //}
+
+        //[HarmonyPatch(typeof(EnsoGameManager))]
+        //[HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
+        //[HarmonyPatch(MethodType.Normal)]
+        //[HarmonyPrefix]
+        //public static bool EnsoGameManager_ProcExecMain_Prefix(EnsoGameManager __instance)
+        //{
+        //    Plugin.LogInfo("__instance.ensoParam.TotalTime: " + __instance.ensoParam.TotalTime + "\n" +
+        //                   "__instance.totalTime: " + __instance.totalTime + "\n" +
+        //                   "__instance.ensoSound.GetSongPosition(): " + __instance.ensoSound.GetSongPosition() + "\n" +
+        //                   "__instance.adjustCounter: " + __instance.adjustCounter + "\n" +
+        //                   "__instance.adjustSubTime: " + __instance.adjustSubTime + "\n" +
+        //                   "__instance.adjustTime: " + __instance.adjustTime + "\n", 1);
+
+        //    return true;
+        //}
     }
 }

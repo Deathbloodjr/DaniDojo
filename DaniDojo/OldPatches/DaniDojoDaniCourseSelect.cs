@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
+using DaniDojo.Assets;
 
 namespace DaniDojo.Patches
 {
@@ -38,9 +39,13 @@ namespace DaniDojo.Patches
             private GameObject CenterCourseParent;
             private GameObject LeftCourseParent;
 
+            bool isLoaded = false;
+
             public void Start()
             {
                 Plugin.Log.LogInfo("DaniDojoDaniCourseSelect Start");
+
+
 
                 var previousCourse = DaniPlayManager.GetCurrentCourse();
                 if (previousCourse != null)
@@ -61,9 +66,9 @@ namespace DaniDojo.Patches
                 }
 
 
+                TopCourseParent = new GameObject("TopCourseParent");
                 CenterCourseParent = new GameObject("CourseParent");
                 LeftCourseParent = new GameObject("LeftCourseParent");
-                TopCourseParent = new GameObject("TopCourseParent");
 
                 StartCoroutine(InitializeScene());
 
@@ -105,9 +110,9 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.InitializeSceneAssets(this.gameObject);
 
                 // Parent Initialization
+                TopCourseParent.transform.SetParent(this.transform);
                 CenterCourseParent.transform.SetParent(this.transform);
                 LeftCourseParent.transform.SetParent(this.transform);
-                TopCourseParent.transform.SetParent(this.transform);
 
                 // Don Initialization
                 donCommon = GameObject.Instantiate(DaniDojoSongSelect.donCommonObject);
@@ -123,11 +128,16 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Center);
 
+                isLoaded = true;
+
+                TaikoSingletonMonoBehaviour<InputGuide>.Instance.DisableGuide();
+
                 yield return null;
             }
 
             public void Update()
             {
+                TaikoSingletonMonoBehaviour<InputGuide>.Instance.DisableGuide();
                 GetInput();
             }
 
@@ -140,7 +150,7 @@ namespace DaniDojo.Patches
                     currentBuffer -= Time.deltaTime;
                     currentBuffer = Math.Max(currentBuffer, 0);
                 }
-                if (!DaniPlayManager.CheckIsInDan())
+                if (!DaniPlayManager.CheckIsInDan() && isLoaded)
                 {
                     ControllerManager.Dir dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
                     if (dir == ControllerManager.Dir.None)
@@ -174,22 +184,22 @@ namespace DaniDojo.Patches
                     else if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetOkDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
                     {
                         DaniPlayManager.StartDanPlay(currentCourse);
-                        var songData = DaniPlayManager.GetSongData();
 
                         DaniSoundManager.StopBgm();
 
-                        DaniDojoTempEnso.BeginSong(songData.SongId, songData.Level);
+                        DaniDojoTempEnso.BeginDan(currentCourse);
                         TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
-                    }
-                    else if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetCancelDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
-                    {
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeScene("SongSelect", false);
                     }
                     else if (dir == ControllerManager.Dir.None)
                     {
                         currentBuffer = 0;
                     }
+                }
+                if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetCancelDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
+                {
+                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
+                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeScene("SongSelect", false);
+                    DaniSoundManager.StopBgm();
                 }
             }
 
@@ -202,8 +212,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Left);
 
-                StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(-1920, 0, 0), courseMoveTime, true));
-                StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(-1920, 0, 0), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -217,8 +227,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Right);
 
-                StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(1920, 0, 0), courseMoveTime, true));
-                StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(1920, 0, 0), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -250,8 +260,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Up);
 
-                StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, 1080, 0), courseMoveTime, true));
-                StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, 1080, 0), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 
@@ -283,8 +293,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Down);
 
-                StartCoroutine(MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, -1080, 0), courseMoveTime, true));
-                StartCoroutine(MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, -1080, 0), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 
@@ -310,24 +320,6 @@ namespace DaniDojo.Patches
                 }
             }
 
-            public IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds, bool deleteAfter = false)
-            {
-                float elapsedTime = 0;
-                Vector3 startingPos = objectToMove.transform.position;
-                while (elapsedTime < seconds)
-                {
-                    objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
-                    elapsedTime += Time.deltaTime;
-                    yield return new WaitForEndOfFrame();
-                }
-                objectToMove.transform.position = end;
-                if (deleteAfter)
-                {
-                    GameObject.Destroy(objectToMove);
-                }
-            }
-
-            
         }
 
         static public void ChangeSceneDaniDojo(GameObject don = null, GameObject playerName = null)

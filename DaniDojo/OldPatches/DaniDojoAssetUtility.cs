@@ -59,7 +59,7 @@ namespace DaniDojo.Patches
                 Plugin.Log.LogError("Could not find file: " + filePath);
                 return new GameObject(name);
             }
-            
+
             //var imageCanvas = newImageObj.AddComponent<Canvas>();
             //var parentCanvas = parent.gameObject.GetComponent<Canvas>();
             //imageCanvas.sortingOrder = sortOrder;

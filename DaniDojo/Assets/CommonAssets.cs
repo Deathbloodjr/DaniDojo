@@ -41,7 +41,7 @@ namespace DaniDojo.Assets
             var songTitleInfo = wordDataMgr.GetWordListInfo("song_" + song.SongId);
             string songTitle;
 
-            if (songTitleInfo != null)
+            if (songTitleInfo != null && songTitleInfo.Text != "")
             {
                 songTitle = songTitleInfo.Text;
             }
@@ -154,52 +154,209 @@ namespace DaniDojo.Assets
             return AssetUtility.CreateImageChild(parent, "SongLevel", position, Path.Combine(AssetFilePath, "DifficultyAssets", file));
         }
 
+        static public GameObject CreateCourseTitleBar(GameObject parent, Vector2 position, DaniCourse course)
+        {
+            if (course.CourseLevel != DaniCourseLevel.gaiden &&
+                course.CourseLevel != DaniCourseLevel.sousaku)
+            {
+                return null;
+            }
+
+            string bgImage = string.Empty;
+            if (course.CourseLevel == DaniCourseLevel.gaiden)
+            {
+                bgImage = "GaidenTitleBg.png";
+            }
+            else if (course.CourseLevel == DaniCourseLevel.sousaku)
+            {
+                bgImage = "SousakuTitleBg.png";
+            }
+
+            var titleBarObject = AssetUtility.CreateImageChild(parent, "CourseTitleBar", position, Path.Combine("Course", "CourseSelect", bgImage));
+
+            var wordDataMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.WordDataMgr;
+            FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
+
+            // Using Hoshikuzu struck as a base, assuming it will have accurate font data
+            // It might not have accurate font data for detail
+            var titleFontType = wordDataMgr.GetWordListInfo("song_struck").FontType;
+            var titleFont = fontTMPMgr.GetDefaultFontAsset(titleFontType);
+            var titleFontMaterial = fontTMPMgr.GetDefaultFontMaterial(titleFontType, DataConst.DefaultFontMaterialType.KanbanSelect);
+
+            string courseTitle = course.Title;
+            if ((Plugin.Instance.ConfigSongTitleLanguage.Value == "Jp" || course.EngTitle == "") && course.JpTitle != "")
+            {
+                courseTitle = course.JpTitle;
+            }
+            else if ((Plugin.Instance.ConfigSongTitleLanguage.Value == "Eng" || course.JpTitle == "") && course.EngTitle != "")
+            {
+                courseTitle = course.EngTitle;
+            }
+
+            var titleText = AssetUtility.CreateTextChild(titleBarObject, "Title", new Rect(72, 6, 950, 70), courseTitle);
+            AssetUtility.SetTextFontAndMaterial(titleText, titleFont, titleFontMaterial);
+            AssetUtility.SetTextAlignment(titleText, HorizontalAlignmentOptions.Left);
+            AssetUtility.SetTextFontSize(titleText, 41);
+
+            return titleBarObject;
+        }
+
         static public GameObject CreateDaniCourse(GameObject parent, Vector2 position, DaniCourse course)
         {
             string bgImageFile = course.Background switch
             {
-                CourseBackground.Tan => bgImageFile = "TanBg.png",
-                CourseBackground.Wood => bgImageFile = "WoodBg.png",
-                CourseBackground.Blue => bgImageFile = "BlueBg.png",
-                CourseBackground.Red => bgImageFile = "RedBg.png",
-                CourseBackground.Silver => bgImageFile = "SilverBg.png",
-                CourseBackground.Gold => bgImageFile = "GoldBg.png",
-                _ => bgImageFile = "TanBg.png",
+                CourseBackground.Tan => "Tan.png",
+                CourseBackground.Wood => "Wood.png",
+                CourseBackground.Blue => "Blue.png",
+                CourseBackground.Red => "Red.png",
+                CourseBackground.Silver => "Silver.png",
+                CourseBackground.Gold => "Gold.png",
+                CourseBackground.Gaiden => "Gaiden.png",
+                CourseBackground.Sousaku => "Sousaku.png",
+                _ => "Sousaku.png",
             };
 
-            var courseId = course.Id;
-            if (int.TryParse(courseId, out int _))
+            string topJpText = string.Empty;
+            string botJpText = string.Empty;
+            string topEngText = string.Empty;
+            string botEngText = string.Empty;
+
+            switch (course.CourseLevel)
             {
-                courseId = course.Title;
+                case DaniCourseLevel.kyuuFirst:
+                case DaniCourseLevel.dan1:
+                    topJpText = "Starting.png";
+                    topEngText = "First.png";
+                    break;
+                case DaniCourseLevel.kyuu10:
+                case DaniCourseLevel.dan10:
+                    topJpText = "10th.png";
+                    topEngText = "Tenth.png";
+                    break;
+                case DaniCourseLevel.kyuu9:
+                case DaniCourseLevel.dan9:
+                    topJpText = "9th.png";
+                    topEngText = "Ninth.png";
+                    break;
+                case DaniCourseLevel.kyuu8:
+                case DaniCourseLevel.dan8:
+                    topJpText = "8th.png";
+                    topEngText = "Eighth.png";
+                    break;
+                case DaniCourseLevel.kyuu7:
+                case DaniCourseLevel.dan7:
+                    topJpText = "7th.png";
+                    topEngText = "Seventh.png";
+                    break;
+                case DaniCourseLevel.kyuu6:
+                case DaniCourseLevel.dan6:
+                    topJpText = "6th.png";
+                    topEngText = "Sixth.png";
+                    break;
+                case DaniCourseLevel.kyuu5:
+                case DaniCourseLevel.dan5:
+                    topJpText = "5th.png";
+                    topEngText = "Fifth.png";
+                    break;
+                case DaniCourseLevel.kyuu4:
+                case DaniCourseLevel.dan4:
+                    topJpText = "4th.png";
+                    topEngText = "Fourth.png";
+                    break;
+                case DaniCourseLevel.kyuu3:
+                case DaniCourseLevel.dan3:
+                    topJpText = "3rd.png";
+                    topEngText = "Third.png";
+                    break;
+                case DaniCourseLevel.kyuu2:
+                case DaniCourseLevel.dan2:
+                    topJpText = "2nd.png";
+                    topEngText = "Second.png";
+                    break;
+                case DaniCourseLevel.kyuu1:
+                    topJpText = "1st.png";
+                    topEngText = "First.png";
+                    break;
+                case DaniCourseLevel.kuroto:
+                    topJpText = "kuro.png";
+                    topEngText = "Kuroto.png";
+                    break;
+                case DaniCourseLevel.meijin:
+                    topJpText = "mei.png";
+                    topEngText = "Meijin.png";
+                    break;
+                case DaniCourseLevel.chojin:
+                    topJpText = "cho.png";
+                    topEngText = "Chojin.png";
+                    break;
+                case DaniCourseLevel.tatsujin:
+                    topJpText = "tatsu.png";
+                    topEngText = "Tatsujin.png";
+                    break;
+                case DaniCourseLevel.gaiden:
+                    topJpText = "gai.png";
+                    botJpText = "den.png";
+                    topEngText = "Gaiden.png";
+                    break;
+                default:
+                    topJpText = "sou.png";
+                    botJpText = "saku.png";
+                    topEngText = "Sousaku.png";
+                    break;
             }
 
-            string textImageBg = courseId switch
+            switch (course.CourseLevel)
             {
-                "5kyuu" or "五級 5th Kyu" => textImageBg = "kyuu5.png",
-                "4kyuu" or "四級 4th Kyu" => textImageBg = "kyuu4.png",
-                "3kyuu" or "三級 3rd Kyu" => textImageBg = "kyuu3.png",
-                "2kyuu" or "二級 2nd Kyu" => textImageBg = "kyuu2.png",
-                "1kyuu" or "一級 1st Kyu" => textImageBg = "kyuu1.png",
-                "1dan" or "初段 1st Dan" => textImageBg = "dan1.png",
-                "2dan" or "二段 2nd Dan" => textImageBg = "dan2.png",
-                "3dan" or "三段 3rd Dan" => textImageBg = "dan3.png",
-                "4dan" or "四段 4th Dan" => textImageBg = "dan4.png",
-                "5dan" or "五段 5th Dan" => textImageBg = "dan5.png",
-                "6dan" or "六段 6th Dan" => textImageBg = "dan6.png",
-                "7dan" or "七段 7th Dan" => textImageBg = "dan7.png",
-                "8dan" or "八段 8th Dan" => textImageBg = "dan8.png",
-                "9dan" or "九段 9th Dan" => textImageBg = "dan9.png",
-                "10dan" or "十段 10th Dan" => textImageBg = "dan10.png",
-                "11dan" or "玄人 Kuroto" => textImageBg = "kuroto.png",
-                "12dan" or "名人 Meijin" => textImageBg = "meijin.png",
-                "13dan" or "超人 Chojin" => textImageBg = "chojin.png",
-                "14dan" or "達人 Tatsujin" => textImageBg = "tatsujin.png",
-                _ => textImageBg = "gaiden.png",
-            };
+                case DaniCourseLevel.kyuuFirst:
+                case DaniCourseLevel.kyuu10:
+                case DaniCourseLevel.kyuu9:
+                case DaniCourseLevel.kyuu8:
+                case DaniCourseLevel.kyuu7:
+                case DaniCourseLevel.kyuu6:
+                case DaniCourseLevel.kyuu5:
+                case DaniCourseLevel.kyuu4:
+                case DaniCourseLevel.kyuu3:
+                case DaniCourseLevel.kyuu2:
+                case DaniCourseLevel.kyuu1:
+                    botJpText = "kyuu.png";
+                    botEngText = "Kyu.png";
+                    break;
+                case DaniCourseLevel.dan1:
+                case DaniCourseLevel.dan2:
+                case DaniCourseLevel.dan3:
+                case DaniCourseLevel.dan4:
+                case DaniCourseLevel.dan5:
+                case DaniCourseLevel.dan6:
+                case DaniCourseLevel.dan7:
+                case DaniCourseLevel.dan8:
+                case DaniCourseLevel.dan9:
+                case DaniCourseLevel.dan10:
+                    botJpText = "dan.png";
+                    botEngText = "Dan.png";
+                    break;
+                case DaniCourseLevel.kuroto:
+                case DaniCourseLevel.meijin:
+                case DaniCourseLevel.chojin:
+                case DaniCourseLevel.tatsujin:
+                    botJpText = "jin.png";
+                    break;
+            }
+
 
             var daniCourseParent = AssetUtility.CreateEmptyObject(parent, "DaniCourse", position);
-            AssetUtility.CreateImageChild(daniCourseParent, "Background", new Vector2(0, 0), Path.Combine(AssetFilePath, "Course", "DaniCourseIcons", bgImageFile));
-            AssetUtility.CreateImageChild(daniCourseParent, "Text", new Vector2(52, 124), Path.Combine(AssetFilePath, "Course", "DaniCourseIcons", textImageBg));
+            AssetUtility.CreateImageChild(daniCourseParent, "Background", new Vector2(0, -1), Path.Combine("Course", "Main", "Bg", bgImageFile));
+            var textParent = AssetUtility.GetOrCreateEmptyChild(daniCourseParent, "Text", new Vector2(52, 124));
+            AssetUtility.CreateImageChild(textParent, "TopJpText", new Vector2(12, 225), Path.Combine("Course", "Main", "JpText", topJpText));
+            AssetUtility.CreateImageChild(textParent, "BotJpText", new Vector2(12, 93), Path.Combine("Course", "Main", "JpText", botJpText));
+            if (botEngText == string.Empty)
+            {
+                AssetUtility.CreateImageChild(textParent, "EngText", new Vector2(0, 16), Path.Combine("Course", "Main", "EngText", topEngText));
+            }
+            else
+            {
+                AssetUtility.CreateImageChild(textParent, "TopEngText", new Vector2(0, 30), Path.Combine("Course", "Main", "EngText", topEngText));
+                AssetUtility.CreateImageChild(textParent, "BotEngText", new Vector2(0, 00), Path.Combine("Course", "Main", "EngText", botEngText));
+            }
 
             return daniCourseParent;
         }

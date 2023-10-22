@@ -312,6 +312,38 @@ namespace DaniDojo.Managers
             }
         }
 
+        static public void AddHitResultFromEachPlayer(EachPlayer player)
+        {
+            var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
+            if (songPlayData.Goods != (int)player.countRyo)
+            {
+                songPlayData.Goods = (int)player.countRyo;
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Goods);
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
+                AddCombo();
+            }
+            if (songPlayData.Oks != (int)player.countKa)
+            {
+                songPlayData.Oks = (int)player.countKa;
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Oks);
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
+                AddCombo();
+            }
+            if (songPlayData.Bads != (int)player.countFuka)
+            {
+                songPlayData.Bads = (int)player.countFuka;
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Bads);
+                currentPlay.CurrentSongCombo = 0;
+                currentPlay.CurrentCombo = 0;
+            }
+            if (songPlayData.Drumroll != (int)player.countRenda)
+            {
+                songPlayData.Drumroll = (int)player.countRenda;
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Drumroll);
+                DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.TotalHits);
+            }
+        }
+
         static void AddGood()
         {
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
@@ -335,6 +367,7 @@ namespace DaniDojo.Managers
             currentPlay.CurrentCombo++;
             currentPlay.PlayData.MaxCombo = Math.Max(currentPlay.PlayData.MaxCombo, currentPlay.CurrentCombo);
             songPlayData.Combo = Math.Max(currentPlay.CurrentSongCombo, songPlayData.Combo);
+            DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Combo);
         }
 
         static public void AddScore(int points)
@@ -478,7 +511,7 @@ namespace DaniDojo.Managers
         static DaniRank CalculateBorder(DaniBorder border, PlayData play)
         {
             var playValues = GetBorderPlayResults(border, play);
-            if (playValues.Count > border.RedReqs.Count || 
+            if (playValues.Count > border.RedReqs.Count ||
                 playValues.Count > border.GoldReqs.Count)
             {
                 Plugin.LogError("CalculateBorder Error: Too many values in PlayValues compared to Border Requirements.");
@@ -541,12 +574,12 @@ namespace DaniDojo.Managers
                 switch (border.BorderType)
                 {
                     //case BorderType.SoulGauge: playResults.Add(play.SoulGauge); break; // Soul Gauge will take some time to figure out properly
-                    case BorderType.Goods:     playResults.Add(play.SongPlayData.Sum((x) => x.Goods)); break;
-                    case BorderType.Oks:       playResults.Add(play.SongPlayData.Sum((x) => x.Oks)); break;
-                    case BorderType.Bads:      playResults.Add(play.SongPlayData.Sum((x) => x.Bads)); break;
-                    case BorderType.Combo:     playResults.Add(play.MaxCombo); break;
-                    case BorderType.Drumroll:  playResults.Add(play.SongPlayData.Sum((x) => x.Drumroll)); break;
-                    case BorderType.Score:     playResults.Add(play.SongPlayData.Sum((x) => x.Score)); break;
+                    case BorderType.Goods: playResults.Add(play.SongPlayData.Sum((x) => x.Goods)); break;
+                    case BorderType.Oks: playResults.Add(play.SongPlayData.Sum((x) => x.Oks)); break;
+                    case BorderType.Bads: playResults.Add(play.SongPlayData.Sum((x) => x.Bads)); break;
+                    case BorderType.Combo: playResults.Add(play.MaxCombo); break;
+                    case BorderType.Drumroll: playResults.Add(play.SongPlayData.Sum((x) => x.Drumroll)); break;
+                    case BorderType.Score: playResults.Add(play.SongPlayData.Sum((x) => x.Score)); break;
                     case BorderType.TotalHits: playResults.Add(play.SongPlayData.Sum((x) => x.Goods + x.Oks + x.Drumroll)); break;
                 }
             }
@@ -556,12 +589,12 @@ namespace DaniDojo.Managers
                 {
                     switch (border.BorderType)
                     {
-                        case BorderType.Goods:     playResults.Add(play.SongPlayData[i].Goods); break;
-                        case BorderType.Oks:       playResults.Add(play.SongPlayData[i].Oks); break;
-                        case BorderType.Bads:      playResults.Add(play.SongPlayData[i].Bads); break;
-                        case BorderType.Combo:     playResults.Add(play.SongPlayData[i].Combo); break;
-                        case BorderType.Drumroll:  playResults.Add(play.SongPlayData[i].Drumroll); break;
-                        case BorderType.Score:     playResults.Add(play.SongPlayData[i].Score); break;
+                        case BorderType.Goods: playResults.Add(play.SongPlayData[i].Goods); break;
+                        case BorderType.Oks: playResults.Add(play.SongPlayData[i].Oks); break;
+                        case BorderType.Bads: playResults.Add(play.SongPlayData[i].Bads); break;
+                        case BorderType.Combo: playResults.Add(play.SongPlayData[i].Combo); break;
+                        case BorderType.Drumroll: playResults.Add(play.SongPlayData[i].Drumroll); break;
+                        case BorderType.Score: playResults.Add(play.SongPlayData[i].Score); break;
                         case BorderType.TotalHits: playResults.Add(play.SongPlayData[i].Goods + play.SongPlayData[i].Oks + play.SongPlayData[i].Drumroll); break;
                     }
                 }
@@ -703,6 +736,12 @@ namespace DaniDojo.Managers
                     }
                 }
 
+                if (playValue < goldReq && remainingNotes == 0)
+                {
+                    data.State = BorderBarState.Rainbow;
+                    data.FlashState = BorderBarFlashState.None;
+                }
+
             }
             return data;
         }
@@ -739,6 +778,6 @@ namespace DaniDojo.Managers
                 return DaniCombo.Silver;
             }
         }
-    
+
     }
 }

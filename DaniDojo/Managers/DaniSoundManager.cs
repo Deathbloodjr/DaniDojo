@@ -14,7 +14,7 @@ namespace DaniDojo.Managers
         static string AssetFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
 
         static private CriPlayer bgmPlayer;
-        static private Dictionary<string, CriPlayer> players = new Dictionary<string, CriPlayer>(); 
+        static private Dictionary<string, CriPlayer> players = new Dictionary<string, CriPlayer>();
 
         static public void SetupBgm(string fileName, bool isLoop)
         {
@@ -52,7 +52,7 @@ namespace DaniDojo.Managers
             {
                 player = players[fileName];
             }
-            Plugin.Instance.StartCoroutine(PlayProcess(player, "intro", TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se)));
+            Plugin.Instance.StartCoroutine(PlayProcess(player, "song_trance", TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se)));
         }
 
         static public void StopSound(string fileName)
@@ -118,11 +118,12 @@ namespace DaniDojo.Managers
             {
                 return;
             }
-            player.Player.Stop(true);
+            player.Player.Stop(false);
         }
 
         static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
+            Plugin.LogInfo("PlayProcess: " + cueKey);
             yield return new WaitWhile(() => player.CheckLoading());
             StopSound(player);
             player.Player.SetVolume(volume);

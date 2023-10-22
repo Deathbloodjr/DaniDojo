@@ -39,6 +39,7 @@ namespace DaniDojo.Data
     public enum DaniCourseLevel
     {
         None,
+        kyuuFirst,
         kyuu10,
         kyuu9,
         kyuu8,
@@ -72,6 +73,8 @@ namespace DaniDojo.Data
         public DaniSeries Parent { get; set; }
         public string Id { get; set; }
         public string Title { get; set; }
+        public string JpTitle { get; set; }
+        public string EngTitle { get; set; }
         public int Order { get; set; }
         public bool IsLocked { get; set; }
         public CourseBackground Background { get; set; }
