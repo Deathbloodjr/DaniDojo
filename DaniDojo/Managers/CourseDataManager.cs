@@ -80,7 +80,21 @@ namespace DaniDojo.Managers
             //Plugin.LogInfo("Loading Course start", true);
             DaniCourse course = new DaniCourse();
             course.Id = node["Id"].GetValue<string>();
-            course.Title = node["Title"].GetValue<string>();
+            course.Title = course.Id;
+            course.JpTitle = string.Empty;
+            course.EngTitle = string.Empty;
+            if (node["Title"] != null)
+            {
+                course.Title = node["Title"].GetValue<string>();
+            }
+            if (node["JpTitle"] != null)
+            {
+                course.JpTitle = node["JpTitle"].GetValue<string>();
+            }
+            if (node["EngTitle"] != null)
+            {
+                course.EngTitle = node["EngTitle"].GetValue<string>();
+            }
             course.Order = node["Order"].GetValue<int>();
 
             course.IsLocked = node["IsLocked"].GetValue<bool>();
@@ -97,13 +111,23 @@ namespace DaniDojo.Managers
                     case "Red": course.Background = CourseBackground.Red; break;
                     case "Silver": course.Background = CourseBackground.Silver; break;
                     case "Gold": course.Background = CourseBackground.Gold; break;
-                    default: course.Background = CourseBackground.Tan; break;
+                    case "Gaiden": course.Background = CourseBackground.Gaiden; break;
+                    default: course.Background = CourseBackground.Sousaku; break;
+                }
+                if (course.Background == CourseBackground.Gaiden)
+                {
+                    course.CourseLevel = DaniCourseLevel.gaiden;
+                }
+                else if (course.Background == CourseBackground.Sousaku)
+                {
+                    course.CourseLevel = DaniCourseLevel.sousaku;
                 }
             }
             else
             {
                 switch (course.CourseLevel)
                 {
+                    case DaniCourseLevel.kyuuFirst:
                     case DaniCourseLevel.kyuu10:
                     case DaniCourseLevel.kyuu9:
                     case DaniCourseLevel.kyuu8:
@@ -436,7 +460,7 @@ namespace DaniDojo.Managers
                         course.Background = CourseBackground.Tan;
                         break;
                 }
-                
+
 
             }
 
@@ -660,36 +684,47 @@ namespace DaniDojo.Managers
         {
             switch (title.ToLower())
             {
+                case "1stkyu":
                 case "1stkyuu":
-                case "初級 First Kyu":
-                    return DaniCourseLevel.kyuu5;
+                case "初級 first kyu":
+                    return DaniCourseLevel.kyuuFirst;
+                case "10kyu":
                 case "10kyuu":
-                case "十級 10th Kyu":
-                    return DaniCourseLevel.kyuu5;
+                case "十級 10th kyu":
+                    return DaniCourseLevel.kyuu10;
+                case "9kyu":
                 case "9kyuu":
-                case "九級 9th Kyu":
-                    return DaniCourseLevel.kyuu5;
+                case "九級 9th kyu":
+                    return DaniCourseLevel.kyuu9;
+                case "8kyu":
                 case "8kyuu":
                 case "八級 8th kyu":
-                    return DaniCourseLevel.kyuu5;
+                    return DaniCourseLevel.kyuu8;
+                case "7kyu":
                 case "7kyuu":
                 case "七級 7th kyu":
-                    return DaniCourseLevel.kyuu5;
+                    return DaniCourseLevel.kyuu7;
+                case "6kyu":
                 case "6kyuu":
                 case "六級 6th kyu":
-                    return DaniCourseLevel.kyuu5;
+                    return DaniCourseLevel.kyuu6;
+                case "5kyu":
                 case "5kyuu":
                 case "五級 5th kyu":
                     return DaniCourseLevel.kyuu5;
+                case "4kyu":
                 case "4kyuu":
                 case "四級 4th kyu":
                     return DaniCourseLevel.kyuu4;
+                case "3kyu":
                 case "3kyuu":
                 case "三級 3rd kyu":
                     return DaniCourseLevel.kyuu3;
+                case "2kyu":
                 case "2kyuu":
                 case "二級 2nd kyu":
                     return DaniCourseLevel.kyuu2;
+                case "1kyu":
                 case "1kyuu":
                 case "一級 1st kyu":
                     return DaniCourseLevel.kyuu1;
@@ -724,19 +759,21 @@ namespace DaniDojo.Managers
                 case "十段 10th dan":
                     return DaniCourseLevel.dan10;
                 case "11dan":
+                case "kuroto":
                 case "玄人 kuroto":
                     return DaniCourseLevel.kuroto;
                 case "12dan":
+                case "meijin":
                 case "名人 meijin":
                     return DaniCourseLevel.meijin;
                 case "13dan":
+                case "chojin":
                 case "超人 chojin":
                     return DaniCourseLevel.chojin;
                 case "14dan":
+                case "tatsujin":
                 case "達人 tatsujin":
                     return DaniCourseLevel.tatsujin;
-                case "gaiden":
-                    return DaniCourseLevel.gaiden;
                 default:
                     return DaniCourseLevel.sousaku;
             }

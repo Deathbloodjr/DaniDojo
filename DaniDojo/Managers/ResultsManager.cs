@@ -48,7 +48,7 @@ namespace DaniDojo.Managers
                 GetInput();
             }
 
-                
+
             public void GetInput()
             {
                 ControllerManager.Dir dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
@@ -94,6 +94,7 @@ namespace DaniDojo.Managers
                 var borders = ResultsAssets.CreateBorderPanels(PlayRecordParent, currentCourse, currentPlay);
 
                 var danCourseIcon = ResultsAssets.CreateCourseIcon(bg, currentCourse);
+                var danCourseTitle = ResultsAssets.CreateCourseTitle(bg, currentCourse);
 
                 donCommon = Instantiate(DaniDojoSongSelect.donCommonObject);
                 playerName = Instantiate(DaniDojoSongSelect.playerNameObject);

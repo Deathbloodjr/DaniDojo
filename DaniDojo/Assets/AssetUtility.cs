@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,27 +13,58 @@ namespace DaniDojo.Assets
 {
     internal class AssetUtility
     {
+        static string AssetFilePath = "";
         static Dictionary<string, Sprite> LoadedSprites;
 
         static public Sprite LoadSprite(string spriteFilePath)
         {
+            var filePath = spriteFilePath;
+            // If the dictionary wasn't created yet, create it
             if (LoadedSprites == null)
             {
                 LoadedSprites = new Dictionary<string, Sprite>();
             }
+
+            if (AssetFilePath == "")
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(Plugin.Instance.ConfigDaniDojoAssetLocation.Value);
+                var files = dirInfo.GetFiles("danidojo.scene");
+                if (files.Length != 0)
+                {
+                    AssetFilePath = files[0].Directory.FullName;
+                }
+            }
+
+            // If the file doesn't start with the Asset path, append it on
+            if (!File.Exists(filePath) && !filePath.StartsWith(AssetFilePath))
+            {
+                filePath = Path.Combine(AssetFilePath, filePath);
+            }
+
+            // If the file doesn't end with an extension (".png")
+            // Add the extension automatically
+            // This feels very hardcodey, but it could be a decent start for something decent
+            if (!File.Exists(filePath) && !filePath.Contains("."))
+            {
+                filePath += ".png";
+            }
+
+            // If the dictionary has the filepath as a key, return the corresponding sprite
             if (LoadedSprites.ContainsKey(spriteFilePath))
             {
                 return LoadedSprites[spriteFilePath];
             }
-            else if (File.Exists(spriteFilePath))
+            // otherwise, if the file exists, load it, and add it to the dictionary
+            else if (File.Exists(filePath))
             {
-                LoadedSprites.Add(spriteFilePath, LoadSpriteFromFile(spriteFilePath));
+                LoadedSprites.Add(spriteFilePath, LoadSpriteFromFile(filePath));
                 return LoadedSprites[spriteFilePath];
             }
             // otherwise, the file doesn't exist, log an error, and return null (or hopefully a small transparent sprite
             else
             {
                 Plugin.LogError("Could not find file: " + spriteFilePath);
+                Plugin.LogError("Searched for : " + filePath);
                 // Instead of null, could I have this return just a 1x1 transparent sprite or something?
 
                 // Creates a transparent 2x2 texture, and returns that as the sprite
@@ -179,6 +211,13 @@ namespace DaniDojo.Assets
         {
             var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
             textComponent.color = color;
+        }
+
+        static public void SetTextFontSize(GameObject gameObject, float fontSize)
+        {
+            var textComponent = gameObject.GetOrAddComponent<TextMeshProUGUI>();
+            textComponent.enableAutoSizing = false;
+            textComponent.fontSize = fontSize;
         }
 
         #endregion
@@ -336,6 +375,62 @@ namespace DaniDojo.Assets
         }
 
         #endregion
+
+        public static IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds, bool deleteAfter = false)
+        {
+            float elapsedTime = 0;
+            Vector3 startingPos = objectToMove.transform.position;
+            while (elapsedTime < seconds)
+            {
+                objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
+                elapsedTime += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+            objectToMove.transform.position = end;
+            if (deleteAfter)
+            {
+                GameObject.Destroy(objectToMove);
+            }
+        }
+
+        public static IEnumerator ChangeTransparencyOverSeconds(GameObject obj, float seconds, bool makeVisible)
+        {
+            float endValue = makeVisible ? 1f : 0f;
+            var image = obj.GetComponent<Image>();
+            float imageStartValue = 0f;
+            if (image != null)
+            {
+                imageStartValue = image.color.a;
+            }
+            var text = obj.GetComponent<TextMeshProUGUI>();
+            float textStartValue = 0f;
+            if (text != null)
+            {
+                textStartValue = text.color.a;
+            }
+            float elapsedTime = 0;
+            while (elapsedTime < seconds)
+            {
+                if (image != null)
+                {
+                    image.color = new Color(image.color.r, image.color.g, image.color.b, Mathf.Lerp(imageStartValue, endValue, elapsedTime / seconds));
+                }
+                if (text != null)
+                {
+                    text.color = new Color(text.color.r, text.color.g, text.color.b, Mathf.Lerp(textStartValue, endValue, elapsedTime / seconds));
+                }
+                elapsedTime += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+            if (image != null)
+            {
+                image.color = new Color(image.color.r, image.color.g, image.color.b, endValue);
+            }
+            if (text != null)
+            {
+                text.color = new Color(text.color.r, text.color.g, text.color.b, endValue);
+            }
+        }
     }
 
     public static class Extensions

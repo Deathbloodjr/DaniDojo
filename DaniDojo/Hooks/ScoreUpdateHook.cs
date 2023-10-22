@@ -20,7 +20,20 @@ namespace DaniDojo.Hooks
             {
                 DaniPlayManager.AddScore(score);
             }
-            
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ScorePlayer))]
+        [HarmonyPatch(nameof(ScorePlayer.SetScore))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPrefix]
+        public static bool ScorePlayer_SetScore_Prefix(ScorePlayer __instance, ref int score)
+        {
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                score = DaniPlayManager.GetCurrentPlay().SongPlayData.Sum(x => x.Score);
+            }
             return true;
         }
     }

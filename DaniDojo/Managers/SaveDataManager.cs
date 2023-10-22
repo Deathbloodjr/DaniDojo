@@ -307,7 +307,7 @@ namespace DaniDojo.Managers
 
         #endregion
 
-		static public void AddPlayData(uint hash, PlayData play)
+        static public void AddPlayData(uint hash, PlayData play)
         {
             Plugin.LogInfo("AddPlayData", 1);
             for (int i = 0; i < SaveData.Courses.Count; i++)

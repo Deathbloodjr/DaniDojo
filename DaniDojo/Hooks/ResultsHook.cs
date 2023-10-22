@@ -13,6 +13,7 @@ namespace DaniDojo.Hooks
 {
     internal class ResultsHook
     {
+        // Go into the dani results screen instead of the normal results screen
         [HarmonyPatch(typeof(EnsoGameManager))]
         [HarmonyPatch(nameof(EnsoGameManager.ProcResult))]
         [HarmonyPatch(MethodType.Normal)]
@@ -21,6 +22,7 @@ namespace DaniDojo.Hooks
         {
             if (__instance.stateTimer == 1 && (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult()))
             {
+                //__instance.graphicManager.SetActiveStateFade();
                 GameObject ResultsParent = GameObject.Find("DaniResults");
                 if (ResultsParent == null)
                 {
@@ -38,5 +40,20 @@ namespace DaniDojo.Hooks
 
             return true;
         }
+
+        // Don't save any results from this play
+        [HarmonyPatch(typeof(EnsoGameManager))]
+        [HarmonyPatch(nameof(EnsoGameManager.SetResults))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPrefix]
+        public static bool EnsoGameManager_SetResults_Prefix(EnsoGameManager __instance)
+        {
+            if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
+            {
+                return false;
+            }
+            return true;
+        }
+
     }
 }

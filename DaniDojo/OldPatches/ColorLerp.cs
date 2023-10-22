@@ -118,7 +118,7 @@ namespace DaniDojo.Patches
                         image.color = Color32.Lerp(data.Color, new Color32(255, 255, 255, 255), Mathf.PingPong(Time.time / intervalFast, intervalFast));
                     }
                 }
-               
+
 
                 if (isRainbow || isSmallRainbow || isSmallResultRainbow)
                 {
@@ -210,6 +210,15 @@ namespace DaniDojo.Patches
                 isSmallRainbow = false;
                 isSmallResultRainbow = true;
             }
+        }
+
+        public void EndRainbow()
+        {
+            isRainbow = false;
+            isSmallRainbow = false;
+            isSmallResultRainbow = false;
+            image = GetComponent<Image>();
+            image.sprite = null;
         }
 
         public void End()
