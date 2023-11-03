@@ -1,4 +1,8 @@
 # DaniDojo
+| Mono | IL2CPP |
+|:--:|:--:|
+|✅|❌|
+
  A mod to allow players to play DaniDojo mode in TDMX.\
 \
 This is a very alpha version of the mod.\
