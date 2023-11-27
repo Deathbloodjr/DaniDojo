@@ -917,7 +917,7 @@ namespace DaniDojo.Patches
 
             //static Dictionary<SelectAssetName, Sprite> SelectAssetSprites;
 
-            public static void InitializeSceneAssets(GameObject parent)
+            public static void InitializeSceneAssets(GameObject parent, GameObject bgParent)
             {
                 TaikoSingletonMonoBehaviour<CommonObjects>.Instance.InputGuide.GetComponentInChildren<Animator>().SetTrigger("Out");
 
@@ -934,75 +934,15 @@ namespace DaniDojo.Patches
 
                 //DaniDojoAssetUtility.CreateImage("BgLightsOff", Path.Combine("Select", "BgLightsOff.png"), new Vector2(0, 0), parent.transform);
                 //DaniDojoAssetUtility.CreateImage("BgLightsOn", Path.Combine("Select", "BgLightsOn.png"), new Vector2(0, 0), parent.transform);
-                AssetUtility.CreateImageChild(parent, "BgLightsOff", Vector2.zero, Path.Combine("Select", "BgLightsOff.png"));
-                AssetUtility.CreateImageChild(parent, "BgLightsOn", Vector2.zero, Path.Combine("Select", "BgLightsOn.png"));
+                AssetUtility.CreateImageChild(bgParent, "BgLightsOff", Vector2.zero, Path.Combine("Select", "BgLightsOff.png"));
+                AssetUtility.CreateImageChild(bgParent, "BgLightsOn", Vector2.zero, Path.Combine("Select", "BgLightsOn.png"));
                 // TODO: Make a coroutine to flicker the BgLightsOn's transparency
 
                 //InitializeSelectAssetSprites();
             }
 
-            //private static void InitializeSelectAssetSprites()
-            //{
-            //    if (SelectAssetSprites == null)
-            //    {
-            //        SelectAssetSprites = new Dictionary<SelectAssetName, Sprite>();
-            //    }
-            //    foreach (SelectAssetName asset in Enum.GetValues(typeof(SelectAssetName)))
-            //    {
-            //        InitializeSelectAssetSprite(asset);
-            //    }
-            //}
+            
 
-            //private static void InitializeSelectAssetSprite(SelectAssetName asset)
-            //{
-            //    if (!SelectAssetSprites.ContainsKey(asset))
-            //    {
-            //        DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(BaseImageFilePath));
-            //        if (dirInfo.Exists)
-            //        {
-            //            var assetFile = dirInfo.GetFiles(asset.ToString() + ".png", SearchOption.AllDirectories);
-            //            if (assetFile.Length > 0)
-            //            {
-            //                if (assetFile.Length > 1)
-            //                {
-            //                    Plugin.Log.LogInfo("Multiple files for " + asset.ToString() + " found, loading the first one found!");
-
-            //                }
-            //                var sprite = DaniDojoAssetUtility.CreateSprite(assetFile[0].FullName);
-            //                SelectAssetSprites.Add(asset, sprite);
-            //            }
-            //            else
-            //            {
-            //                Plugin.Log.LogError(asset.ToString() + ".png not found!");
-            //            }
-            //        }
-            //        else
-            //        {
-            //            Plugin.Log.LogError("DaniDojoAsset file path not found!");
-            //        }
-            //    }
-            //}
-
-            //private static Sprite GetAssetSprite(SelectAssetName asset)
-            //{
-            //    InitializeSelectAssetSprite(asset);
-            //    if (SelectAssetSprites.ContainsKey(asset))
-            //    {
-            //        return SelectAssetSprites[asset];
-            //    }
-            //    else
-            //    {
-            //        return DaniDojoAssetUtility.CreateSprite("");
-            //    }
-            //}
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="seriesInfo"></param>
-            /// <param name="currentCourse"></param>
-            /// <param name="parent"></param>
-            /// <returns>The current Course GameObject.</returns>
             public static void CreateSeriesAssets(DaniSeries seriesInfo, GameObject parent)
             {
                 FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
@@ -1010,9 +950,9 @@ namespace DaniDojo.Patches
                 GameObject seriesTitleObject = GameObject.Find("SeriesTitle");
                 if (seriesTitleObject == null)
                 {
-                    seriesTitleObject = DaniDojoAssetUtility.CreateText("SeriesTitle", seriesInfo.Title, new Rect(1920 - 592, 777, 500, 100),
+                    seriesTitleObject = DaniDojoAssetUtility.CreateText("SeriesTitle", seriesInfo.Title, new Rect(1920 - 1092, 777, 1000, 100),
                                           fontTMPMgr.GetDefaultFontAsset(DataConst.FontType.Japanese), fontTMPMgr.GetDefaultFontMaterial(DataConst.FontType.Japanese, DataConst.DefaultFontMaterialType.OutlineBlack),
-                                          HorizontalAlignmentOptions.Right, new Color32(0, 0, 0, 255), parent.transform);
+                                          HorizontalAlignmentOptions.Right, new Color32(0, 0, 0, 255), parent.transform.parent);
                     var seriesTitleText = seriesTitleObject.GetComponent<TextMeshProUGUI>();
                     seriesTitleText.enableAutoSizing = false;
                     seriesTitleText.fontSize = 50;
@@ -1029,8 +969,8 @@ namespace DaniDojo.Patches
                     GameObject.Destroy(GameObject.Find("TopCourses"));
                 }
 
-                var topCoursesParent = new GameObject("TopCourses");
-                topCoursesParent.transform.SetParent(parent.transform);
+                
+                var topCoursesParent = AssetUtility.CreateEmptyObject(parent, "TopCourses", new Vector2(0, 0));
                 for (int i = 0; i < seriesInfo.Courses.Count; i++)
                 {
                     var highScore = SaveDataManager.GetCourseRecord(seriesInfo.Courses[i].Hash);
@@ -1171,9 +1111,13 @@ namespace DaniDojo.Patches
                             botText = "jin.png";
                             break;
                     }
-                    GameObject topCourseObject = new GameObject(seriesInfo.Courses[i].Title);
-                    topCourseObject.transform.SetParent(topCoursesParent.transform);
-                    topCourseObject.transform.position = new Vector2(183 + (68 * i), 884);
+                    //var basePosition = AssetUtility.GetPositionFrom1080p(new Vector2(183, 884));
+                    var basePosition = new Vector2(183, 884);
+                    var topCourseObject = AssetUtility.CreateEmptyObject(topCoursesParent, seriesInfo.Courses[i].Title, basePosition + new Vector2(68 * i, 0));
+
+                    //GameObject topCourseObject = new GameObject(seriesInfo.Courses[i].Title);
+                    //topCourseObject.transform.SetParent(topCoursesParent.transform);
+                    //topCourseObject.transform.position = new Vector2(183 + (68 * i), 884);
                     AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "Background", Vector2.zero, Path.Combine("Course", "Top", "Bg", backgroundName));
                     AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "TopText", new Vector2(19, 62), Path.Combine("Course", "Top", "Text", topText));
                     AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "BotText", new Vector2(19, 24), Path.Combine("Course", "Top", "Text", botText));

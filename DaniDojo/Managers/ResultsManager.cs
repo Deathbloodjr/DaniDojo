@@ -59,14 +59,14 @@ namespace DaniDojo.Managers
                     CurrentScreen = DaniResultScreen.Songs;
                     TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
 
-                    StartCoroutine(MoveOverSeconds(PlayRecordParent, new Vector2(337 + 1920, 44), 0.1f));
+                    StartCoroutine(MoveOverSeconds(PlayRecordParent, new Vector2(0, 44) + AssetUtility.GetPositionFrom1080p(new Vector2(337 + 1920, 0)), 0.1f));
                 }
                 else if ((dir == ControllerManager.Dir.Right || okDown) && CurrentScreen == DaniResultScreen.Songs)
                 {
                     CurrentScreen = DaniResultScreen.PlayResults;
                     TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
 
-                    StartCoroutine(MoveOverSeconds(PlayRecordParent, new Vector2(337, 44), 0.1f));
+                    StartCoroutine(MoveOverSeconds(PlayRecordParent, new Vector2(0, 44) + AssetUtility.GetPositionFrom1080p(new Vector2(337, 0)), 0.1f));
                 }
                 else if ((okDown) && CurrentScreen == DaniResultScreen.PlayResults)
                 {

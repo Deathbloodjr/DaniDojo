@@ -1,11 +1,11 @@
 ﻿using DaniDojo.Data;
 using DaniDojo.Utility;
+using LightWeightJsonParser;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace DaniDojo.Managers
@@ -38,7 +38,7 @@ namespace DaniDojo.Managers
             {
                 Plugin.LogInfo("Loading File \"" + files[i].Name + "\"");
                 var text = File.ReadAllText(files[i].FullName);
-                JsonNode node = JsonNode.Parse(text);
+                LWJson node = LWJson.Parse(text);
                 var series = LoadSeries(node);
                 allSeriesData.Add(series);
                 Plugin.LogInfo("Loading File \"" + files[i].Name + "\" complete");
@@ -49,7 +49,7 @@ namespace DaniDojo.Managers
             return allSeriesData;
         }
 
-        static DaniSeries LoadSeries(JsonNode node)
+        static DaniSeries LoadSeries(LWJson node)
         {
             //Plugin.LogInfo("Loading Series start", true);
             if (node["danSeriesTitle"] != null)
@@ -58,10 +58,10 @@ namespace DaniDojo.Managers
                 return oldSeriesData;
             }
             DaniSeries seriesData = new DaniSeries();
-            seriesData.Id = node["SeriesId"].GetValue<string>();
-            seriesData.Title = node["SeriesTitle"].GetValue<string>();
-            seriesData.IsActive = node["IsActive"].GetValue<bool>();
-            seriesData.Order = node["Order"].GetValue<int>();
+            seriesData.Id = node["SeriesId"].AsString();
+            seriesData.Title = node["SeriesTitle"].AsString();
+            seriesData.IsActive = node["IsActive"].AsBoolean();
+            seriesData.Order = node["Order"].AsInteger();
             var courses = node["Courses"].AsArray();
             for (int i = 0; i < courses.Count; i++)
             {
@@ -75,34 +75,34 @@ namespace DaniDojo.Managers
             return seriesData;
         }
 
-        static DaniCourse LoadCourse(JsonNode node, DaniSeries parent)
+        static DaniCourse LoadCourse(LWJson node, DaniSeries parent)
         {
             //Plugin.LogInfo("Loading Course start", true);
             DaniCourse course = new DaniCourse();
-            course.Id = node["Id"].GetValue<string>();
+            course.Id = node["Id"].AsString();
             course.Title = course.Id;
             course.JpTitle = string.Empty;
             course.EngTitle = string.Empty;
             if (node["Title"] != null)
             {
-                course.Title = node["Title"].GetValue<string>();
+                course.Title = node["Title"].AsString();
             }
             if (node["JpTitle"] != null)
             {
-                course.JpTitle = node["JpTitle"].GetValue<string>();
+                course.JpTitle = node["JpTitle"].AsString();
             }
             if (node["EngTitle"] != null)
             {
-                course.EngTitle = node["EngTitle"].GetValue<string>();
+                course.EngTitle = node["EngTitle"].AsString();
             }
-            course.Order = node["Order"].GetValue<int>();
+            course.Order = node["Order"].AsInteger();
 
-            course.IsLocked = node["IsLocked"].GetValue<bool>();
+            course.IsLocked = node["IsLocked"].AsBoolean();
             course.CourseLevel = GetCourseLevelFromTitle(course.Id);
 
             if (node["Background"] != null)
             {
-                var background = node["Background"].GetValue<string>();
+                var background = node["Background"].AsString();
                 switch (background)
                 {
                     case "Tan": course.Background = CourseBackground.Tan; break;
@@ -179,39 +179,39 @@ namespace DaniDojo.Managers
             return course;
         }
 
-        static DaniSongData LoadSongData(JsonNode node)
+        static DaniSongData LoadSongData(LWJson node)
         {
             //Plugin.LogInfo("Loading Song Data start", true);
             DaniSongData song = new DaniSongData();
-            song.SongId = node["SongId"].GetValue<string>();
-            song.TitleEng = node["TitleEng"].GetValue<string>();
-            song.TitleJp = node["TitleJp"].GetValue<string>();
-            //song.Level = (EnsoData.EnsoLevelType)(node["Level"]!.GetValue<int>() - 1);
+            song.SongId = node["SongId"].AsString();
+            song.TitleEng = node["TitleEng"].AsString();
+            song.TitleJp = node["TitleJp"].AsString();
+            //song.Level = (EnsoData.EnsoLevelType)(node["Level"]!.AsInteger() - 1);
 
             string levelString = string.Empty;
             try
             {
-                var levelInt = node["Level"].GetValue<int>();
+                var levelInt = node["Level"].AsInteger();
                 levelString = levelInt.ToString();
                 Plugin.LogInfo("Level int = " + levelInt, 2);
             }
             catch { }
             try
             {
-                levelString = node["Level"].GetValue<string>();
+                levelString = node["Level"].AsString();
                 Plugin.LogInfo("Level string = " + levelString, 2);
             }
             catch { }
             try
             {
-                var levelInt = node["Course"].GetValue<int>();
+                var levelInt = node["Course"].AsInteger();
                 levelString = levelInt.ToString();
                 Plugin.LogInfo("Course int = " + levelInt, 2);
             }
             catch { }
             try
             {
-                levelString = node["Course"].GetValue<string>();
+                levelString = node["Course"].AsString();
                 Plugin.LogInfo("Course string = " + levelString, 2);
             }
             catch { }
@@ -261,12 +261,12 @@ namespace DaniDojo.Managers
                     break;
             }
 
-            song.IsHidden = node["IsHidden"].GetValue<bool>();
+            song.IsHidden = node["IsHidden"].AsBoolean();
             //Plugin.LogInfo("Loading Song Data finish", true);
             return song;
         }
 
-        static DaniBorder LoadBorder(JsonNode node)
+        static DaniBorder LoadBorder(LWJson node)
         {
             //Plugin.LogInfo("Loading Border start", true);
             DaniBorder border = new DaniBorder();
@@ -274,14 +274,14 @@ namespace DaniDojo.Managers
             string borderTypeString = string.Empty;
             try
             {
-                var borderTypeInt = node["BorderType"]!.GetValue<int>();
+                var borderTypeInt = node["BorderType"]!.AsInteger();
                 borderTypeString = borderTypeInt.ToString();
                 //Plugin.LogInfo("BorderType int = " + borderTypeInt, true);
             }
             catch { }
             try
             {
-                borderTypeString = node["BorderType"]!.GetValue<string>();
+                borderTypeString = node["BorderType"]!.AsString();
                 //Plugin.LogInfo("BorderType string = " + borderTypeString, true);
             }
             catch { }
@@ -336,15 +336,15 @@ namespace DaniDojo.Managers
 
             //Plugin.LogInfo("BorderType Loaded", true);
             var redBorder = node["RedBorder"];
-            if (redBorder is JsonArray)
+            if (redBorder is LWJsonArray)
             {
                 Plugin.LogInfo("Border is Array", 2);
                 var redBorderArray = redBorder.AsArray();
                 var goldBorderArray = node["GoldBorder"].AsArray();
                 for (int i = 0; i < redBorderArray.Count; i++)
                 {
-                    border.RedReqs.Add(redBorderArray[i].GetValue<int>());
-                    border.GoldReqs.Add(goldBorderArray[i].GetValue<int>());
+                    border.RedReqs.Add(redBorderArray[i].AsInteger());
+                    border.GoldReqs.Add(goldBorderArray[i].AsInteger());
                 }
 
                 // If there's only 1 item, IsTotal = true
@@ -353,8 +353,8 @@ namespace DaniDojo.Managers
             else
             {
                 //Plugin.LogInfo("Border is not Array", true);
-                border.RedReqs.Add(node["RedBorder"].GetValue<int>());
-                border.GoldReqs.Add(node["GoldBorder"].GetValue<int>());
+                border.RedReqs.Add(node["RedBorder"].AsInteger());
+                border.GoldReqs.Add(node["GoldBorder"].AsInteger());
                 border.IsTotal = true;
             }
             //Plugin.LogInfo("Loading Border finish", true);
@@ -362,14 +362,14 @@ namespace DaniDojo.Managers
         }
 
 
-        static DaniSeries LoadOldSeries(JsonNode node)
+        static DaniSeries LoadOldSeries(LWJson node)
         {
             //Plugin.LogInfo("Loading Old Series start", true);
             DaniSeries seriesData = new DaniSeries();
-            seriesData.Title = node["danSeriesTitle"]!.GetValue<string>();
-            seriesData.Id = node["danSeriesId"]!.GetValue<string>();
-            seriesData.IsActive = node["isActiveDan"]!.GetValue<bool>();
-            seriesData.Order = node["order"]!.GetValue<int>();
+            seriesData.Title = node["danSeriesTitle"]!.AsString();
+            seriesData.Id = node["danSeriesId"]!.AsString();
+            seriesData.IsActive = node["isActiveDan"]!.AsBoolean();
+            seriesData.Order = node["order"]!.AsInteger();
             var courses = node["courses"].AsArray();
             for (int j = 0; j < courses.Count; j++)
             {
@@ -382,17 +382,17 @@ namespace DaniDojo.Managers
             return seriesData;
         }
 
-        static DaniCourse LoadOldCourse(JsonNode node, DaniSeries parent)
+        static DaniCourse LoadOldCourse(LWJson node, DaniSeries parent)
         {
             //Plugin.LogInfo("Loading Old Course start", true);
             DaniCourse course = new DaniCourse();
 
-            course.Order = node["danId"]!.GetValue<int>();
+            course.Order = node["danId"]!.AsInteger();
             course.Id = course.Order.ToString();
-            course.Title = node["title"]!.GetValue<string>();
+            course.Title = node["title"]!.AsString();
             if (node["Background"] != null)
             {
-                var background = node["Background"].GetValue<string>();
+                var background = node["Background"].AsString();
                 switch (background)
                 {
                     case "Tan": course.Background = CourseBackground.Tan; break;
@@ -469,7 +469,7 @@ namespace DaniDojo.Managers
             // Check to see if "locked" is in the json for this course
             if (node["locked"] != null)
             {
-                course.IsLocked = node["locked"]!.GetValue<bool>();
+                course.IsLocked = node["locked"]!.AsBoolean();
             }
 
 
@@ -479,9 +479,9 @@ namespace DaniDojo.Managers
 
                 DaniSongData song = new DaniSongData();
 
-                song.SongId = songNode["songNo"]!.GetValue<string>();
-                song.Level = (EnsoData.EnsoLevelType)(songNode["level"]!.GetValue<int>() - 1);
-                song.IsHidden = songNode["isHiddenSongName"]!.GetValue<bool>();
+                song.SongId = songNode["songNo"]!.AsString();
+                song.Level = (EnsoData.EnsoLevelType)(songNode["level"]!.AsInteger() - 1);
+                song.IsHidden = songNode["isHiddenSongName"]!.AsBoolean();
 
                 course.Songs.Add(song);
             }
@@ -491,29 +491,29 @@ namespace DaniDojo.Managers
                 var borderNode = node["aryOdaiBorder"]![i]!;
                 DaniBorder border = new DaniBorder();
 
-                border.BorderType = (BorderType)borderNode["odaiType"]!.GetValue<int>();
-                border.IsTotal = borderNode["borderType"]!.GetValue<int>() == 1;
+                border.BorderType = (BorderType)borderNode["odaiType"]!.AsInteger();
+                border.IsTotal = borderNode["borderType"]!.AsInteger() == 1;
 
                 if (borderNode["redBorderTotal"] != null)
                 {
-                    border.RedReqs.Add(borderNode["redBorderTotal"]!.GetValue<int>());
+                    border.RedReqs.Add(borderNode["redBorderTotal"]!.AsInteger());
                 }
                 else
                 {
-                    border.RedReqs.Add(borderNode["redBorder_1"]!.GetValue<int>());
-                    border.RedReqs.Add(borderNode["redBorder_2"]!.GetValue<int>());
-                    border.RedReqs.Add(borderNode["redBorder_3"]!.GetValue<int>());
+                    border.RedReqs.Add(borderNode["redBorder_1"]!.AsInteger());
+                    border.RedReqs.Add(borderNode["redBorder_2"]!.AsInteger());
+                    border.RedReqs.Add(borderNode["redBorder_3"]!.AsInteger());
                 }
 
                 if (borderNode["goldBorderTotal"] != null)
                 {
-                    border.GoldReqs.Add(borderNode["goldBorderTotal"]!.GetValue<int>());
+                    border.GoldReqs.Add(borderNode["goldBorderTotal"]!.AsInteger());
                 }
                 else
                 {
-                    border.GoldReqs.Add(borderNode["goldBorder_1"]!.GetValue<int>());
-                    border.GoldReqs.Add(borderNode["goldBorder_2"]!.GetValue<int>());
-                    border.GoldReqs.Add(borderNode["goldBorder_3"]!.GetValue<int>());
+                    border.GoldReqs.Add(borderNode["goldBorder_1"]!.AsInteger());
+                    border.GoldReqs.Add(borderNode["goldBorder_2"]!.AsInteger());
+                    border.GoldReqs.Add(borderNode["goldBorder_3"]!.AsInteger());
                 }
 
                 course.Borders.Add(border);

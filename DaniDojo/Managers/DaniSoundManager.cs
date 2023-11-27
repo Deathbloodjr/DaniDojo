@@ -85,7 +85,10 @@ namespace DaniDojo.Managers
                 player.LoadingState = CriPlayer.LoadingStates.Finished;
                 return false;
             }
-            player.CueSheet = CriAtom.AddCueSheetAsync(player.CueSheetName, File.ReadAllBytes(Path.Combine(AssetFilePath, "Sound", fileName)), null, null, false);
+            if (File.Exists(Path.Combine(AssetFilePath, "Sound", fileName)))
+            {
+                player.CueSheet = CriAtom.AddCueSheetAsync(player.CueSheetName, File.ReadAllBytes(Path.Combine(AssetFilePath, "Sound", fileName)), null, null, false);
+            }
             if (player.CueSheet != null)
             {
                 return true;
@@ -123,7 +126,7 @@ namespace DaniDojo.Managers
 
         static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
-            Plugin.LogInfo("PlayProcess: " + cueKey);
+            //Plugin.LogInfo("PlayProcess: " + cueKey);
             yield return new WaitWhile(() => player.CheckLoading());
             StopSound(player);
             player.Player.SetVolume(volume);

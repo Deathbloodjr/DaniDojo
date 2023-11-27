@@ -8,9 +8,7 @@ using BepInEx.Configuration;
 using DaniDojo.Patches;
 using System.IO;
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 using System.Linq;
-using System.Text.Json;
 using DaniDojo.Managers;
 using DaniDojo.Hooks;
 
