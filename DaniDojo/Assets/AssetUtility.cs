@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PlayFab.DataModels;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -354,6 +355,21 @@ namespace DaniDojo.Assets
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.zero;
             rectTransform.pivot = Vector2.zero;
+
+            gameObject.transform.localScale = Vector3.one;
+
+            return rectTransform;
+        }
+        static public RectTransform SetRect(GameObject gameObject, Vector2 pos)
+        {
+            var rectTransform = gameObject.GetOrAddComponent<RectTransform>();
+            rectTransform.anchoredPosition = pos;
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.zero;
+            rectTransform.pivot = Vector2.zero;
+
+            gameObject.transform.localScale = Vector3.one;
+
             return rectTransform;
         }
         static public RectTransform SetRect(GameObject gameObject, Rect rect, Vector2 anchorMin, Vector2 anchorMax)
@@ -430,6 +446,27 @@ namespace DaniDojo.Assets
             {
                 text.color = new Color(text.color.r, text.color.g, text.color.b, endValue);
             }
+        }
+
+        public static Vector2 GetPositionFrom1080p(Vector2 inputPos)
+        {
+            Vector2 result = new Vector2()
+            {
+                x = (inputPos.x / 1920f) * Screen.width,
+                y = (inputPos.y / 1080f) * Screen.height,
+            };
+            return result;
+        }
+
+        public static Vector3 GetPositionFrom1080p(Vector3 inputPos)
+        {
+            Vector3 result = new Vector3()
+            {
+                x = (inputPos.x / 1920f) * Screen.width,
+                y = (inputPos.y / 1080f) * Screen.height,
+                z = inputPos.z,
+            };
+            return result;
         }
     }
 

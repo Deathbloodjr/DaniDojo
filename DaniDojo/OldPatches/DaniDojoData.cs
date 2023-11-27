@@ -26,9 +26,9 @@
 
 //            public DaniSong(JsonNode node)
 //            {
-//                songId = node["songNo"]!.GetValue<string>();
-//                level = (EnsoData.EnsoLevelType)(node["level"]!.GetValue<int>() - 1);
-//                isHidden = node["isHiddenSongName"]!.GetValue<bool>();
+//                songId = node["songNo"]!.AsString();
+//                level = (EnsoData.EnsoLevelType)(node["level"]!.AsInteger() - 1);
+//                isHidden = node["isHiddenSongName"]!.AsBoolean();
 //            }
 //        }
 
@@ -50,29 +50,29 @@
 //                redBorders = new List<int>();
 //                goldBorders = new List<int>();
 
-//                borderType = (BorderType)node["odaiType"]!.GetValue<int>();
-//                isTotalRequirements = node["borderType"]!.GetValue<int>() == 1;
+//                borderType = (BorderType)node["odaiType"]!.AsInteger();
+//                isTotalRequirements = node["borderType"]!.AsInteger() == 1;
 
 //                if (node["redBorderTotal"] != null)
 //                {
-//                    redBorders.Add(node["redBorderTotal"]!.GetValue<int>());
+//                    redBorders.Add(node["redBorderTotal"]!.AsInteger());
 //                }
 //                else
 //                {
-//                    redBorders.Add(node["redBorder_1"]!.GetValue<int>());
-//                    redBorders.Add(node["redBorder_2"]!.GetValue<int>());
-//                    redBorders.Add(node["redBorder_3"]!.GetValue<int>());
+//                    redBorders.Add(node["redBorder_1"]!.AsInteger());
+//                    redBorders.Add(node["redBorder_2"]!.AsInteger());
+//                    redBorders.Add(node["redBorder_3"]!.AsInteger());
 //                }
 
 //                if (node["goldBorderTotal"] != null)
 //                {
-//                    goldBorders.Add(node["goldBorderTotal"]!.GetValue<int>());
+//                    goldBorders.Add(node["goldBorderTotal"]!.AsInteger());
 //                }
 //                else
 //                {
-//                    goldBorders.Add(node["goldBorder_1"]!.GetValue<int>());
-//                    goldBorders.Add(node["goldBorder_2"]!.GetValue<int>());
-//                    goldBorders.Add(node["goldBorder_3"]!.GetValue<int>());
+//                    goldBorders.Add(node["goldBorder_1"]!.AsInteger());
+//                    goldBorders.Add(node["goldBorder_2"]!.AsInteger());
+//                    goldBorders.Add(node["goldBorder_3"]!.AsInteger());
 //                }
 //            }
 
@@ -182,8 +182,8 @@
 //            songs = new List<DaniSong>();
 //            borders = new List<DaniBorder>();
 
-//            danId = node["danId"]!.GetValue<int>();
-//            title = node["title"]!.GetValue<string>();
+//            danId = node["danId"]!.AsInteger();
+//            title = node["title"]!.AsString();
 //            AssignCourse(title);
 
 //            // Check to see if "locked" is in the json for this course
@@ -202,13 +202,13 @@
 //            }
 //            else
 //            {
-//                locked = node["locked"]!.GetValue<bool>();
+//                locked = node["locked"]!.AsBoolean();
 //            }
 
 //            string danBg = "default";
 //            if (node["danBg"] != null)
 //            {
-//                danBg = node["danBg"]!.GetValue<string>();
+//                danBg = node["danBg"]!.AsString();
 //            }
 //            AssignCourseBg(danBg);
 
@@ -495,25 +495,25 @@
 
 //            songResults = new List<SongResult>();
 //            hash = node!["danHash"].GetValue<uint>();
-//            danResult = (DanResult)node!["danResult"].GetValue<int>();
-//            comboResult = (DanComboResult)node!["danComboResult"].GetValue<int>();
-//            playCount = node!["playCount"].GetValue<int>();
-//            songReached = node!["songReached"].GetValue<int>();
-//            // = courses[k]!["totalSoulGauge"].GetValue<int>(),
-//            combo = node!["totalCombo"].GetValue<int>();
-//            soulGauge = node!["totalSoulGauge"].GetValue<int>();
+//            danResult = (DanResult)node!["danResult"].AsInteger();
+//            comboResult = (DanComboResult)node!["danComboResult"].AsInteger();
+//            playCount = node!["playCount"].AsInteger();
+//            songReached = node!["songReached"].AsInteger();
+//            // = courses[k]!["totalSoulGauge"].AsInteger(),
+//            combo = node!["totalCombo"].AsInteger();
+//            soulGauge = node!["totalSoulGauge"].AsInteger();
 
 //            songResults = new List<SongResult>();
 //            for (int i = 0; i < node!["songScores"].AsArray().Count; i++)
 //            {
 //                SongResult songResult = new SongResult()
 //                {
-//                    score = node!["songScores"].AsArray()[i]["score"].GetValue<int>(),
-//                    goods = node!["songScores"].AsArray()[i]["goods"].GetValue<int>(),
-//                    oks = node!["songScores"].AsArray()[i]["oks"].GetValue<int>(),
-//                    bads = node!["songScores"].AsArray()[i]["bads"].GetValue<int>(),
-//                    songCombo = node!["songScores"].AsArray()[i]["combo"].GetValue<int>(),
-//                    renda = node!["songScores"].AsArray()[i]["drumroll"].GetValue<int>(),
+//                    score = node!["songScores"].AsArray()[i]["score"].AsInteger(),
+//                    goods = node!["songScores"].AsArray()[i]["goods"].AsInteger(),
+//                    oks = node!["songScores"].AsArray()[i]["oks"].AsInteger(),
+//                    bads = node!["songScores"].AsArray()[i]["bads"].AsInteger(),
+//                    songCombo = node!["songScores"].AsArray()[i]["combo"].AsInteger(),
+//                    renda = node!["songScores"].AsArray()[i]["drumroll"].AsInteger(),
 //                };
 //                songResults.Add(songResult);
 //            }

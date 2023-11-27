@@ -21,7 +21,6 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool LoadingScript_SetLoadingCanvasIn_Prefix(LoadingScript __instance)
         {
-            Plugin.LogInfo("In");
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
                 __instance.isDisplaying = true;
@@ -64,7 +63,6 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool LoadingScript_SetLoadingCanvasOut_Prefix(LoadingScript __instance)
         {
-            Plugin.LogInfo("Out");
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
                 __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, delegate (bool result)
@@ -86,7 +84,6 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool LoadingScript_setLoadingCanvasOut_Prefix(LoadingScript __instance, LoadingScript.BoolDelegate callback)
         {
-            Plugin.LogInfo("out");
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
                 __instance.setAlphaCanvasGroup(false, false, false);

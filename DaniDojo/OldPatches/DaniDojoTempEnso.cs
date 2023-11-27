@@ -427,24 +427,29 @@ namespace DaniDojo.Patches
 
                 Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Parent set");
 
-                var daniDojoCanvas = DaniDojoParent.AddComponent<Canvas>();
+                AssetUtility.AddCanvasComponent(DaniDojoParent);
+
+                var daniDojoCanvas = DaniDojoParent.GetComponent<Canvas>();
                 var baseCanvas = CanvasBg.GetComponent<Canvas>();
                 daniDojoCanvas.renderMode = baseCanvas.renderMode;
                 daniDojoCanvas.worldCamera = baseCanvas.worldCamera;
-                daniDojoCanvas.sortingLayerName = "EnsoBG";
-                daniDojoCanvas.sortingOrder = 50;
-                daniDojoCanvas.overrideSorting = true;
 
-                Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas set");
+                daniDojoCanvas.planeDistance = 1000;
 
-                var daniDojoCanvasScaler = DaniDojoParent.AddComponent<CanvasScaler>();
-                var baseCanvasScaler = CanvasBg.GetComponent<CanvasScaler>();
-                daniDojoCanvasScaler.uiScaleMode = baseCanvasScaler.uiScaleMode;
-                daniDojoCanvasScaler.referenceResolution = baseCanvasScaler.referenceResolution;
-                daniDojoCanvasScaler.screenMatchMode = baseCanvasScaler.screenMatchMode;
-                daniDojoCanvasScaler.matchWidthOrHeight = baseCanvasScaler.matchWidthOrHeight;
+                //daniDojoCanvas.sortingLayerName = "EnsoBG";
+                //daniDojoCanvas.sortingOrder = 50;
+                //daniDojoCanvas.overrideSorting = true;
 
-                Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas Scaler set");
+                //Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas set");
+
+                //var daniDojoCanvasScaler = DaniDojoParent.AddComponent<CanvasScaler>();
+                //var baseCanvasScaler = CanvasBg.GetComponent<CanvasScaler>();
+                //daniDojoCanvasScaler.uiScaleMode = baseCanvasScaler.uiScaleMode;
+                //daniDojoCanvasScaler.referenceResolution = baseCanvasScaler.referenceResolution;
+                //daniDojoCanvasScaler.screenMatchMode = baseCanvasScaler.screenMatchMode;
+                //daniDojoCanvasScaler.matchWidthOrHeight = baseCanvasScaler.matchWidthOrHeight;
+
+                //Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas Scaler set");
 
 
                 DaniDojoAssetUtility.ChangeSprite("hideLeft", Path.Combine(baseImageFilePath, "Enso", "lane_left_3.png"));

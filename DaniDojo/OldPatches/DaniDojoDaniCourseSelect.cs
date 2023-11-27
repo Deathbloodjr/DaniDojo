@@ -35,9 +35,11 @@ namespace DaniDojo.Patches
             //public DonCommon donCommon;
             //public PlayerName playerName;
 
+            private GameObject BackgroundParent;
             private GameObject TopCourseParent;
             private GameObject CenterCourseParent;
             private GameObject LeftCourseParent;
+            private GameObject DonChanParent;
 
             bool isLoaded = false;
 
@@ -66,10 +68,11 @@ namespace DaniDojo.Patches
                 }
 
 
-                TopCourseParent = new GameObject("TopCourseParent");
-                CenterCourseParent = new GameObject("CourseParent");
-                LeftCourseParent = new GameObject("LeftCourseParent");
-
+                BackgroundParent = AssetUtility.CreateEmptyObject(this.gameObject, "BackgroundParent", Vector2.zero);
+                TopCourseParent = AssetUtility.CreateEmptyObject(this.gameObject, "TopCourseParent", Vector2.zero);
+                CenterCourseParent = AssetUtility.CreateEmptyObject(this.gameObject, "CourseParent", Vector2.zero);
+                LeftCourseParent = AssetUtility.CreateEmptyObject(this.gameObject, "LeftCourseParent", Vector2.zero);
+                DonChanParent = AssetUtility.CreateEmptyObject(this.gameObject, "DonChanParent", AssetUtility.GetPositionFrom1080p(new Vector2(-32, 27)));
                 StartCoroutine(InitializeScene());
 
                 // This doesn't work how I planned
@@ -107,22 +110,28 @@ namespace DaniDojo.Patches
                 // I also can't place Don-chan as a child of that parent, as it moves left and right
 
                 // Basic scene assets
-                DaniDojoAssets.SelectAssets.InitializeSceneAssets(this.gameObject);
+                DaniDojoAssets.SelectAssets.InitializeSceneAssets(this.gameObject, BackgroundParent);
 
                 // Parent Initialization
-                TopCourseParent.transform.SetParent(this.transform);
-                CenterCourseParent.transform.SetParent(this.transform);
-                LeftCourseParent.transform.SetParent(this.transform);
+                //TopCourseParent.transform.SetParent(this.transform);
+                //CenterCourseParent.transform.SetParent(this.transform);
+                //LeftCourseParent.transform.SetParent(this.transform);
 
                 // Don Initialization
                 donCommon = GameObject.Instantiate(DaniDojoSongSelect.donCommonObject);
                 playerName = GameObject.Instantiate(DaniDojoSongSelect.playerNameObject);
 
-                donCommon.transform.SetParent(this.transform);
-                playerName.transform.SetParent(this.transform);
+                donCommon.transform.SetParent(DonChanParent.transform);
+                playerName.transform.SetParent(DonChanParent.transform);
 
-                donCommon.transform.position = new Vector3(260, 340, 0);
-                playerName.transform.position = new Vector3(260, 140, 0);
+                AssetUtility.SetRect(donCommon, new Vector3(0, 0, 0));
+                AssetUtility.SetRect(playerName, new Vector3(86, 43, 0));
+
+                donCommon.transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
+
+
+                //donCommon.transform.position = AssetUtility.GetPositionFrom1080p(new Vector3(260, 340, 0));
+                //playerName.transform.position = AssetUtility.GetPositionFrom1080p(new Vector3(260, 140, 0));
 
                 // Scene data
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
@@ -212,8 +221,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Left);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(-1920, 0, 0), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(-1920, 0, 0)), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -227,8 +236,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Right);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(1920, 0, 0), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(1920, 0, 0)), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -260,8 +269,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Up);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, 1080, 0), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, 1080, 0)), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 
@@ -293,8 +302,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Down);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + new Vector3(0, -1080, 0), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, new Vector2(342, 26), courseMoveTime));
+                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, -1080, 0)), courseMoveTime, true));
+                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 
@@ -303,8 +312,7 @@ namespace DaniDojo.Patches
                 GameObject currentCourse = GameObject.Find(course.Title);
                 if (currentCourse != null)
                 {
-                    var curPosition = currentCourse.transform.position;
-                    curPosition.y -= 40;
+                    var curPosition = currentCourse.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, -40, 0));
                     currentCourse.transform.position = curPosition;
                 }
             }
@@ -315,7 +323,8 @@ namespace DaniDojo.Patches
                 if (currentCourse != null)
                 {
                     var curPosition = currentCourse.transform.position;
-                    curPosition.y = 884;
+                    var newY = AssetUtility.GetPositionFrom1080p(new Vector3(currentCourse.transform.position.x, 884, currentCourse.transform.position.z)).y;
+                    curPosition.y = newY;
                     currentCourse.transform.position = curPosition;
                 }
             }
@@ -324,8 +333,6 @@ namespace DaniDojo.Patches
 
         static public void ChangeSceneDaniDojo(GameObject don = null, GameObject playerName = null)
         {
-
-
             if (Plugin.Assets != null)
             {
                 if (don != null)
@@ -363,6 +370,7 @@ namespace DaniDojo.Patches
                 yield return null;
             }
             var CourseSelectManager = new GameObject("CourseSelectManager");
+            CourseSelectManager.transform.position = Vector3.zero;
             CourseSelectManager.AddComponent<DaniDojoDaniCourseSelect.DaniDojoSelectManager>();
         }
 

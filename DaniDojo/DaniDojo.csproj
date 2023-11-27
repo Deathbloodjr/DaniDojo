@@ -51,7 +51,6 @@
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="Taiko.GameLibs" Version="1.2.2-r.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.34" IncludeAssets="compile" />
-    <PackageReference Include="System.Text.Json" Version="8.0.0-preview.3.23174.8" />
     <Reference Include="$(GameDir)\Taiko no Tatsujin_Data\Managed\Unity.TextMeshPro.dll" Private="false" />
   </ItemGroup>
 

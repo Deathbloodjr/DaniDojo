@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using DaniDojo.Data;
+using LightWeightJsonParser;
 
 namespace DaniDojo.Managers
 {
@@ -35,18 +34,18 @@ namespace DaniDojo.Managers
             // This is assuming there won't be a new save and old save
             if (File.Exists(Path.Combine(folderLocation, SaveFileName)))
             {
-                var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, SaveFileName)));
+                var node = LWJson.Parse(File.ReadAllText(Path.Combine(folderLocation, SaveFileName)));
                 data = LoadSaveFile(node);
             }
             else if (File.Exists(Path.Combine(folderLocation, TmpSaveFileName)))
             {
-                var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, TmpSaveFileName)));
+                var node = LWJson.Parse(File.ReadAllText(Path.Combine(folderLocation, TmpSaveFileName)));
                 data = LoadSaveFile(node);
                 SaveDaniSaveData(data);
             }
             else if (File.Exists(Path.Combine(folderLocation, OldSaveFileName)))
             {
-                var node = JsonNode.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
+                var node = LWJson.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
                 data = LoadOldSaveFile(node);
                 SaveDaniSaveData(data);
                 return LoadSaveData(folderLocation);
@@ -56,7 +55,7 @@ namespace DaniDojo.Managers
             return data;
         }
 
-        static DaniSaveData LoadSaveFile(JsonNode node)
+        static DaniSaveData LoadSaveFile(LWJson node)
         {
             DaniSaveData data = new DaniSaveData();
             data.Courses = new List<SaveCourse>();
@@ -70,11 +69,11 @@ namespace DaniDojo.Managers
             return data;
         }
 
-        static SaveCourse LoadCourseObject(JsonNode node)
+        static SaveCourse LoadCourseObject(LWJson node)
         {
             SaveCourse course = new SaveCourse();
 
-            course.Hash = node["Hash"].GetValue<uint>();
+            course.Hash = (uint)node["Hash"].AsDouble();
 
             var playDataObject = node["PlayData"].AsArray();
             for (int i = 0; i < playDataObject.Count; i++)
@@ -91,20 +90,20 @@ namespace DaniDojo.Managers
             return course;
         }
 
-        static PlayData LoadPlayDataObject(JsonNode node)
+        static PlayData LoadPlayDataObject(LWJson node)
         {
             PlayData playData = new PlayData();
 
-            playData.PlayDateTime = node["DateTime"].GetValue<DateTime>();
+            playData.PlayDateTime = DateTime.Parse(node["DateTime"].AsString());
             var modifiers = node["Modifiers"];
             playData.Modifiers = new PlayModifiers(
-                (DataConst.SpeedTypes)modifiers["Speed"].GetValue<int>(),
-                (DataConst.OptionOnOff)modifiers["Vanish"].GetValue<int>(),
-                (DataConst.OptionOnOff)modifiers["Inverse"].GetValue<int>(),
-                (DataConst.RandomLevel)modifiers["Random"].GetValue<int>(),
-                (DataConst.SpecialTypes)modifiers["Special"].GetValue<int>());
-            playData.MaxCombo = node["MaxCombo"].GetValue<int>();
-            playData.SoulGauge = node["SoulGauge"].GetValue<int>();
+                (DataConst.SpeedTypes)modifiers["Speed"].AsInteger(),
+                (DataConst.OptionOnOff)modifiers["Vanish"].AsInteger(),
+                (DataConst.OptionOnOff)modifiers["Inverse"].AsInteger(),
+                (DataConst.RandomLevel)modifiers["Random"].AsInteger(),
+                (DataConst.SpecialTypes)modifiers["Special"].AsInteger());
+            playData.MaxCombo = node["MaxCombo"].AsInteger();
+            playData.SoulGauge = node["SoulGauge"].AsInteger();
 
             var songDataObject = node["Songs"].AsArray();
             for (int i = 0; i < songDataObject.Count; i++)
@@ -129,21 +128,21 @@ namespace DaniDojo.Managers
             return playData;
         }
 
-        static SongPlayData LoadSongDataObject(JsonNode node)
+        static SongPlayData LoadSongDataObject(LWJson node)
         {
             SongPlayData songPlayData = new SongPlayData();
 
-            songPlayData.Score = node["Score"].GetValue<int>();
-            songPlayData.Goods = node["Goods"].GetValue<int>();
-            songPlayData.Oks = node["Oks"].GetValue<int>();
-            songPlayData.Bads = node["Bads"].GetValue<int>();
-            songPlayData.Drumroll = node["Drumroll"].GetValue<int>();
-            songPlayData.Combo = node["Combo"].GetValue<int>();
+            songPlayData.Score = node["Score"].AsInteger();
+            songPlayData.Goods = node["Goods"].AsInteger();
+            songPlayData.Oks = node["Oks"].AsInteger();
+            songPlayData.Bads = node["Bads"].AsInteger();
+            songPlayData.Drumroll = node["Drumroll"].AsInteger();
+            songPlayData.Combo = node["Combo"].AsInteger();
 
             return songPlayData;
         }
 
-        static DaniSaveData LoadOldSaveFile(JsonNode node)
+        static DaniSaveData LoadOldSaveFile(LWJson node)
         {
             DaniSaveData data = new DaniSaveData();
 
@@ -158,15 +157,15 @@ namespace DaniDojo.Managers
             return data;
         }
 
-        static SaveCourse LoadOldCourseObject(JsonNode node)
+        static SaveCourse LoadOldCourseObject(LWJson node)
         {
             SaveCourse course = new SaveCourse();
 
-            course.Hash = node["danHash"].GetValue<uint>();
+            course.Hash = (uint)node["danHash"].AsDouble();
 
             PlayData play = new PlayData();
-            play.SoulGauge = node["totalSoulGauge"].GetValue<int>();
-            play.MaxCombo = node["totalCombo"].GetValue<int>();
+            play.SoulGauge = node["totalSoulGauge"].AsInteger();
+            play.MaxCombo = node["totalCombo"].AsInteger();
 
             var songsObject = node["songScores"].AsArray();
             for (int i = 0; i < songsObject.Count; i++)
@@ -183,16 +182,16 @@ namespace DaniDojo.Managers
             return course;
         }
 
-        static SongPlayData LoadOldSongObject(JsonNode node)
+        static SongPlayData LoadOldSongObject(LWJson node)
         {
             SongPlayData songPlayData = new SongPlayData();
 
-            songPlayData.Score = node["score"].GetValue<int>();
-            songPlayData.Goods = node["goods"].GetValue<int>();
-            songPlayData.Oks = node["oks"].GetValue<int>();
-            songPlayData.Bads = node["bads"].GetValue<int>();
-            songPlayData.Drumroll = node["drumroll"].GetValue<int>();
-            songPlayData.Combo = node["combo"].GetValue<int>();
+            songPlayData.Score = node["score"].AsInteger();
+            songPlayData.Goods = node["goods"].AsInteger();
+            songPlayData.Oks = node["oks"].AsInteger();
+            songPlayData.Bads = node["bads"].AsInteger();
+            songPlayData.Drumroll = node["drumroll"].AsInteger();
+            songPlayData.Combo = node["combo"].AsInteger();
 
             return songPlayData;
         }
@@ -210,9 +209,9 @@ namespace DaniDojo.Managers
         static void SaveDaniSaveData(DaniSaveData saveData)
         {
             Plugin.LogInfo("Saving Dani Data", 1);
-            var saveJsonObject = new JsonObject()
+            var saveJsonObject = new LWJsonObject()
             {
-                ["Courses"] = new JsonArray(),
+                ["Courses"] = new LWJsonArray(),
             };
 
             for (int i = 0; i < saveData.Courses.Count; i++)
@@ -229,14 +228,15 @@ namespace DaniDojo.Managers
 
             // Write the json file to the tmp file path
             var tmpFilePath = Path.Combine(folderLocation, TmpSaveFileName);
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            options.WriteIndented = false; // To save space hopefully
-            var jsonString = saveJsonObject.ToJsonString(options);
+            //JsonSerializerOptions options = new JsonSerializerOptions();
+            //options.WriteIndented = false; // To save space hopefully
+            //var jsonString = saveJsonObject.ToJsonString(options);
+            var jsonString = saveJsonObject.ToString();
             File.WriteAllText(tmpFilePath, jsonString);
 
             // Attempt to read the tmp file path
             var writtenText = File.ReadAllText(tmpFilePath);
-            var loadedFile = LoadSaveFile(JsonNode.Parse(writtenText));
+            var loadedFile = LoadSaveFile(LWJson.Parse(writtenText));
             if (loadedFile != null)
             {
                 // I hope this overwrites the current SaveFile
@@ -248,13 +248,11 @@ namespace DaniDojo.Managers
             Plugin.LogInfo("Saving Dani Data Complete", 1);
         }
 
-        static JsonObject SaveCourseObject(SaveCourse course)
+        static LWJsonObject SaveCourseObject(SaveCourse course)
         {
-            var courseJsonObject = new JsonObject()
-            {
-                ["Hash"] = course.Hash,
-                ["PlayData"] = new JsonArray(),
-            };
+            var courseJsonObject = new LWJsonObject()
+                .Add("Hash", course.Hash)
+                .Add("PlayData", new LWJsonArray());
 
             for (int i = 0; i < course.PlayData.Count; i++)
             {
@@ -265,24 +263,20 @@ namespace DaniDojo.Managers
             return courseJsonObject;
         }
 
-        static JsonObject SavePlayDataObject(PlayData playData)
+        static LWJsonObject SavePlayDataObject(PlayData playData)
         {
-            var playDataJsonObject = new JsonObject()
-            {
-                ["DateTime"] = playData.PlayDateTime.ToString("s"),
-                ["Modifiers"] = new JsonObject()
-                {
-                    ["Speed"] = (int)playData.Modifiers.Speed,
-                    ["Vanish"] = (int)playData.Modifiers.Vanish,
-                    ["Inverse"] = (int)playData.Modifiers.Inverse,
-                    ["Random"] = (int)playData.Modifiers.Random,
-                    ["Special"] = (int)playData.Modifiers.Special,
-                },
-                ["MaxCombo"] = playData.MaxCombo,
-                ["SoulGauge"] = playData.SoulGauge,
-                ["Songs"] = new JsonArray(),
-            };
-
+            var playDataJsonObject = new LWJsonObject()
+                .Add("DateTime", playData.PlayDateTime.ToString("s"))
+                .Add("DateTime", new LWJsonObject()
+                    .Add("Speed", (int)playData.Modifiers.Speed)
+                    .Add("Vanish", (int)playData.Modifiers.Vanish)
+                    .Add("Inverse", (int)playData.Modifiers.Inverse)
+                    .Add("Random", (int)playData.Modifiers.Random)
+                    .Add("Special", (int)playData.Modifiers.Special))
+                .Add("MaxCombo", playData.MaxCombo)
+                .Add("SoulGauge", playData.SoulGauge)
+                .Add("Songs", new LWJsonArray());
+          
             for (int i = 0; i < playData.SongPlayData.Count; i++)
             {
                 var songDataObject = SaveSongDataObject(playData.SongPlayData[i]);
@@ -291,17 +285,15 @@ namespace DaniDojo.Managers
             return playDataJsonObject;
         }
 
-        static JsonObject SaveSongDataObject(SongPlayData song)
+        static LWJsonObject SaveSongDataObject(SongPlayData song)
         {
-            var songJsonObject = new JsonObject()
-            {
-                ["Score"] = song.Score,
-                ["Goods"] = song.Goods,
-                ["Oks"] = song.Oks,
-                ["Bads"] = song.Bads,
-                ["Drumroll"] = song.Drumroll,
-                ["Combo"] = song.Combo,
-            };
+            var songJsonObject = new LWJsonObject()
+                .Add("Score", song.Score)
+                .Add("Goods", song.Goods)
+                .Add("Oks", song.Oks)
+                .Add("Bads", song.Bads)
+                .Add("Drumroll", song.Drumroll)
+                .Add("Combo", song.Combo);
             return songJsonObject;
         }
 
