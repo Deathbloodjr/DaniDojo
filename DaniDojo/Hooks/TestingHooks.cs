@@ -15,11 +15,11 @@ namespace DaniDojo.Hooks
         //[HarmonyPrefix]
         //public static bool EnsoGameManager_ProcToResult_Prefix(EnsoGameManager __instance)
         //{
-        //    Plugin.LogInfo("ProcToResult", 1);
+        //    Plugin.LogInfo(LogType.Info, "ProcToResult", 1);
 
         //    if (__instance.graphicManager.IsEnsoFadeBlackEnd())
         //    {
-        //        Plugin.LogInfo("IsEnsoFadeBlackEnd() == true", 1);
+        //        Plugin.LogInfo(LogType.Info, "IsEnsoFadeBlackEnd() == true", 1);
         //    }
 
         //    return true;
@@ -32,27 +32,32 @@ namespace DaniDojo.Hooks
         //public static bool EnsoGameManager_ProcResult_Prefix(EnsoGameManager __instance)
         //{
 
-        //    Plugin.LogInfo("ProcResult", 1);
+        //    Plugin.LogInfo(LogType.Info, "ProcResult", 1);
 
-        //    Plugin.LogInfo("this.ensoParam.IsResultEnd: " + __instance.ensoParam.IsResultEnd);
-
-        //    return true;
-        //}
-
-        //[HarmonyPatch(typeof(EnsoGameManager))]
-        //[HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
-        //[HarmonyPatch(MethodType.Normal)]
-        //[HarmonyPrefix]
-        //public static bool EnsoGameManager_ProcExecMain_Prefix(EnsoGameManager __instance)
-        //{
-        //    Plugin.LogInfo("__instance.ensoParam.TotalTime: " + __instance.ensoParam.TotalTime + "\n" +
-        //                   "__instance.totalTime: " + __instance.totalTime + "\n" +
-        //                   "__instance.ensoSound.GetSongPosition(): " + __instance.ensoSound.GetSongPosition() + "\n" +
-        //                   "__instance.adjustCounter: " + __instance.adjustCounter + "\n" +
-        //                   "__instance.adjustSubTime: " + __instance.adjustSubTime + "\n" +
-        //                   "__instance.adjustTime: " + __instance.adjustTime + "\n", 1);
+        //    Plugin.LogInfo(LogType.Info, "this.ensoParam.IsResultEnd: " + __instance.ensoParam.IsResultEnd);
 
         //    return true;
         //}
+
+        [HarmonyPatch(typeof(EnsoGameManager))]
+        [HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPrefix]
+        public static bool EnsoGameManager_ProcExecMain_Prefix(EnsoGameManager __instance)
+        {
+            List<string> data = new List<string>()
+            {
+                "__instance.ensoParam.TotalTime: " + __instance.ensoParam.TotalTime,
+                "__instance.totalTime: " + __instance.totalTime,
+                "__instance.ensoSound.GetSongPosition(): " + __instance.ensoSound.GetSongPosition(),
+                "__instance.adjustCounter: " + __instance.adjustCounter,
+                "__instance.adjustSubTime: " + __instance.adjustSubTime,
+                "__instance.adjustTime: " + __instance.adjustTime,
+            };
+
+            //Plugin.LogInfo(LogType.Info, data, 1);
+
+            return true;
+        }
     }
 }

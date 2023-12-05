@@ -19,6 +19,16 @@ using BepInEx.Unity.IL2CPP;
 
 namespace DaniDojo
 {
+    public enum LogType
+    {
+        Info,
+        Warning,
+        Error,
+        Fatal,
+        Message,
+        Debug
+    }
+
     [BepInPlugin(PluginInfo.PLUGIN_GUID, "Dani Dojo", PluginInfo.PLUGIN_VERSION)]
 #if TAIKO_MONO
     public class Plugin : BaseUnityPlugin
@@ -75,9 +85,7 @@ namespace DaniDojo
 
         private void SetupConfig()
         {
-            // I never really used this
-            // I'd rather just use a folder in BepInEx's folder for storing information
-            var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string dataFolder = Path.Combine("BepInEx", "data", "DaniDojo");
 
             ConfigEnabled = Config.Bind("General",
                 "Enabled",
@@ -86,17 +94,17 @@ namespace DaniDojo
 
             ConfigDaniDojoDataLocation = Config.Bind("Data",
                 "DaniDojoDataLocation",
-                "BepInEx\\data\\DaniDojoCourses",
+                Path.Combine(dataFolder, "Courses"),
                 "The file location for all dani dojo course data.");
 
             ConfigDaniDojoAssetLocation = Config.Bind("Data",
                 "DaniDojoAssetLocation",
-                "BepInEx\\data\\DaniDojoAssets",
+                Path.Combine(dataFolder, "Assets"),
                 "The file location for all dani dojo asset data.");
 
             ConfigDaniDojoSaveLocation = Config.Bind("Data",
                 "DaniDojoSaveLocation",
-                "BepInEx\\data\\DaniDojoSaves",
+                Path.Combine(dataFolder, "Save"),
                 "The file location for dani dojo save data.");
 
             ConfigSongTitleLanguage = Config.Bind("General",
@@ -191,44 +199,91 @@ namespace DaniDojo
 #endif
         }
 
-        public void LogInfoInstance(string value, int detailLevel = 0)
+        //public void LogInfoInstance(string value, int detailLevel = 0)
+        //{
+        //    // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
+        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+        //    {
+        //        Log.LogInfo("[" + detailLevel + "] " + value);
+        //    }
+        //}
+        //public static void LogInfo(string value, int detailLevel = 0)
+        //{
+        //    Instance.LogInfoInstance(value, detailLevel);
+        //}
+
+        public void LogInfoInstance(LogType type, string value, int detailLevel = 0)
         {
             // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
             if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
             {
-                Log.LogInfo("[" + detailLevel + "] " + value);
+                switch (type)
+                {
+                    case LogType.Info:
+                        Log.LogInfo("[" + detailLevel + "] " + value);
+                        break;
+                    case LogType.Warning:
+                        Log.LogWarning("[" + detailLevel + "] " + value);
+                        break;
+                    case LogType.Error:
+                        Log.LogError("[" + detailLevel + "] " + value);
+                        break;
+                    case LogType.Fatal:
+                        Log.LogFatal("[" + detailLevel + "] " + value);
+                        break;
+                    case LogType.Message:
+                        Log.LogMessage("[" + detailLevel + "] " + value);
+                        break;
+                    case LogType.Debug:
+                        Log.LogDebug("[" + detailLevel + "] " + value);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        public static void LogInfo(string value, int detailLevel = 0)
+        public static void LogInfo(LogType type, string value, int detailLevel = 0)
         {
-            Instance.LogInfoInstance(value, detailLevel);
+            Instance.LogInfoInstance(type, value, detailLevel);
         }
-
-
-        public void LogWarningInstance(string value, int detailLevel = 0)
+        public static void LogInfo(LogType type, List<string> value, int detailLevel = 0)
         {
-            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+            if (value.Count == 0)
             {
-                Log.LogWarning("[" + detailLevel + "] " + value);
+                return;
             }
-        }
-        public static void LogWarning(string value, int detailLevel = 0)
-        {
-            Instance.LogWarningInstance(value, detailLevel);
-        }
-
-
-        public void LogErrorInstance(string value, int detailLevel = 0)
-        {
-            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+            string sendValue = value[0];
+            for (int i = 1; i < value.Count; i++)
             {
-                Log.LogError("[" + detailLevel + "] " + value);
+                sendValue += "\n" + value[i];
             }
+            Instance.LogInfoInstance(type, sendValue, detailLevel);
         }
-        public static void LogError(string value, int detailLevel = 0)
-        {
-            Instance.LogErrorInstance(value, detailLevel);
-        }
+
+        //public void LogWarningInstance(string value, int detailLevel = 0)
+        //{
+        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+        //    {
+        //        Log.LogWarning("[" + detailLevel + "] " + value);
+        //    }
+        //}
+        //public static void LogWarning(string value, int detailLevel = 0)
+        //{
+        //    Instance.LogWarningInstance(value, detailLevel);
+        //}
+
+
+        //public void LogErrorInstance(string value, int detailLevel = 0)
+        //{
+        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
+        //    {
+        //        Log.LogError("[" + detailLevel + "] " + value);
+        //    }
+        //}
+        //public static void LogError(string value, int detailLevel = 0)
+        //{
+        //    Instance.LogErrorInstance(value, detailLevel);
+        //}
 
     }
 }

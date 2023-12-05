@@ -32,13 +32,13 @@ namespace DaniDojo.Patches
             {
                 TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
 
-                //Plugin.LogInfo("frameResults.isAllOnpuEnd: " + frameResults.isAllOnpuEnd, 1);
-                //Plugin.LogInfo("frameResults.isPastLastOnpuJustTime: " + frameResults.isPastLastOnpuJustTime, 1);
+                //Plugin.LogInfo(LogType.Info, "frameResults.isAllOnpuEnd: " + frameResults.isAllOnpuEnd, 1);
+                //Plugin.LogInfo(LogType.Info, "frameResults.isPastLastOnpuJustTime: " + frameResults.isPastLastOnpuJustTime, 1);
                 if (__instance.ensoParam.EnsoEndType == EnsoPlayingParameter.EnsoEndTypes.None && frameResults.isPastLastOnpuJustTime)
                 {
-                    //Plugin.LogInfo("frameResults.totalTime: " + frameResults.totalTime, 1);
-                    //Plugin.LogInfo("__instance.songTime: " + __instance.songTime, 1);
-                    //Plugin.LogInfo("frameResults.fumenLength: " + frameResults.fumenLength, 1);
+                    //Plugin.LogInfo(LogType.Info, "frameResults.totalTime: " + frameResults.totalTime, 1);
+                    //Plugin.LogInfo(LogType.Info, "__instance.songTime: " + __instance.songTime, 1);
+                    //Plugin.LogInfo(LogType.Info, "frameResults.fumenLength: " + frameResults.fumenLength, 1);
                     //if (frameResults.totalTime < frameResults.fumenLength || frameResults.totalTime < __instance.songTime)
                     //{
                     //    //Plugin.Log.LogInfo("CheckEnsoEnd: totalTime less than fumen Length and song Time");
@@ -348,7 +348,7 @@ namespace DaniDojo.Patches
 
             Plugin.Instance.StartCoroutine(PauseEnsoSong(pause));
 
-            Plugin.LogInfo("EnsoPause: " + EnsoPause);
+            Plugin.LogInfo(LogType.Info, "EnsoPause: " + EnsoPause);
 
         }
 
@@ -373,7 +373,7 @@ namespace DaniDojo.Patches
 
             if (pause)
             {
-                Plugin.LogInfo("StopSong");
+                Plugin.LogInfo(LogType.Info, "StopSong");
                 ensoGameManager.ensoSound.StopSong();
                 var laneHitEffects = GameObject.FindObjectOfType<LaneHitEffects>();
                 laneHitEffects.Start();
@@ -382,10 +382,15 @@ namespace DaniDojo.Patches
             }
             if (!pause)
             {
-                Plugin.LogInfo("PrepareSong");
+                Plugin.LogInfo(LogType.Info, "PrepareSong");
                 ensoGameManager.ensoSound.StopSong();
                 ensoGameManager.ensoSound.PrepareSong(0);
                 ensoGameManager.ensoSound.PlaySong();
+
+                ensoGameManager.totalTime = 0;
+                ensoGameManager.adjustCounter = 0;
+                ensoGameManager.adjustSubTime = 0.0;
+                ensoGameManager.adjustTime = 0.0;
             }
         }
 
