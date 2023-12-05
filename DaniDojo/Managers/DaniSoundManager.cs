@@ -126,7 +126,7 @@ namespace DaniDojo.Managers
 
         static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
-            //Plugin.LogInfo("PlayProcess: " + cueKey);
+            //Plugin.LogInfo(LogType.Info, "PlayProcess: " + cueKey);
             yield return new WaitWhile(() => player.CheckLoading());
             StopSound(player);
             player.Player.SetVolume(volume);

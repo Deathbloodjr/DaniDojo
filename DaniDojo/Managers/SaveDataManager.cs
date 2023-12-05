@@ -20,10 +20,10 @@ namespace DaniDojo.Managers
         #region Loading
         public static void LoadSaveData()
         {
-            Plugin.LogInfo("LoadSaveData Start", 1);
+            Plugin.LogInfo(LogType.Info, "LoadSaveData Start", 1);
             SaveData = new DaniSaveData(); // I'm not sure if this line is actually needed, or even detrimental
             SaveData = LoadSaveData(Plugin.Instance.ConfigDaniDojoSaveLocation.Value);
-            Plugin.LogInfo("LoadSaveData Finished", 1);
+            Plugin.LogInfo(LogType.Info, "LoadSaveData Finished", 1);
         }
 
         static DaniSaveData LoadSaveData(string folderLocation)
@@ -208,7 +208,7 @@ namespace DaniDojo.Managers
 
         static void SaveDaniSaveData(DaniSaveData saveData)
         {
-            Plugin.LogInfo("Saving Dani Data", 1);
+            Plugin.LogInfo(LogType.Info, "Saving Dani Data", 1);
             var saveJsonObject = new LWJsonObject()
             {
                 ["Courses"] = new LWJsonArray(),
@@ -245,7 +245,7 @@ namespace DaniDojo.Managers
                 File.Move(Path.Combine(folderLocation, TmpSaveFileName), Path.Combine(folderLocation, SaveFileName));
             }
 
-            Plugin.LogInfo("Saving Dani Data Complete", 1);
+            Plugin.LogInfo(LogType.Info, "Saving Dani Data Complete", 1);
         }
 
         static LWJsonObject SaveCourseObject(SaveCourse course)
@@ -267,7 +267,7 @@ namespace DaniDojo.Managers
         {
             var playDataJsonObject = new LWJsonObject()
                 .Add("DateTime", playData.PlayDateTime.ToString("s"))
-                .Add("DateTime", new LWJsonObject()
+                .Add("Modifiers", new LWJsonObject()
                     .Add("Speed", (int)playData.Modifiers.Speed)
                     .Add("Vanish", (int)playData.Modifiers.Vanish)
                     .Add("Inverse", (int)playData.Modifiers.Inverse)
@@ -301,7 +301,7 @@ namespace DaniDojo.Managers
 
         static public void AddPlayData(uint hash, PlayData play)
         {
-            Plugin.LogInfo("AddPlayData", 1);
+            Plugin.LogInfo(LogType.Info, "AddPlayData", 1);
             for (int i = 0; i < SaveData.Courses.Count; i++)
             {
                 if (SaveData.Courses[i].Hash == hash)
@@ -340,7 +340,7 @@ namespace DaniDojo.Managers
         /// <returns>The next highest course.</returns>
         static public DaniCourse GetDefaultCourse(DaniSeries series)
         {
-            Plugin.LogInfo("GetDefaultCourse Start", 2);
+            Plugin.LogInfo(LogType.Info, "GetDefaultCourse Start", 2);
             // First find the first dan, which is generally the starting point
             // Then move up from there to find the highest cleared dan
             int highestClearedIndex = 0;
@@ -353,7 +353,7 @@ namespace DaniDojo.Managers
                 }
             }
 
-            Plugin.LogInfo("GetDefaultCourse Middle", 2);
+            Plugin.LogInfo(LogType.Info, "GetDefaultCourse Middle", 2);
 
             for (int i = highestClearedIndex; i < series.Courses.Count - 1; i++)
             {
@@ -364,7 +364,7 @@ namespace DaniDojo.Managers
                 }
             }
 
-            Plugin.LogInfo("GetDefaultCourse End", 2);
+            Plugin.LogInfo(LogType.Info, "GetDefaultCourse End", 2);
             return series.Courses[highestClearedIndex];
         }
 

@@ -440,29 +440,29 @@ namespace DaniDojo.Patches
 
             public static void UpdateRequirementBar(BorderType borderType)
             {
-                Plugin.LogInfo("UpdateRequirementBar Start", 2);
+                Plugin.LogInfo(LogType.Info, "UpdateRequirementBar Start", 2);
                 var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
                 var borders = DaniPlayManager.GetCurrentBorderOfType(borderType);
 
                 for (int j = 0; j < indexes.Count; j++)
                 {
-                    Plugin.LogInfo("UpdateRequirementBar: Index: " + j, 2);
+                    Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: Index: " + j, 2);
                     GameObject panel = GameObject.Find("Panel" + indexes[j]);
                     if (panel != null)
                     {
-                        Plugin.LogInfo("UpdateRequirementBar: 1", 2);
+                        Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 1", 2);
                         //var bar = panel.transform.Find("CurReqBarFill");
                         var bar = AssetUtility.GetChildByName(panel, "CurReqBarFill");
                         var emptyBar = AssetUtility.GetChildByName(panel, "CurReqBarEmpty");
                         if (bar != null && emptyBar != null)
                         {
-                            Plugin.LogInfo("UpdateRequirementBar: 2", 2);
+                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 2", 2);
                             var image = bar.GetOrAddComponent<Image>();
                             var emptyImage = emptyBar.GetOrAddComponent<Image>();
                             var colorLerp = bar.GetOrAddComponent<ColorLerp>();
                             BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber());
 
-                            Plugin.LogInfo("UpdateRequirementBar: 3", 2);
+                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 3", 2);
 
                             bool isGold = data.State == BorderBarState.Rainbow;
 
@@ -479,7 +479,7 @@ namespace DaniDojo.Patches
                                 colorLerp.UpdateState(data, borders[j].IsTotal);
                             }
 
-                            Plugin.LogInfo("UpdateRequirementBar: 4", 2);
+                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 4", 2);
 
                             ChangeReqCurrentValue(panel, data.PlayValue, isGold);
 
@@ -488,7 +488,7 @@ namespace DaniDojo.Patches
                             // Probably don't need this clamp anymore, but it shouldn't hurt to have it.
                             newScale.x = Math.Max(newScale.x, 0);
                             newScale.x = Math.Min(newScale.x, 1);
-                            Plugin.LogInfo("UpdateRequirementBar: 5", 2);
+                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 5", 2);
 
                             // Previously was resizing the filled area
                             // Currently resizing the empty area
@@ -496,7 +496,7 @@ namespace DaniDojo.Patches
                             newScale.x -= 1;
                             emptyImage.transform.localScale = newScale;
                             image.color = data.Color;
-                            Plugin.LogInfo("UpdateRequirementBar: 6", 2);
+                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 6", 2);
                         }
 
                         // Why is this even here?

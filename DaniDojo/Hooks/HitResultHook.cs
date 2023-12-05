@@ -70,7 +70,7 @@ namespace DaniDojo.Hooks
                 EachPlayer eachPlayer = frameResult.GetEachPlayer(0);
                 DaniPlayManager.AddHitResultFromEachPlayer(eachPlayer);
                 return;
-                Plugin.LogInfo("eachPlayer.countFuka: " + eachPlayer.countFuka);
+                Plugin.LogInfo(LogType.Info, "eachPlayer.countFuka: " + eachPlayer.countFuka);
                 for (int i = 0; i < frameResult.hitResultInfoNum - 1; i++)
                 {
                     if (frameResult.hitResultInfo[i].player == 0)

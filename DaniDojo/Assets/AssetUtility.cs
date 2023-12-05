@@ -64,8 +64,8 @@ namespace DaniDojo.Assets
             // otherwise, the file doesn't exist, log an error, and return null (or hopefully a small transparent sprite
             else
             {
-                Plugin.LogError("Could not find file: " + spriteFilePath);
-                Plugin.LogError("Searched for : " + filePath);
+                Plugin.LogInfo(LogType.Error, "Could not find file: " + spriteFilePath);
+                Plugin.LogInfo(LogType.Error, "Searched for : " + filePath);
                 // Instead of null, could I have this return just a 1x1 transparent sprite or something?
 
                 // Creates a transparent 2x2 texture, and returns that as the sprite
