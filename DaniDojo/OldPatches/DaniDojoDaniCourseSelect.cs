@@ -331,18 +331,18 @@ namespace DaniDojo.Patches
 
         }
 
-        static public void ChangeSceneDaniDojo(GameObject don = null, GameObject playerName = null)
+        static public void ChangeSceneDaniDojo()
         {
-            if (Plugin.Assets != null)
+            if (true)
             {
-                if (don != null)
+                if (DaniDojoSongSelect.donCommonObject != null)
                 {
-                    DaniDojoSongSelect.donCommonObject = GameObject.Instantiate(don);
+                    DaniDojoSongSelect.donCommonObject = GameObject.Instantiate(DaniDojoSongSelect.donCommonObject);
                     GameObject.DontDestroyOnLoad(DaniDojoSongSelect.donCommonObject);
                 }
-                if (playerName != null)
+                if (DaniDojoSongSelect.playerNameObject != null)
                 {
-                    DaniDojoSongSelect.playerNameObject = GameObject.Instantiate(playerName);
+                    DaniDojoSongSelect.playerNameObject = GameObject.Instantiate(DaniDojoSongSelect.playerNameObject);
                     GameObject.DontDestroyOnLoad(DaniDojoSongSelect.playerNameObject);
                 }
 

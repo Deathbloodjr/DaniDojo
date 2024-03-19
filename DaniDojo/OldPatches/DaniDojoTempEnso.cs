@@ -323,6 +323,7 @@ namespace DaniDojo.Patches
             CreateAssets = false;
 
             ensoGameManager.taikoCorePlayer.EnsoFinailize();
+            ensoGameManager.ensoSound.Dispose();
 
             fumenLoader.Awake();
             ensoGameManager.Awake();
@@ -334,10 +335,8 @@ namespace DaniDojo.Patches
             ensoGameManager.adjustCounter = 0;
             ensoGameManager.adjustSubTime = 0.0;
             ensoGameManager.adjustTime = 0.0;
-            ensoGameManager.ensoSound.neiroPlayer[0].Load();
 
             Plugin.Instance.StartCoroutine(CloseLaneCovers(false, course.Songs[songIndex].SongId, (EnsoData.SongGenre)musicInfoAccesser.GenreNo));
-
         }
 
         public static bool EnsoPause = false;
@@ -404,7 +403,11 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool EnsoGraphicManager_CreateParts_Prefix(EnsoGraphicManager __instance)
         {
-            return CreateAssets;
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                return CreateAssets;
+            }
+            return true;
         }
 
         static string baseImageFilePath = Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
@@ -658,7 +661,11 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool EnsoDonAnimation_ProcessNormal_Prefix(EnsoDonAnimation __instance)
         {
-            return false;
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(IconCourse))]
@@ -744,7 +751,10 @@ namespace DaniDojo.Patches
         public static void EnsoPauseMenu_OnReturnClicked_Postfix(EnsoPauseMenu __instance)
         {
             // Exit the dan
-            DaniPlayManager.LeaveDanPlay();
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                DaniPlayManager.LeaveDanPlay();
+            }
         }
 
         [HarmonyPatch(typeof(EnsoPauseMenu))]
@@ -754,7 +764,10 @@ namespace DaniDojo.Patches
         public static void EnsoPauseMenu_OnButtonModeClicked_Postfix(EnsoPauseMenu __instance)
         {
             // Exit the dan
-            DaniPlayManager.LeaveDanPlay();
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                DaniPlayManager.LeaveDanPlay();
+            }
         }
 
     }

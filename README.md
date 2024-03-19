@@ -1,4 +1,8 @@
 # DaniDojo
+| Mono | IL2CPP |
+|:--:|:--:|
+|✅|❌|
+
  A mod to allow players to play DaniDojo mode in TDMX.\
 \
 This is a very alpha version of the mod.\
@@ -6,8 +10,8 @@ This is a very alpha version of the mod.\
 There's a decent chance the mod won't work at all without having the proper assets\
 This is something I have some plans for in the future, I will not distribute the assets here\
 
-
-With this mod installed, you can enter the Dani Course selection screen by hitting up in the mode select menu. It will mention it's the dani select course at the bottom right.
+# Requirements
+ - [CustomGameModes](https://github.com/deathbloodjr/CustomGameModes)
 
 
 [A vague roadmap for the mod can be found here](https://docs.google.com/spreadsheets/d/1fuAAfK-0Vw74TwxXF5WVy1fh1ADsVzUkDd7dOHc7EdQ/edit#gid=1112016116)\
