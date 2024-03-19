@@ -67,4 +67,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="com.DB.CustomGameModes">
+      <HintPath>..\..\CustomGameModes\CustomGameModes\bin\Release-Mono\net48\com.DB.CustomGameModes.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

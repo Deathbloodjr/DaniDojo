@@ -127,7 +127,11 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool EnsoGameManager_ProcExecMain_Prefix(EnsoGameManager __instance)
         {
-            return !DaniDojoTempEnso.EnsoPause;
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                return !DaniDojoTempEnso.EnsoPause;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(EnsoSound))]
@@ -136,7 +140,11 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool EnsoSound_PlaySong_Prefix(EnsoGameManager __instance)
         {
-            return !DaniDojoTempEnso.EnsoPause;
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                return !DaniDojoTempEnso.EnsoPause;
+            }
+            return true;
         }
     }
 }

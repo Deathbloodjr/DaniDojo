@@ -59,5 +59,26 @@ namespace DaniDojo.Hooks
 
             return true;
         }
+
+        //[HarmonyPatch(typeof(EnsoSound))]
+        //[HarmonyPatch(nameof(EnsoSound.LoadStart))]
+        //[HarmonyPatch(MethodType.Normal)]
+        //[HarmonyPrefix]
+        //public static bool EnsoSound_LoadStart_Prefix(EnsoSound __instance)
+        //{
+        //    //List<string> data = new List<string>()
+        //    //{
+        //    //    "__instance.ensoParam.TotalTime: " + __instance.ensoParam.TotalTime,
+        //    //    "__instance.totalTime: " + __instance.totalTime,
+        //    //    "__instance.ensoSound.GetSongPosition(): " + __instance.ensoSound.GetSongPosition(),
+        //    //    "__instance.adjustCounter: " + __instance.adjustCounter,
+        //    //    "__instance.adjustSubTime: " + __instance.adjustSubTime,
+        //    //    "__instance.adjustTime: " + __instance.adjustTime,
+        //    //};
+
+        //    //Plugin.LogInfo(LogType.Info, data, 1);
+
+        //    return true;
+        //}
     }
 }

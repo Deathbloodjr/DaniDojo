@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DaniDojo.Managers;
 using DaniDojo.Hooks;
+using CustomGameModes.Patches;
 
 #if TAIKO_IL2CPP
 using BepInEx.Unity.IL2CPP.Utils;
@@ -30,6 +31,7 @@ namespace DaniDojo
     }
 
     [BepInPlugin(PluginInfo.PLUGIN_GUID, "Dani Dojo", PluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("com.DB.CustomGameModes")]
 #if TAIKO_MONO
     public class Plugin : BaseUnityPlugin
 #elif TAIKO_IL2CPP
@@ -54,9 +56,6 @@ namespace DaniDojo
         public ConfigEntry<int> ConfigLoggingDetailLevelEnabled;
 
 
-        //public static List<DaniSeriesData> AllDaniData;
-        //public static List<DaniDojoCurrentPlay> AllDaniScores;
-
 #if TAIKO_MONO
         private void Awake()
 #elif TAIKO_IL2CPP
@@ -73,11 +72,8 @@ namespace DaniDojo
 
             SetupConfig();
 
-            InitializeDaniDojoSceneAssetBundle();
 
-            //InitializeDaniData();
             CourseDataManager.LoadCourseData();
-            //InitializeDaniRecords();
             SaveDataManager.LoadSaveData();
 
             SetupHarmony();
@@ -128,20 +124,6 @@ namespace DaniDojo
                 "Enables more detailed logs to be sent to the console. The higher the number, the more logs will be displayed. Mostly for my own debugging.");
         }
 
-        private const string ASSETBUNDLE_NAME = "danidojo.scene";
-        public static AssetBundle Assets;
-        private void InitializeDaniDojoSceneAssetBundle()
-        {
-            Plugin.Log.LogInfo("danidojo scene load start");
-            string assetBundlePath = Path.Combine(ConfigDaniDojoAssetLocation.Value, ASSETBUNDLE_NAME);
-            if (!File.Exists(assetBundlePath))
-            {
-                Assets = null;
-                return;
-            }
-            Assets = AssetBundle.LoadFromFile(assetBundlePath);
-            Plugin.Log.LogInfo("danidojo scene loaded?");
-        }
 
         private void SetupHarmony()
         {
@@ -165,7 +147,6 @@ namespace DaniDojo
 
 
                 _harmony.PatchAll(typeof(DaniDojoTempEnso));
-                //_harmony.PatchAll(typeof(DaniDojoTempSelect));
                 _harmony.PatchAll(typeof(DaniDojoSongSelect));
                 _harmony.PatchAll(typeof(PlayerNameDaniRank));
 
@@ -179,6 +160,9 @@ namespace DaniDojo
 
 
                 _harmony.PatchAll(typeof(TestingHooks));
+
+                CustomModeSelectApi.AddButton("DaniDojo", "Dan-i Dojo", "Enters the Dan-i Dojo mode!", new Color32(37, 101, 172, 255), () => DaniDojoDaniCourseSelect.ChangeSceneDaniDojo());
+
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");
             }
             else
@@ -199,18 +183,6 @@ namespace DaniDojo
 #endif
         }
 
-        //public void LogInfoInstance(string value, int detailLevel = 0)
-        //{
-        //    // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
-        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
-        //    {
-        //        Log.LogInfo("[" + detailLevel + "] " + value);
-        //    }
-        //}
-        //public static void LogInfo(string value, int detailLevel = 0)
-        //{
-        //    Instance.LogInfoInstance(value, detailLevel);
-        //}
 
         public void LogInfoInstance(LogType type, string value, int detailLevel = 0)
         {
@@ -242,6 +214,16 @@ namespace DaniDojo
                 }
             }
         }
+
+        public static void LogInfo(string value, int detailLevel = 0)
+        {
+            LogInfo(LogType.Info, value, detailLevel);
+        }
+        public static void LogInfo(List<string> value, int detailLevel = 0)
+        {
+            LogInfo(LogType.Info, value, detailLevel);
+        }
+
         public static void LogInfo(LogType type, string value, int detailLevel = 0)
         {
             Instance.LogInfoInstance(type, value, detailLevel);
@@ -259,31 +241,6 @@ namespace DaniDojo
             }
             Instance.LogInfoInstance(type, sendValue, detailLevel);
         }
-
-        //public void LogWarningInstance(string value, int detailLevel = 0)
-        //{
-        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
-        //    {
-        //        Log.LogWarning("[" + detailLevel + "] " + value);
-        //    }
-        //}
-        //public static void LogWarning(string value, int detailLevel = 0)
-        //{
-        //    Instance.LogWarningInstance(value, detailLevel);
-        //}
-
-
-        //public void LogErrorInstance(string value, int detailLevel = 0)
-        //{
-        //    if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
-        //    {
-        //        Log.LogError("[" + detailLevel + "] " + value);
-        //    }
-        //}
-        //public static void LogError(string value, int detailLevel = 0)
-        //{
-        //    Instance.LogErrorInstance(value, detailLevel);
-        //}
 
     }
 }
