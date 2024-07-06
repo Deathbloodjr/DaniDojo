@@ -385,7 +385,7 @@ namespace DaniDojo.Managers
         {
             var series = CourseDataManager.GetActiveSeries();
             SaveCourse highestCourseRecord = null;
-            for (int i = 0; i < series.Courses.Count - 1; i++)
+            for (int i = 0; i < series.Courses.Count; i++)
             {
                 var saveCourse = GetCourseRecord(series.Courses[i].Hash);
                 if (saveCourse.RankCombo.Rank >= DaniRank.RedClear)

@@ -34,6 +34,14 @@ namespace DaniDojo.Assets
                 {
                     AssetFilePath = files[0].Directory.FullName;
                 }
+                else
+                {
+                    files = dirInfo.GetFiles("CustomGameModes.scene");
+                    if (files.Length != 0)
+                    {
+                        AssetFilePath = files[0].Directory.FullName;
+                    }
+                }
             }
 
             // If the file doesn't start with the Asset path, append it on
