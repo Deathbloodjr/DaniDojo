@@ -22,6 +22,8 @@ namespace DaniDojo.Patches
 {
     internal class DaniDojoTempEnso
     {
+        static bool IsEndOfCourse = false;
+
         [HarmonyPatch(typeof(EnsoGameManager))]
         [HarmonyPatch(nameof(EnsoGameManager.CheckEnsoEnd))]
         [HarmonyPatch(MethodType.Normal)]
@@ -45,6 +47,14 @@ namespace DaniDojo.Patches
                     //    return false;
                     //}
 
+                    if (DaniPlayManager.IsFinalSong() && !IsEndOfCourse)
+                    {
+                        IsEndOfCourse = true;
+                        // Make any bads/oks become rainbow if they're gold reqs
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Oks, 0);
+                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Bads, 0);
+                    }
+
                     // 5 seconds after the final note of the song
                     // Definitely not perfect, but better than what happened with magical parfait
                     if (frameResults.totalTime < frameResults.fumenLength + 1000)
@@ -63,6 +73,10 @@ namespace DaniDojo.Patches
                     {
                         CreateAssets = true;
                     }
+                }
+                else
+                {
+                    IsEndOfCourse = false;
                 }
             }
 
@@ -130,7 +144,11 @@ namespace DaniDojo.Patches
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].dron = DataConst.OptionOnOff.Off;
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].reverse = DataConst.OptionOnOff.Off;
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].randomlv = DataConst.RandomLevel.None;
+#if DEBUG
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.Auto;
+#else
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
+#endif
             // To prevent highscores from showing up
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].hiScore = 2000000;
 
@@ -285,7 +303,11 @@ namespace DaniDojo.Patches
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].dron = DataConst.OptionOnOff.Off;
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].reverse = DataConst.OptionOnOff.Off;
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].randomlv = DataConst.RandomLevel.None;
+#if DEBUG
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.Auto;
+#else
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
+#endif
             // To prevent highscores from showing up
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].hiScore = 2000000;
 
@@ -481,77 +503,109 @@ namespace DaniDojo.Patches
 
                 Plugin.Log.LogInfo("Image Change 2");
 
-                List<string> StuffToDisable = new List<string>()
-                {
-                    "bg_normal_01_light",
-                    "bg_normal_02_light",
-                    "bg05_04_001",
+                //List<string> StuffToDisable = new List<string>()
+                //{
+                //    "bg_normal_01_light",
+                //    "bg_normal_02_light",
+                //    "bg05_04_001",
 
-                    "dummy_01",
-                    "dummy_02",
-                    "dummy_03",
-                    "dummy_04",
-                    "dummy_05",
+                //    "dummy_01",
+                //    "dummy_02",
+                //    "dummy_03",
+                //    "dummy_04",
+                //    "dummy_05",
 
-                    "dai",
-                    "chochin_a",
-                    "chochin_b",
-                    "bg_normal_04_sakura",
-                    "sakura",
-                    "akari",
-                    "fever_effect_01",
-                    "fever_effect_02",
-                    "fever_effect_namco",
+                //    "dai",
+                //    "chochin_a",
+                //    "chochin_b",
+                //    "bg_normal_04_sakura",
+                //    "sakura",
+                //    "akari",
+                //    "fever_effect_01",
+                //    "fever_effect_02",
+                //    "fever_effect_namco",
 
-                    "bg13_bg_001",
-                    "bg13_bg_001_f",
-                    "bg13_akari_001_l",
-                    "bg13_akari_001_r",
-                    "bg13_akari_002_l",
-                    "bg13_akari_002_r",
-                    "bg13_akari_001_l_1",
-                    "bg13_akari_003_c_1",
-                    "bg13_akari_002_c_1",
-                    "bg13_akari_004_c_1",
-                    "bg13_akari_001_r_1",
-                    "bg13_akari_001_r_2",
-                    "bg13_akari_003_c_2",
-                    "bg13_akari_001_c_2",
-                    "bg13_akari_004_c_2",
-                    "bg13_akari_002_l_3",
-                    "bg13_akari_001_c_3",
-                    "bg13_akari_003_r_3",
+                //    "bg13_bg_001",
+                //    "bg13_bg_001_f",
+                //    "bg13_akari_001_l",
+                //    "bg13_akari_001_r",
+                //    "bg13_akari_002_l",
+                //    "bg13_akari_002_r",
+                //    "bg13_akari_001_l_1",
+                //    "bg13_akari_003_c_1",
+                //    "bg13_akari_002_c_1",
+                //    "bg13_akari_004_c_1",
+                //    "bg13_akari_001_r_1",
+                //    "bg13_akari_001_r_2",
+                //    "bg13_akari_003_c_2",
+                //    "bg13_akari_001_c_2",
+                //    "bg13_akari_004_c_2",
+                //    "bg13_akari_002_l_3",
+                //    "bg13_akari_001_c_3",
+                //    "bg13_akari_003_r_3",
 
-                    "bg13_akari_002_r_a",
-                    "bg13_akari_002_l_a",
-                    "bg13_akari_002_r_b",
-                    "bg13_akari_002_l_b",
+                //    "bg13_akari_002_r_a",
+                //    "bg13_akari_002_l_a",
+                //    "bg13_akari_002_r_b",
+                //    "bg13_akari_002_l_b",
 
 
-                    "bg_normal_03_tatemono",
-                    "bg_normal_03_denkyu",
-                    "bg_normal_03_akari",
+                //    "bg_normal_03_tatemono",
+                //    "bg_normal_03_denkyu",
+                //    "bg_normal_03_akari",
 
-                    "bg_normal_03_kumade",
-                    "bg_normal_03_kumade_a",
+                //    "bg_normal_03_kumade",
+                //    "bg_normal_03_kumade_a",
 
-                    "bg_fever_a_01",
-                    "bg_fever_a_02",
-                    "bg_fever_a_03",
-                };
+                //    "bg_fever_a_01",
+                //    "bg_fever_a_02",
+                //    "bg_fever_a_03",
+                //};
 
 
 
                 Plugin.Log.LogInfo("Image Change 3");
 
-                for (int j = 0; j < StuffToDisable.Count; j++)
+                var bgDon = GameObject.FindObjectOfType<BGDon>();
+                if (bgDon != null)
                 {
-                    GameObject disableThis = GameObject.Find(StuffToDisable[j]);
-                    if (disableThis != null)
+                    bgDon.gameObject.SetActive(false);
+                }
+                var dancer = GameObject.FindObjectOfType<DancerPlayer>();
+                if (dancer != null)
+                {
+                    dancer.gameObject.SetActive(false);
+                }
+                var bgDai = GameObject.FindObjectOfType<BgDai>();
+                if (bgDai != null)
+                {
+                    //bgDai.gameObject.SetActive(false);
+                    var bgDaiDai = bgDai.transform.Find("main").Find("bg_fever_mc").Find("dai");
+                    if (bgDaiDai != null)
                     {
-                        disableThis.SetActive(false);
+                        bgDaiDai.gameObject.SetActive(false);
                     }
                 }
+                var bgDancer = GameObject.FindObjectOfType<BGDancer>();
+                if (bgDancer != null)
+                {
+                    bgDancer.gameObject.SetActive(false);
+                }
+                var bgFever = GameObject.FindObjectOfType<BGFever>();
+                if (bgFever != null)
+                {
+                    bgFever.gameObject.SetActive(false);
+                }
+
+
+                //for (int j = 0; j < StuffToDisable.Count; j++)
+                //{
+                //    GameObject disableThis = GameObject.Find(StuffToDisable[j]);
+                //    if (disableThis != null)
+                //    {
+                //        disableThis.SetActive(false);
+                //    }
+                //}
 
                 Plugin.Log.LogInfo("Image Change 4");
 
