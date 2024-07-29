@@ -373,7 +373,7 @@ namespace DaniDojo.Assets
             Rect emptyBarRect = new Rect(396 + 966, 36, 966, 80);
 
 
-            Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
+            //Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
 
             var fillBar = AssetUtility.CreateImageChild(bar, "CurReqBarFill", fillBarRect, barData.Color);
             var colorLerp = fillBar.AddComponent<ColorLerp>();
@@ -450,7 +450,7 @@ namespace DaniDojo.Assets
                 AssetUtility.CreateImageChild(bar, "CurReqBarBorder", borderBarRect, Path.Combine("Results", "ResultsBorderSmall.png"));
 
 
-                Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
+                //Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
 
                 var fillBarImage = AssetUtility.GetOrAddImageComponent(fillBar);
 

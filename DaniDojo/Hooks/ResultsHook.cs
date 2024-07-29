@@ -21,7 +21,7 @@ namespace DaniDojo.Hooks
         {
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
-                Plugin.LogInfo(LogType.Info, "ActionResultPlayer_Update");
+                //Plugin.LogInfo(LogType.Info, "ActionResultPlayer_Update");
                 if (!__instance.isEnable)
                 {
                     return false;

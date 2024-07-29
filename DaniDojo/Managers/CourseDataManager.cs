@@ -193,26 +193,26 @@ namespace DaniDojo.Managers
             {
                 var levelInt = node["Level"].AsInteger();
                 levelString = levelInt.ToString();
-                Plugin.LogInfo(LogType.Info, "Level int = " + levelInt, 2);
+                //Plugin.LogInfo(LogType.Info, "Level int = " + levelInt, 2);
             }
             catch { }
             try
             {
                 levelString = node["Level"].AsString();
-                Plugin.LogInfo(LogType.Info, "Level string = " + levelString, 2);
+                //Plugin.LogInfo(LogType.Info, "Level string = " + levelString, 2);
             }
             catch { }
             try
             {
                 var levelInt = node["Course"].AsInteger();
                 levelString = levelInt.ToString();
-                Plugin.LogInfo(LogType.Info, "Course int = " + levelInt, 2);
+                //Plugin.LogInfo(LogType.Info, "Course int = " + levelInt, 2);
             }
             catch { }
             try
             {
                 levelString = node["Course"].AsString();
-                Plugin.LogInfo(LogType.Info, "Course string = " + levelString, 2);
+                //Plugin.LogInfo(LogType.Info, "Course string = " + levelString, 2);
             }
             catch { }
 
@@ -338,7 +338,7 @@ namespace DaniDojo.Managers
             var redBorder = node["RedBorder"];
             if (redBorder is LWJsonArray)
             {
-                Plugin.LogInfo(LogType.Info, "Border is Array", 2);
+                //Plugin.LogInfo(LogType.Info, "Border is Array", 2);
                 var redBorderArray = redBorder.AsArray();
                 var goldBorderArray = node["GoldBorder"].AsArray();
                 for (int i = 0; i < redBorderArray.Count; i++)
@@ -540,7 +540,7 @@ namespace DaniDojo.Managers
                     }
                 }
             }
-            Plugin.LogInfo(LogType.Error, "Could not find corresponding Course from Hash");
+            //Plugin.LogInfo(LogType.Error, "Could not find corresponding Course from Hash");
             return null;
         }
 

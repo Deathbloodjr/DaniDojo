@@ -438,7 +438,7 @@ namespace DaniDojo.Patches
                 }
             }
 
-            public static void UpdateRequirementBar(BorderType borderType)
+            public static void UpdateRequirementBar(BorderType borderType, int remainingNotes = -1)
             {
                 Plugin.LogInfo(LogType.Info, "UpdateRequirementBar Start", 2);
                 var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
@@ -460,7 +460,7 @@ namespace DaniDojo.Patches
                             var image = bar.GetOrAddComponent<Image>();
                             var emptyImage = emptyBar.GetOrAddComponent<Image>();
                             var colorLerp = bar.GetOrAddComponent<ColorLerp>();
-                            BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber());
+                            BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber(), remainingNotes: remainingNotes);
 
                             Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 3", 2);
 
@@ -1113,14 +1113,14 @@ namespace DaniDojo.Patches
                     }
                     //var basePosition = AssetUtility.GetPositionFrom1080p(new Vector2(183, 884));
                     var basePosition = new Vector2(183, 884);
-                    var topCourseObject = AssetUtility.CreateEmptyObject(topCoursesParent, seriesInfo.Courses[i].Title, basePosition + new Vector2(68 * i, 0));
+                    var topCourseObject = AssetUtility.CreateEmptyObject(topCoursesParent, seriesInfo.Courses[i].Id, basePosition + new Vector2(68 * i, 0));
 
                     //GameObject topCourseObject = new GameObject(seriesInfo.Courses[i].Title);
                     //topCourseObject.transform.SetParent(topCoursesParent.transform);
                     //topCourseObject.transform.position = new Vector2(183 + (68 * i), 884);
-                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "Background", Vector2.zero, Path.Combine("Course", "Top", "Bg", backgroundName));
-                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "TopText", new Vector2(19, 62), Path.Combine("Course", "Top", "Text", topText));
-                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "BotText", new Vector2(19, 24), Path.Combine("Course", "Top", "Text", botText));
+                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Id + "Background", Vector2.zero, Path.Combine("Course", "Top", "Bg", backgroundName));
+                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Id + "TopText", new Vector2(19, 62), Path.Combine("Course", "Top", "Text", topText));
+                    AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Id + "BotText", new Vector2(19, 24), Path.Combine("Course", "Top", "Text", botText));
                     //DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Background", GetAssetSprite(backgroundName), new Vector2(0, 0), topCourseObject.transform);
                     //DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Text", GetAssetSprite(textName), new Vector2(19, 24), topCourseObject.transform);
 
@@ -1159,7 +1159,7 @@ namespace DaniDojo.Patches
 
                     if (recordName != string.Empty)
                     {
-                        AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Title + "Record", new Vector2(0, 98), Path.Combine("Select", "ResultIcons", "Small", recordName));
+                        AssetUtility.CreateImageChild(topCourseObject, seriesInfo.Courses[i].Id + "Record", new Vector2(0, 98), Path.Combine("Select", "ResultIcons", "Small", recordName));
                         //DaniDojoAssetUtility.CreateImage(seriesInfo.Courses[i].Title + "Record", GetAssetSprite(recordName), new Vector2(0, 98), topCourseObject.transform);
                     }
                 }
