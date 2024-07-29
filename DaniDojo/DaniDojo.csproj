@@ -17,12 +17,14 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release-Mono' ">
     <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
     <DefineConstants>TRACE;TAIKO_MONO;RELEASE</DefineConstants>
+    <GameDir>D:\Taiko no Tatsujin PC Debug</GameDir>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug-Mono' ">
     <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
     <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
     <DefineConstants>TRACE;TAIKO_MONO;DEBUG;</DefineConstants>
+    <GameDir>D:\Taiko no Tatsujin PC Debug</GameDir>
   </PropertyGroup>
 
   <PropertyGroup>
