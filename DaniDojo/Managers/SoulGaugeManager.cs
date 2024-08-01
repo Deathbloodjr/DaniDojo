@@ -188,7 +188,7 @@ namespace DaniDojo.Managers
                 {
                     return bytes;
                 }
-                using (FileStream fs = new FileStream(filePath, FileMode.Open))
+                using (FileStream fs = new FileStream(customPath, FileMode.Open))
                 {
                     MemoryStream memoryStream = new MemoryStream();
                     using (GZipStream gzipStream = new GZipStream(fs, CompressionMode.Decompress))

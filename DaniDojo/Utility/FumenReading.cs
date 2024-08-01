@@ -70,7 +70,7 @@ namespace DaniDojo.Utility
                             case EnsoData.EnsoLevelType.Normal: filePath += "_n.bin"; break;
                             case EnsoData.EnsoLevelType.Hard: filePath += "_h.bin"; break;
                             case EnsoData.EnsoLevelType.Mania: filePath += "_m.bin"; break;
-                            case EnsoData.EnsoLevelType.Ura: filePath += "_u.bin"; break;
+                            case EnsoData.EnsoLevelType.Ura: filePath += "_x.bin"; break;
                         }
                         if (File.Exists(filePath))
                         {
