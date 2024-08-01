@@ -35,19 +35,8 @@ namespace DaniDojo.Patches
             {
                 TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
 
-                //Plugin.LogInfo(LogType.Info, "frameResults.isAllOnpuEnd: " + frameResults.isAllOnpuEnd, 1);
-                //Plugin.LogInfo(LogType.Info, "frameResults.isPastLastOnpuJustTime: " + frameResults.isPastLastOnpuJustTime, 1);
                 if (__instance.ensoParam.EnsoEndType == EnsoPlayingParameter.EnsoEndTypes.None && frameResults.isPastLastOnpuJustTime)
                 {
-                    //Plugin.LogInfo(LogType.Info, "frameResults.totalTime: " + frameResults.totalTime, 1);
-                    //Plugin.LogInfo(LogType.Info, "__instance.songTime: " + __instance.songTime, 1);
-                    //Plugin.LogInfo(LogType.Info, "frameResults.fumenLength: " + frameResults.fumenLength, 1);
-                    //if (frameResults.totalTime < frameResults.fumenLength || frameResults.totalTime < __instance.songTime)
-                    //{
-                    //    //Plugin.Log.LogInfo("CheckEnsoEnd: totalTime less than fumen Length and song Time");
-                    //    return false;
-                    //}
-
                     if (DaniPlayManager.IsFinalSong() && !IsEndOfCourse)
                     {
                         IsEndOfCourse = true;
@@ -64,7 +53,6 @@ namespace DaniDojo.Patches
                     // Definitely not perfect, but better than what happened with magical parfait
                     if (frameResults.totalTime < frameResults.fumenLength + 1000)
                     {
-                        //Plugin.Log.LogInfo("CheckEnsoEnd: totalTime less than fumen Length and song Time");
                         return false;
                     }
 
@@ -86,47 +74,6 @@ namespace DaniDojo.Patches
             return true;
         }
 
-
-        // This function can be useful
-        // It is how I attempted to get SoulGauge and Score Points data previously
-
-        //[HarmonyPatch(typeof(EnsoGameManager))]
-        //[HarmonyPatch(nameof(EnsoGameManager.ProcExecMain))]
-        //[HarmonyPatch(MethodType.Normal)]
-        //[HarmonyPostfix]
-        //public static void EnsoGameManager_ProcExecMain_Postfix(EnsoGameManager __instance)
-        //{
-        //    if (DaniDojoSelectManager.isInDan && result != null)
-        //    {
-        //        if (!result.HasSetConstPoints())
-        //        {
-        //            Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If Start");
-        //            TaikoCoreFrameResults frameResults = __instance.taikoCorePlayer.GetFrameResults();
-
-        //            int tamashiiMax = frameResults.eachPlayer[0].constTamashiiMax;
-        //            int[] tamashiiPoints = new int[3];
-
-        //            for (int i = 0; i < 3; i++)
-        //            {
-        //                tamashiiPoints[i] = (int)frameResults.eachPlayer[0].constTamashiiPoint[i];
-        //            }
-
-        //            int shinuchiScore = (int)frameResults.eachPlayer[0].constShinuchiScore;
-
-        //            for (int i = 0; i < frameResults.eachPlayer[0].constTamashiiPoint.Length; i++)
-        //            {
-        //                Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiPoint[" + i + "]: " + frameResults.eachPlayer[0].constTamashiiPoint[i]);
-        //            }
-        //            Plugin.Log.LogInfo("frameResults.eachPlayer[0].constShinuchiScore: " + frameResults.eachPlayer[0].constShinuchiScore);
-
-        //            // This might always be 10000
-        //            Plugin.Log.LogInfo("frameResults.eachPlayer[0].constTamashiiMax: " + frameResults.eachPlayer[0].constTamashiiMax);
-
-        //            result.SetConstPoints(tamashiiPoints, shinuchiScore, tamashiiMax);
-        //            Plugin.Log.LogInfo("TaikoCorePlayer_StartPlay_Postfix: Internal If End");
-        //        }
-        //    }
-        //}
 
         static bool CreateAssets = true;
 
@@ -452,7 +399,6 @@ namespace DaniDojo.Patches
                 string daniDojoRequirementsParentName = "DaniDojo";
 
                 var DaniDojoParent = new GameObject(daniDojoRequirementsParentName);
-                Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Start");
                 DaniDojoParent.layer = LayerMask.NameToLayer("UI");
 
                 var CanvasBg = GameObject.Find("CanvasBg");
@@ -460,7 +406,6 @@ namespace DaniDojo.Patches
                 DaniDojoParent.name = daniDojoRequirementsParentName;
                 DaniDojoParent.transform.parent = __instance.transform.parent.parent;
 
-                Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Parent set");
 
                 AssetUtility.AddCanvasComponent(DaniDojoParent);
 
@@ -471,105 +416,16 @@ namespace DaniDojo.Patches
 
                 daniDojoCanvas.planeDistance = 1000;
 
-                //daniDojoCanvas.sortingLayerName = "EnsoBG";
-                //daniDojoCanvas.sortingOrder = 50;
-                //daniDojoCanvas.overrideSorting = true;
-
-                //Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas set");
-
-                //var daniDojoCanvasScaler = DaniDojoParent.AddComponent<CanvasScaler>();
-                //var baseCanvasScaler = CanvasBg.GetComponent<CanvasScaler>();
-                //daniDojoCanvasScaler.uiScaleMode = baseCanvasScaler.uiScaleMode;
-                //daniDojoCanvasScaler.referenceResolution = baseCanvasScaler.referenceResolution;
-                //daniDojoCanvasScaler.screenMatchMode = baseCanvasScaler.screenMatchMode;
-                //daniDojoCanvasScaler.matchWidthOrHeight = baseCanvasScaler.matchWidthOrHeight;
-
-                //Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Canvas Scaler set");
+                
 
 
                 DaniDojoAssetUtility.ChangeSprite("hideLeft", Path.Combine(baseImageFilePath, "Enso", "lane_left_3.png"));
 
                 DaniDojoAssets.EnsoAssets.CreateBottomAssets(DaniDojoParent);
 
-                // Change this, it's bad
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA01P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA02P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA03P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA04P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA05P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-                //DaniDojoAssetUtility.ChangeSprite("DonBgA06P1", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"));
-
-                //DaniDojoAssetUtility.CreateImage("DaniTopBg", Path.Combine(baseImageFilePath, "Enso", "donbg_dojo_1p_bg.png"), new Vector2(0, 800), DaniDojoParent.transform);
-
+               
                 DaniDojoAssets.EnsoAssets.ChangeCourseIcon(null);
-                //var courseIconObj = GameObject.Find("icon_course");
-                //DaniDojoAssetUtility.ChangeSprite(courseIconObj, Path.Combine(baseImageFilePath, "Enso", "icon_course_danidojo.png"));
-                //courseIconObj.GetComponentInChildren<TextMeshProUGUI>().text = "Dan-i dojo";
 
-                Plugin.Log.LogInfo("Image Change 2");
-
-                //List<string> StuffToDisable = new List<string>()
-                //{
-                //    "bg_normal_01_light",
-                //    "bg_normal_02_light",
-                //    "bg05_04_001",
-
-                //    "dummy_01",
-                //    "dummy_02",
-                //    "dummy_03",
-                //    "dummy_04",
-                //    "dummy_05",
-
-                //    "dai",
-                //    "chochin_a",
-                //    "chochin_b",
-                //    "bg_normal_04_sakura",
-                //    "sakura",
-                //    "akari",
-                //    "fever_effect_01",
-                //    "fever_effect_02",
-                //    "fever_effect_namco",
-
-                //    "bg13_bg_001",
-                //    "bg13_bg_001_f",
-                //    "bg13_akari_001_l",
-                //    "bg13_akari_001_r",
-                //    "bg13_akari_002_l",
-                //    "bg13_akari_002_r",
-                //    "bg13_akari_001_l_1",
-                //    "bg13_akari_003_c_1",
-                //    "bg13_akari_002_c_1",
-                //    "bg13_akari_004_c_1",
-                //    "bg13_akari_001_r_1",
-                //    "bg13_akari_001_r_2",
-                //    "bg13_akari_003_c_2",
-                //    "bg13_akari_001_c_2",
-                //    "bg13_akari_004_c_2",
-                //    "bg13_akari_002_l_3",
-                //    "bg13_akari_001_c_3",
-                //    "bg13_akari_003_r_3",
-
-                //    "bg13_akari_002_r_a",
-                //    "bg13_akari_002_l_a",
-                //    "bg13_akari_002_r_b",
-                //    "bg13_akari_002_l_b",
-
-
-                //    "bg_normal_03_tatemono",
-                //    "bg_normal_03_denkyu",
-                //    "bg_normal_03_akari",
-
-                //    "bg_normal_03_kumade",
-                //    "bg_normal_03_kumade_a",
-
-                //    "bg_fever_a_01",
-                //    "bg_fever_a_02",
-                //    "bg_fever_a_03",
-                //};
-
-
-
-                Plugin.Log.LogInfo("Image Change 3");
 
                 var bgDon = GameObject.FindObjectOfType<BGDon>();
                 if (bgDon != null)
@@ -584,7 +440,6 @@ namespace DaniDojo.Patches
                 var bgDai = GameObject.FindObjectOfType<BgDai>();
                 if (bgDai != null)
                 {
-                    //bgDai.gameObject.SetActive(false);
                     var bgDaiDai = bgDai.transform.Find("main").Find("bg_fever_mc").Find("dai");
                     if (bgDaiDai != null)
                     {
@@ -603,115 +458,9 @@ namespace DaniDojo.Patches
                 }
 
 
-                //var tamasiiGauge = GameObject.FindObjectOfType<TamasiiGaugePlayerSprite>();
-                //if (tamasiiGauge != null)
-                //{
-                //    tamasiiGauge.SetTamasiiGauge(0, 69f);
-                //}
-
-                //for (int j = 0; j < StuffToDisable.Count; j++)
-                //{
-                //    GameObject disableThis = GameObject.Find(StuffToDisable[j]);
-                //    if (disableThis != null)
-                //    {
-                //        disableThis.SetActive(false);
-                //    }
-                //}
-
-                Plugin.Log.LogInfo("Image Change 4");
-
                 #region AddRequirementAssets
 
-
-                //var daniDojoParentPosition = DaniDojoParent.transform.position;
-                //daniDojoParentPosition.z = 10;
-                //DaniDojoParent.transform.position = daniDojoParentPosition;
-
-
-
-
-
-                //if (DaniDojoSelectManager.currentDan != null)
-                //{
-                //    int numPanels = 0;
-                //    for (int j = 0; j < DaniDojoSelectManager.currentDan.borders.Count && numPanels < 3; j++)
-                //    {
-                //        if (DaniDojoSelectManager.currentDan.borders[j].borderType != BorderType.SoulGauge)
-                //        {
-                //            CreatePanel("Panel" + j, new Vector2(117, 353 - (159 * numPanels)), DaniDojoParent.transform, DaniDojoSelectManager.currentDan.borders[j]);
-                //            numPanels++;
-                //        }
-                //    }
-
-                //    numPanels = 0;
-                //    for (int j = 0; j < DaniDojoSelectManager.currentDan.borders.Count && numPanels < 3; j++)
-                //    {
-                //        if (DaniDojoSelectManager.currentDan.borders[j].borderType != BorderType.SoulGauge)
-                //        {
-                //            DaniDojoAssets.EnsoAssets.UpdateRequirementBar(DaniDojoSelectManager.currentDan.borders[j].borderType);
-                //            numPanels++;
-                //        }
-                //    }
-                //}
-
-
-                Plugin.Log.LogInfo("Panels created");
-
                 CommonAssets.CreateDaniCourse(DaniDojoParent, new Vector2(1548, 5), DaniPlayManager.GetCurrentCourse());
-
-                //var currentCourse = DaniPlayManager.GetCurrentCourse();
-                //if (currentCourse != null)
-                //{
-                //    var courseId = currentCourse.Id;
-                //    if (int.TryParse(courseId, out int _))
-                //    {
-                //        courseId = currentCourse.Title;
-                //    }
-
-                //    (string bgImage, string textImage) imageNames;
-
-                //    imageNames = courseId switch
-                //    {
-                //        "5kyuu" or "五級 5th Kyu" => ("WoodBg.png", "kyuu5.png"),
-                //        "4kyuu" or "四級 4th Kyu" => ("WoodBg.png", "kyuu4.png"),
-                //        "3kyuu" or "三級 3rd Kyu" => ("WoodBg.png", "kyuu3.png"),
-                //        "2kyuu" or "二級 2nd Kyu" => ("WoodBg.png", "kyuu2.png"),
-                //        "1kyuu" or "一級 1st Kyu" => ("WoodBg.png", "kyuu1.png"),
-                //        "1dan" or "初段 1st Dan" => ("BlueBg.png", "dan1.png"),
-                //        "2dan" or "二段 2nd Dan" => ("BlueBg.png", "dan2.png"),
-                //        "3dan" or "三段 3rd Dan" => ("BlueBg.png", "dan3.png"),
-                //        "4dan" or "四段 4th Dan" => ("BlueBg.png", "dan4.png"),
-                //        "5dan" or "五段 5th Dan" => ("BlueBg.png", "dan5.png"),
-                //        "6dan" or "六段 6th Dan" => ("RedBg.png", "dan6.png"),
-                //        "7dan" or "七段 7th Dan" => ("RedBg.png", "dan7.png"),
-                //        "8dan" or "八段 8th Dan" => ("RedBg.png", "dan8.png"),
-                //        "9dan" or "九段 9th Dan" => ("RedBg.png", "dan9.png"),
-                //        "10dan" or "十段 10th Dan" => ("RedBg.png", "dan10.png"),
-                //        "11dan" or "玄人 Kuroto" => ("SilverBg.png", "kuroto.png"),
-                //        "12dan" or "名人 Meijin" => ("SilverBg.png", "meijin.png"),
-                //        "13dan" or "超人 Chojin" => ("SilverBg.png", "chojin.png"),
-                //        "14dan" or "達人 Tatsujin" => ("GoldBg.png", "tatsujin.png"),
-                //        _ => ("TanBg.png", "gaiden.png"),
-                //    };
-
-                //    string bgImageName = imageNames.bgImage;
-                //    string textImageName = imageNames.textImage;
-
-                //    DaniDojoAssetUtility.CreateImage("CurrentDanMarkerBack", Path.Combine(baseImageFilePath, "Course", "DaniCourseIcons", bgImageName), new Vector2(1548, 5), DaniDojoParent.transform);
-                //    DaniDojoAssetUtility.CreateImage("CurrentDanMarkerText", Path.Combine(baseImageFilePath, "Course", "DaniCourseIcons", textImageName), new Vector2(1600, 129), DaniDojoParent.transform);
-                //}
-                //else
-                //{
-                //    DaniDojoAssetUtility.CreateImage("CurrentDanMarkerBack", Path.Combine(baseImageFilePath, "Course", "DaniCourseIcons", "RedBg.png"), new Vector2(1548, 5), DaniDojoParent.transform);
-                //    DaniDojoAssetUtility.CreateImage("CurrentDanMarkerText", Path.Combine(baseImageFilePath, "Course", "DaniCourseIcons", "10dan.png"), new Vector2(1600, 129), DaniDojoParent.transform);
-                //}
-
-                Plugin.Log.LogInfo("CurrentDanMarker created");
-
-
-
-                Plugin.Log.LogInfo("Image Change: DaniDojoRequirements: Sprite Changed");
-
 
                 #endregion
 
@@ -742,8 +491,6 @@ namespace DaniDojo.Patches
             if (DaniPlayManager.CheckIsInDan())
             {
                 DaniDojoAssets.EnsoAssets.ChangeCourseIcon(__instance.gameObject);
-                //DaniDojoAssetUtility.ChangeSprite(__instance.gameObject, Path.Combine(baseImageFilePath, "Enso", "icon_course_danidojo.png"));
-                //__instance.TextDiff.text = "Dan-i dojo";
             }
         }
 
@@ -759,11 +506,6 @@ namespace DaniDojo.Patches
             }
             return true;
         }
-
-
-
-
-
 
 
         [HarmonyPatch(typeof(BGFever))]
