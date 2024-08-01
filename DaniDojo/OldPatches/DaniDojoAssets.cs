@@ -613,6 +613,7 @@ namespace DaniDojo.Patches
                     AssetUtility.SetTextFontAndMaterial(textObj, font, fontMat);
                     AssetUtility.SetTextColor(textObj, Color.red);
                     // TODO: Add the fail sound effect here
+                    DaniSoundManager.PlaySound("disqualify.bin", false);
                 }
 
             }
