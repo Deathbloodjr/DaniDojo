@@ -155,6 +155,19 @@ namespace DaniDojo.Assets
 
         #region Text
 
+        static public GameObject GetOrCreateTextChild(GameObject parent, string name, Rect rect, string text)
+        {
+            var imageChild = GetChildByName(parent, name);
+            if (imageChild == null)
+            {
+                imageChild = CreateTextChild(parent, name, rect, text);
+            }
+            else
+            {
+                ChangeText(parent, text);
+            }
+            return imageChild;
+        }
         static public GameObject CreateTextChild(GameObject parent, string name, Rect rect, string text)
         {
             GameObject newObject = CreateEmptyObject(parent, name, rect);

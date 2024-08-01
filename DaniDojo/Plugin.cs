@@ -43,6 +43,7 @@ namespace DaniDojo
         public static ManualLogSource Log;
 
         public ConfigEntry<bool> ConfigEnabled;
+        public ConfigEntry<bool> ConfigDisplayDanSongsInSongSelect;
         public ConfigEntry<string> ConfigDaniDojoDataLocation;
         public ConfigEntry<string> ConfigDaniDojoAssetLocation;
         public ConfigEntry<string> ConfigDaniDojoSaveLocation;
@@ -87,6 +88,11 @@ namespace DaniDojo
                 "Enabled",
                 true,
                 "Enables the mod.");
+
+            ConfigDisplayDanSongsInSongSelect = Config.Bind("General",
+                "DisplayDanSongsInSongSelect",
+                true,
+                "Will display an icon by songs that are in the active dan series.");
 
             ConfigDaniDojoDataLocation = Config.Bind("Data",
                 "DaniDojoDataLocation",
@@ -144,8 +150,6 @@ namespace DaniDojo
                     Directory.CreateDirectory(ConfigDaniDojoSaveLocation.Value);
                 }
 
-
-
                 _harmony.PatchAll(typeof(DaniDojoTempEnso));
                 _harmony.PatchAll(typeof(DaniDojoSongSelect));
                 _harmony.PatchAll(typeof(PlayerNameDaniRank));
@@ -157,7 +161,13 @@ namespace DaniDojo
                 _harmony.PatchAll(typeof(HitResultHook));
                 _harmony.PatchAll(typeof(LoadingScreenHook));
 
+                _harmony.PatchAll(typeof(TamasiiGaugeHooks));
 
+                if (ConfigDisplayDanSongsInSongSelect.Value)
+                {
+                    _harmony.PatchAll(typeof(SongSelectHooks));
+                    _harmony.PatchAll(typeof(SongCourseSelectHook));
+                }
 
                 _harmony.PatchAll(typeof(TestingHooks));
 

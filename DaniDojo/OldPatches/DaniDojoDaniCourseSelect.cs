@@ -309,7 +309,7 @@ namespace DaniDojo.Patches
 
             private void SelectTopCourse(DaniCourse course)
             {
-                GameObject currentCourse = GameObject.Find(course.Title);
+                GameObject currentCourse = GameObject.Find(course.Id);
                 if (currentCourse != null)
                 {
                     var curPosition = currentCourse.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, -40, 0));
@@ -319,7 +319,7 @@ namespace DaniDojo.Patches
 
             private void ReturnTopCourse(DaniCourse course)
             {
-                GameObject currentCourse = GameObject.Find(course.Title);
+                GameObject currentCourse = GameObject.Find(course.Id);
                 if (currentCourse != null)
                 {
                     var curPosition = currentCourse.transform.position;

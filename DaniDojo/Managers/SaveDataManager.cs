@@ -11,9 +11,14 @@ namespace DaniDojo.Managers
 {
     internal class SaveDataManager
     {
+#if DEBUG
+        const string SaveFileName = "DebugDaniSave.json";
+        const string TmpSaveFileName = "DebugTmpSave.json";
+#else
         const string SaveFileName = "DaniSave.json";
         const string TmpSaveFileName = "TmpSave.json";
         const string OldSaveFileName = "dansave.json";
+#endif
 
         static DaniSaveData SaveData { get; set; }
 
@@ -43,6 +48,7 @@ namespace DaniDojo.Managers
                 data = LoadSaveFile(node);
                 SaveDaniSaveData(data);
             }
+#if RELEASE
             else if (File.Exists(Path.Combine(folderLocation, OldSaveFileName)))
             {
                 var node = LWJson.Parse(File.ReadAllText(Path.Combine(folderLocation, OldSaveFileName)));
@@ -50,7 +56,7 @@ namespace DaniDojo.Managers
                 SaveDaniSaveData(data);
                 return LoadSaveData(folderLocation);
             }
-
+#endif
 
             return data;
         }
@@ -125,6 +131,17 @@ namespace DaniDojo.Managers
                 }
                 playData.SongReached = i + 1;
             }
+
+            // To make up for me storing all SoulGauge values as 0 while I couldn't calculate them
+            if (playData.SoulGauge == 0)
+            {
+                if ((playData.SongReached == playData.SongPlayData.Count) &&
+                    (playData.SongPlayData[playData.SongPlayData.Count - 1].Goods != 0))
+                {
+                    playData.SoulGauge = 100;
+                }
+            }
+
             return playData;
         }
 
