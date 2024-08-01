@@ -360,7 +360,7 @@ namespace DaniDojo.Assets
 
 
             // Create the requirement bars
-            var barData = DaniPlayManager.GetBorderBarData(border, play, remainingNotes: 0);
+            var barData = DaniPlayManager.GetBorderBarData(border, play, remainingNotes: 0, endOfCourse: true);
             var bar = AssetUtility.CreateEmptyObject(parent, "RequirementBar", new Vector2(13, -4));
 
             var curReqBarImagePath = Path.Combine("Enso", "Bars", "RequirementBarTotal.png");
@@ -400,6 +400,11 @@ namespace DaniDojo.Assets
             colorLerp.UpdateState(barData, true, true);
 
 
+            if (barData.Failed)
+            {
+                DaniDojoAssets.EnsoAssets.CreateFailText(bar, border.IsTotal, true);
+            }
+
             // Create the Requirement Value Digits
             var barState = DigitAssets.GetRequirementBarState(barData, border);
             DigitAssets.CreateRequirementBarNumber(bar, new Vector2(403, 44), barData.PlayValue, RequirementBarType.Large, barState);
@@ -433,7 +438,7 @@ namespace DaniDojo.Assets
 
                 // Create the requirement bars
 
-                var barData = DaniPlayManager.GetBorderBarData(border, play, songNumber: i, remainingNotes: 0);
+                var barData = DaniPlayManager.GetBorderBarData(border, play, songNumber: i, remainingNotes: 0, endOfCourse: true);
                 var bar = AssetUtility.CreateEmptyObject(songPanel, "RequirementBar", new Vector2(-264, 13));
 
                 Vector2 barPosition = new Vector2(389, 15);
@@ -470,6 +475,11 @@ namespace DaniDojo.Assets
                 fillBarImage.color = barData.Color;
 
                 colorLerp.UpdateState(barData, false, true);
+
+                if (barData.Failed)
+                {
+                    DaniDojoAssets.EnsoAssets.CreateFailText(bar, border.IsTotal, true);
+                }
 
                 var barState = DigitAssets.GetRequirementBarState(barData, border);
                 DigitAssets.CreateRequirementBarNumber(bar, new Vector2(397, 29), barData.PlayValue, RequirementBarType.Medium, barState);

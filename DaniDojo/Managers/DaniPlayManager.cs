@@ -113,6 +113,8 @@ namespace DaniDojo.Managers
             currentCourse = course;
             currentPlay = new CurrentPlayData(course);
 
+            SoulGaugeManager.InitializeSoulGaugeData(course);
+
             EnsoAssets.SetRainbowStartTime();
 
             // I'm not sure if I'd want to actually begin the song here
@@ -125,6 +127,7 @@ namespace DaniDojo.Managers
             {
                 //Plugin.LogInfo(LogType.Info, "Restart Course", 1);
                 currentPlay = new CurrentPlayData(currentCourse);
+                SoulGaugeManager.InitializeSoulGaugeData(currentCourse);
             }
         }
 
@@ -384,11 +387,6 @@ namespace DaniDojo.Managers
             DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Score);
         }
 
-        static void UpdateSoulGauge(int soulPoints)
-        {
-            currentPlay.CurrentSoulGauge += soulPoints;
-        }
-
         static void AddBad()
         {
             var songPlayData = currentPlay.PlayData.SongPlayData[currentPlay.CurrentSongIndex];
@@ -578,7 +576,7 @@ namespace DaniDojo.Managers
             {
                 switch (border.BorderType)
                 {
-                    //case BorderType.SoulGauge: playResults.Add(play.SoulGauge); break; // Soul Gauge will take some time to figure out properly
+                    case BorderType.SoulGauge: playResults.Add(play.SoulGauge); break; // Soul Gauge will take some time to figure out properly
                     case BorderType.Goods: playResults.Add(play.SongPlayData.Sum((x) => x.Goods)); break;
                     case BorderType.Oks: playResults.Add(play.SongPlayData.Sum((x) => x.Oks)); break;
                     case BorderType.Bads: playResults.Add(play.SongPlayData.Sum((x) => x.Bads)); break;
@@ -618,7 +616,7 @@ namespace DaniDojo.Managers
         /// <param name="remainingNotes"></param>
         /// <param name="remainingDrumrollTime"></param>
         /// <returns></returns>
-        static public BorderBarData GetBorderBarData(DaniBorder border, PlayData play, int songNumber = -1, int remainingNotes = -1, float remainingDrumrollTime = -1f)
+        static public BorderBarData GetBorderBarData(DaniBorder border, PlayData play, int songNumber = -1, int remainingNotes = -1, float remainingDrumrollTime = -1f, bool endOfSong = false, bool endOfCourse = false)
         {
             if (border.BorderType == BorderType.SoulGauge)
             {
@@ -707,8 +705,16 @@ namespace DaniDojo.Managers
                         }
                     }
                 }
+                if ((border.IsTotal && endOfCourse) ||
+                    (!border.IsTotal && (endOfSong || endOfCourse)))
+                {
+                    if (data.PlayValue < redReq)
+                    {
+                        data.Failed = true;
+                    }
+                }
             }
-            else
+            else // OKs or Bad requirements
             {
                 data.FillRatio = (int)((1 - ratio) * 100);
                 if (data.FillRatio == 0 && playValue > 0)
@@ -741,12 +747,20 @@ namespace DaniDojo.Managers
                     }
                 }
 
-                if (playValue < goldReq && remainingNotes == 0)
+                if (playValue < goldReq)
                 {
-                    data.State = BorderBarState.Rainbow;
-                    data.FlashState = BorderBarFlashState.None;
+                    if ((border.IsTotal && endOfCourse) ||
+                        (!border.IsTotal && (endOfSong || endOfCourse)))
+                    {
+                        data.State = BorderBarState.Rainbow;
+                        data.FlashState = BorderBarFlashState.None;
+                    }
                 }
 
+                if (playValue >= redReq)
+                {
+                    data.Failed = true;
+                }
             }
             return data;
         }
@@ -783,6 +797,5 @@ namespace DaniDojo.Managers
                 return DaniCombo.Silver;
             }
         }
-
     }
 }

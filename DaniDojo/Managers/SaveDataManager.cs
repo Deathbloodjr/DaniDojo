@@ -131,6 +131,17 @@ namespace DaniDojo.Managers
                 }
                 playData.SongReached = i + 1;
             }
+
+            // To make up for me storing all SoulGauge values as 0 while I couldn't calculate them
+            if (playData.SoulGauge == 0)
+            {
+                if ((playData.SongReached == playData.SongPlayData.Count) &&
+                    (playData.SongPlayData[playData.SongPlayData.Count - 1].Goods != 0))
+                {
+                    playData.SoulGauge = 100;
+                }
+            }
+
             return playData;
         }
 

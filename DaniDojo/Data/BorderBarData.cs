@@ -62,6 +62,8 @@ namespace DaniDojo.Data
         /// int from 0-100, as a percent of how full the bar should be.
         /// </summary>
         public int FillRatio { get; set; }
+
+        public bool Failed { get; set; }
         public Color32 Color => GetColor();
 
         Color32 GetColor()

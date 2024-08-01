@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DaniDojo.Managers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,14 +13,22 @@ namespace DaniDojo.Data
         public int CurrentSongIndex { get; set; }
         public int CurrentCombo { get; set; }
         public int CurrentSongCombo { get; set; }
-        public int CurrentSoulGauge { get; set; } // Not 0-100, actual game numbers (whatever they may be)
+        /// <summary>
+        /// 0-100
+        /// </summary>
+        public int CurrentSoulGauge
+        {
+            get
+            {
+                return (int)SoulGaugeManager.GetCurrentSoulGaugePercent();
+            }
+        } 
         public PlayData PlayData { get; set; }
         public CurrentPlayData(DaniCourse course)
         {
             Hash = course.Hash;
             CurrentSongIndex = 0;
             CurrentCombo = 0;
-            CurrentSoulGauge = 0;
             PlayData = new PlayData();
             // So you can just do PlayData.SongPlayData[2] right away, without needing to worry about it being created or added yet.
             for (int i = 0; i < course.Songs.Count; i++)

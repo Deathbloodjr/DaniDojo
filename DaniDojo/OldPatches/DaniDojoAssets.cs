@@ -260,6 +260,12 @@ namespace DaniDojo.Patches
 
                             var barState = DigitAssets.GetRequirementBarState(songData1, border);
                             DigitAssets.CreateRequirementBarNumber(prevSongTop, new Vector2(49, 15), songData1.PlayValue, RequirementBarType.Small, barState);
+
+                            if (songData1.Failed)
+                            {
+                                CreateFailText(newPanel, false, false);
+                            }
+
                         }
 
                         if (DaniPlayManager.GetCurrentSongNumber() >= 2)
@@ -406,7 +412,7 @@ namespace DaniDojo.Patches
                         var image = prevSongBarFill.GetOrAddComponent<Image>();
                         if (image != null)
                         {
-                            BorderBarData songData1 = DaniPlayManager.GetBorderBarData(course.Borders[j], DaniPlayManager.GetCurrentPlay(), songIndex - 1);
+                            BorderBarData songData1 = DaniPlayManager.GetBorderBarData(course.Borders[j], DaniPlayManager.GetCurrentPlay(), songIndex - 1, remainingNotes: 0, endOfSong: true);
 
                             var newScale = image.transform.localScale;
                             newScale.x = songData1.FillRatio / 100f;
@@ -438,7 +444,21 @@ namespace DaniDojo.Patches
                 }
             }
 
-            public static void UpdateRequirementBar(BorderType borderType, int remainingNotes = -1)
+            public static void UpdateAllRequirementBars(int remainingNotes = -1, bool endOfSong = false, bool endOfCourse = false)
+            {
+                var numPanels = 0;
+                var course = DaniPlayManager.GetCurrentCourse();
+                for (int j = 0; j < course.Borders.Count && numPanels < 3; j++)
+                {
+                    if (course.Borders[j].BorderType != BorderType.SoulGauge)
+                    {
+                        UpdateRequirementBar(course.Borders[j].BorderType, remainingNotes, endOfSong, endOfCourse);
+                        numPanels++;
+                    }
+                }
+            }
+
+            public static void UpdateRequirementBar(BorderType borderType, int remainingNotes = -1, bool endOfSong = false, bool endOfCourse = false)
             {
                 Plugin.LogInfo(LogType.Info, "UpdateRequirementBar Start", 2);
                 var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
@@ -460,7 +480,7 @@ namespace DaniDojo.Patches
                             var image = bar.GetOrAddComponent<Image>();
                             var emptyImage = emptyBar.GetOrAddComponent<Image>();
                             var colorLerp = bar.GetOrAddComponent<ColorLerp>();
-                            BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber(), remainingNotes: remainingNotes);
+                            BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber(), remainingNotes: remainingNotes, endOfSong: endOfSong, endOfCourse: endOfCourse);
 
                             Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 3", 2);
 
@@ -497,6 +517,11 @@ namespace DaniDojo.Patches
                             emptyImage.transform.localScale = newScale;
                             image.color = data.Color;
                             Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 6", 2);
+
+                            if (data.Failed)
+                            {
+                                CreateFailText(panel, borders[j].IsTotal, false);
+                            }
                         }
 
                         // Why is this even here?
@@ -562,6 +587,34 @@ namespace DaniDojo.Patches
             {
                 GameObject panelObj = GameObject.Find(panel);
                 ChangeReqCurrentValue(panelObj, value, isGold);
+            }
+
+            public static void CreateFailText(GameObject panel, bool isTotal, bool isResult)
+            {
+                FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
+
+                TMP_FontAsset font = fontTMPMgr.GetDefaultFontAsset(DataConst.FontType.EFIGS);
+                Material fontMat = fontTMPMgr.GetDefaultFontMaterial(DataConst.FontType.EFIGS, DataConst.DefaultFontMaterialType.OutlineBlack);
+
+                Rect textRect = new Rect(800, 40, 1000, 75);
+                if (!isTotal)
+                {
+                    textRect = new Rect(650, textRect.y, textRect.width, textRect.height);
+                }
+                if (isResult && !isTotal)
+                {
+                    textRect = new Rect(510, 24, 1000, 45);
+                }
+
+                var textObj = AssetUtility.GetChildByName(panel, "FailText");
+                if (textObj == null)
+                {
+                    textObj = AssetUtility.GetOrCreateTextChild(panel, "FailText", textRect, "Failed");
+                    AssetUtility.SetTextFontAndMaterial(textObj, font, fontMat);
+                    AssetUtility.SetTextColor(textObj, Color.red);
+                    // TODO: Add the fail sound effect here
+                }
+
             }
 
 
@@ -1396,9 +1449,11 @@ namespace DaniDojo.Patches
                 //DaniDojoAssetUtility.CreateImage("RequirementsPanelLeftBorder", GetAssetSprite(SelectAssetName.RequirementsPanelBorder), new Vector2(78, 33), courseObject.transform);
                 //DaniDojoAssetUtility.CreateImage("RequirementsPanelRightBorder", GetAssetSprite(SelectAssetName.RequirementsPanelBorder), new Vector2(1440, 33), courseObject.transform);
 
-                AssetUtility.CreateImageChild(courseObject, "RequirementsMainPanel", new Vector2(78, 417), Path.Combine("Select", "RequirementsMainPanel"));
+                var requirementsMainPanel = AssetUtility.CreateImageChild(courseObject, "RequirementsMainPanel", new Vector2(78, 417), Path.Combine("Select", "RequirementsMainPanel"));
                 AssetUtility.CreateImageChild(courseObject, "RequirementsPanelLeftBorder", new Vector2(78, 33), Path.Combine("Select", "RequirementsPanelBorder"));
                 AssetUtility.CreateImageChild(courseObject, "RequirementsPanelRightBorder", new Vector2(1440, 33), Path.Combine("Select", "RequirementsPanelBorder"));
+
+
 
                 // Add Soul Gauge Requirements
                 //var SoulGaugeReqPanel = DaniDojoAssetUtility.CreateImage("SoulGaugeReqPanel", GetAssetSprite(SelectAssetName.SoulGaugeReqPanel), new Vector2(94, 268), courseObject.transform);
@@ -1410,6 +1465,11 @@ namespace DaniDojo.Patches
 
                 TMP_FontAsset reqValueFont = fontTMPMgr.GetDescriptionFontAsset(DataConst.FontType.EFIGS);
                 Material reqValueFontMaterial = fontTMPMgr.GetDescriptionFontMaterial(DataConst.FontType.EFIGS, DataConst.DescriptionFontMaterialType.OutlineSongInfo);
+
+                Rect requirementsMainPanelRect = new Rect(102, 20, 100, 100);
+                var requirementMainPanelText = AssetUtility.CreateTextChild(requirementsMainPanel, "RequirementsMainPanelHeader", requirementsMainPanelRect, "Clear Conditions");
+                AssetUtility.SetTextFontAndMaterial(requirementMainPanelText, reqTypeFont, reqTypeFontMaterial);
+                AssetUtility.SetTextAlignment(requirementMainPanelText, HorizontalAlignmentOptions.Center);
 
                 Rect SoulGaugeHeaderRect = new Rect(40, 139, 240, 25);
                 //DaniDojoAssetUtility.CreateText("SoulGaugeHeader", "Soul Gauge", SoulGaugeHeaderRect, reqTypeFont, reqTypeFontMaterial, HorizontalAlignmentOptions.Center, new Color32(74, 64, 51, 255), SoulGaugeReqPanel.transform);

@@ -23,6 +23,7 @@ namespace DaniDojo.Patches
     internal class DaniDojoTempEnso
     {
         static bool IsEndOfCourse = false;
+        static bool IsEndOfSong = false;
 
         [HarmonyPatch(typeof(EnsoGameManager))]
         [HarmonyPatch(nameof(EnsoGameManager.CheckEnsoEnd))]
@@ -51,8 +52,12 @@ namespace DaniDojo.Patches
                     {
                         IsEndOfCourse = true;
                         // Make any bads/oks become rainbow if they're gold reqs
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Oks, 0);
-                        DaniDojoAssets.EnsoAssets.UpdateRequirementBar(BorderType.Bads, 0);
+                        DaniDojoAssets.EnsoAssets.UpdateAllRequirementBars(0, endOfCourse: IsEndOfCourse);
+                    }
+                    else if (!IsEndOfSong)
+                    {
+                        IsEndOfSong = true;
+                        DaniDojoAssets.EnsoAssets.UpdateAllRequirementBars(0, endOfCourse: IsEndOfCourse, endOfSong: IsEndOfSong);
                     }
 
                     // 5 seconds after the final note of the song
@@ -68,15 +73,13 @@ namespace DaniDojo.Patches
                         var courseData = DaniPlayManager.GetCurrentCourse();
                         var songIndex = DaniPlayManager.GetCurrentSongNumber();
                         AdvanceSong(courseData, songIndex);
+                        IsEndOfSong = false;
+                        IsEndOfCourse = false;
                     }
                     else
                     {
                         CreateAssets = true;
                     }
-                }
-                else
-                {
-                    IsEndOfCourse = false;
                 }
             }
 
@@ -146,6 +149,7 @@ namespace DaniDojo.Patches
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].randomlv = DataConst.RandomLevel.None;
 #if DEBUG
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.Auto;
+            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
 #else
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
 #endif
@@ -305,6 +309,7 @@ namespace DaniDojo.Patches
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].randomlv = DataConst.RandomLevel.None;
 #if DEBUG
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.Auto;
+            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
 #else
             TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
 #endif
@@ -597,6 +602,12 @@ namespace DaniDojo.Patches
                     bgFever.gameObject.SetActive(false);
                 }
 
+
+                //var tamasiiGauge = GameObject.FindObjectOfType<TamasiiGaugePlayerSprite>();
+                //if (tamasiiGauge != null)
+                //{
+                //    tamasiiGauge.SetTamasiiGauge(0, 69f);
+                //}
 
                 //for (int j = 0; j < StuffToDisable.Count; j++)
                 //{
