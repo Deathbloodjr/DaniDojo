@@ -77,7 +77,7 @@ namespace DaniDojo.Assets
                 // Instead of null, could I have this return just a 1x1 transparent sprite or something?
 
                 // Creates a transparent 2x2 texture, and returns that as the sprite
-                Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
+                Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false, IntPtr.Zero);
                 Color fillColor = Color.clear;
                 Color[] fillPixels = new Color[tex.width * tex.height];
                 for (int i = 0; i < fillPixels.Length; i++)

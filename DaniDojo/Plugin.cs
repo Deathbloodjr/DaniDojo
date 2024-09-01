@@ -171,7 +171,15 @@ namespace DaniDojo
 
                 _harmony.PatchAll(typeof(TestingHooks));
 
-                CustomModeSelectApi.AddButton("DaniDojo", "Dan-i Dojo", "Enters the Dan-i Dojo mode!", new Color32(37, 101, 172, 255), () => DaniDojoDaniCourseSelect.ChangeSceneDaniDojo());
+                try
+                {
+                    CustomModeSelectApi.AddButton("DaniDojo", "Dan-i Dojo", "Enters the Dan-i Dojo mode!", new Color32(37, 101, 172, 255), () => DaniDojoDaniCourseSelect.ChangeSceneDaniDojo());
+                }
+                catch (Exception e)
+                {
+                    LogInfo(LogType.Error, "Failed to add button for DaniDojo mode.");
+                    LogInfo(LogType.Error, e.Message);
+                }
 
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");
             }
