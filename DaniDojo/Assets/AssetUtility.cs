@@ -28,18 +28,21 @@ namespace DaniDojo.Assets
 
             if (AssetFilePath == "")
             {
+                AssetFilePath = Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
                 DirectoryInfo dirInfo = new DirectoryInfo(Plugin.Instance.ConfigDaniDojoAssetLocation.Value);
-                var files = dirInfo.GetFiles("danidojo.scene");
-                if (files.Length != 0)
+                List<string> anchorFiles = new List<string>()
                 {
-                    AssetFilePath = files[0].Directory.FullName;
-                }
-                else
+                    "README.txt",
+                    "danidojo.scene",
+                    "CustomGameModes.scene",
+                };
+                for (int i = 0; i < anchorFiles.Count; i++)
                 {
-                    files = dirInfo.GetFiles("CustomGameModes.scene");
+                    var files = dirInfo.GetFiles(anchorFiles[i], SearchOption.AllDirectories);
                     if (files.Length != 0)
                     {
                         AssetFilePath = files[0].Directory.FullName;
+                        break;
                     }
                 }
             }
