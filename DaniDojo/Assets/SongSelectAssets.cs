@@ -26,21 +26,24 @@ namespace DaniDojo.Assets
         {
             ActiveSongIds.Clear();
             var activeSeries = CourseDataManager.GetActiveSeries();
-            for (int i = 0; i < activeSeries.Courses.Count; i++)
+            if (activeSeries != null)
             {
-                var course = activeSeries.Courses[i];
-                var save = SaveDataManager.GetCourseRecord(course.Hash);
-                for (int j = 0; j < course.Songs.Count; j++)
+                for (int i = 0; i < activeSeries.Courses.Count; i++)
                 {
-                    var song = course.Songs[j];
-                    if (!ActiveSongIds.Contains(song.SongId))
+                    var course = activeSeries.Courses[i];
+                    var save = SaveDataManager.GetCourseRecord(course.Hash);
+                    for (int j = 0; j < course.Songs.Count; j++)
                     {
-                        // Don't show the song if it's hidden and the player hasn't reached it yet
-                        if (save.SongReached <= j && song.IsHidden)
+                        var song = course.Songs[j];
+                        if (!ActiveSongIds.Contains(song.SongId))
                         {
-                            continue;
+                            // Don't show the song if it's hidden and the player hasn't reached it yet
+                            if (save.SongReached <= j && song.IsHidden)
+                            {
+                                continue;
+                            }
+                            ActiveSongIds.Add(song.SongId);
                         }
-                        ActiveSongIds.Add(song.SongId);
                     }
                 }
             }

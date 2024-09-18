@@ -670,6 +670,10 @@ namespace DaniDojo.Managers
 
         static public DaniSeries GetActiveSeries()
         {
+            if (AllSeriesData.Count == 0)
+            {
+                return null;
+            }
             for (int i = 0; i < AllSeriesData.Count; i++)
             {
                 if (AllSeriesData[i].IsActive)

@@ -402,12 +402,15 @@ namespace DaniDojo.Managers
         {
             var series = CourseDataManager.GetActiveSeries();
             SaveCourse highestCourseRecord = null;
-            for (int i = 0; i < series.Courses.Count; i++)
+            if (series != null)
             {
-                var saveCourse = GetCourseRecord(series.Courses[i].Hash);
-                if (saveCourse.RankCombo.Rank >= DaniRank.RedClear)
+                for (int i = 0; i < series.Courses.Count; i++)
                 {
-                    highestCourseRecord = saveCourse;
+                    var saveCourse = GetCourseRecord(series.Courses[i].Hash);
+                    if (saveCourse.RankCombo.Rank >= DaniRank.RedClear)
+                    {
+                        highestCourseRecord = saveCourse;
+                    }
                 }
             }
             return highestCourseRecord;
