@@ -1,79 +1,88 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release-IL2CPP' ">
-    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
-    <DefineConstants>TRACE;TAIKO_IL2CPP;RELEASE</DefineConstants>
+  <PropertyGroup>
+    <AuthorName>DB</AuthorName>
+    <ModName>DaniDojo</ModName>
+    <ModVersion>0.7.0</ModVersion>
+    <Description>A mod to allow players to play DaniDojo mode in TDMX.</Description>
+  </PropertyGroup>
+
+  <Target Name="UserFile" AfterTargets="PreBuildEvent">
+    <Copy
+      Condition="!Exists('.\$(MSBuildProjectDir)\$(ModName).csproj.user')"
+      SourceFiles="..\$(MSBuildProjectDir)\Resources\Template.csproj.user"
+      DestinationFiles=".\$(MSBuildProjectDir)\$(ModName).csproj.user"/>
+    <Error
+      Condition="$(GameDir)==''"
+      Text="Set the GameDir variable in .csproj.user file to your game executable directory."/>
+  </Target>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'TDMX-IL2CPP-Release' ">
+    <DefineConstants>TDMX;IL2CPP;TDMX_IL2CPP;RELEASE;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'TDMX-IL2CPP-Debug' ">
+    <DefineConstants>TDMX;IL2CPP;TDMX_IL2CPP;DEBUG;</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)' == 'TDMX-Mono-Release' ">
+    <DefineConstants>TDMX;MONO;TDMX_MONO;RELEASE;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'TDMX-Mono-Debug' ">
+    <DefineConstants>TDMX;MONO;TDMX_MONO;DEBUG;</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(DefineConstants.Contains('RELEASE'))">
     <Optimize>true</Optimize>
-    <GameDir>D:\Taiko no Tatsujin PC Official\T Tablet\Content</GameDir>
+    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">false</DebugSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug-IL2CPP' ">
+  <PropertyGroup Condition="$(DefineConstants.Contains('DEBUG'))">
+    <Optimize>false</Optimize>
     <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
-    <DefineConstants>TRACE;TAIKO_IL2CPP;DEBUG;</DefineConstants>
-    <GameDir>D:\Taiko no Tatsujin PC Official\T Tablet\Content</GameDir>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release-Mono' ">
-    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
-    <DefineConstants>TRACE;TAIKO_MONO;RELEASE</DefineConstants>
-    <GameDir>D:\Taiko no Tatsujin PC Debug</GameDir>
-  </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug-Mono' ">
-    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
-    <DefineConstants>TRACE;TAIKO_MONO;DEBUG;</DefineConstants>
-    <GameDir>D:\Taiko no Tatsujin PC Debug</GameDir>
+  <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_IL2CPP'))">
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_MONO'))">
+    <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework Condition="$(DefineConstants.Contains('TAIKO_IL2CPP'))">net6.0</TargetFramework>
-    <TargetFramework Condition="$(DefineConstants.Contains('TAIKO_MONO'))">net48</TargetFramework>
-    <AssemblyName>com.DB.DaniDojo</AssemblyName>
-    <Description>A mod to allow players to play DaniDojo mode in TDMX.</Description>
-    <Version>0.6.2</Version>
+    <AssemblyName Condition="$(DefineConstants.Contains('TDMX'))">com.$(AuthorName).TDMX.$(ModName)</AssemblyName>
+    <Version>$(ModVersion)</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <RootNamespace>DaniDojo</RootNamespace>
-    <PackageId>DaniDojo</PackageId>
-    <PackageVersion>0.6.2</PackageVersion>
-    <Configurations>Release-IL2CPP;Release-Mono;Debug-IL2CPP;Debug-Mono</Configurations>
+    <RootNamespace>$(ModName)</RootNamespace>
+    <PackageId>$(ModName)</PackageId>
+    <PackageVersion>$(ModVersion)</PackageVersion>
     <Platforms>AnyCPU</Platforms>
+    <Configurations>TDMX-IL2CPP-Release;TDMX-IL2CPP-Debug;TDMX-Mono-Release;TDMX-Mono-Debug</Configurations>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(DefineConstants.Contains('TAIKO_IL2CPP'))">
-    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.663" />
-    <Reference Include="$(GameDir)\BepInEx\interop\*.dll" Private="false" />
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(DefineConstants.Contains('TAIKO_MONO'))">
+  <ItemGroup Condition="$(DefineConstants.Contains('TDMX_MONO'))">
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="Taiko.GameLibs" Version="1.2.2-r.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.34" IncludeAssets="compile" />
     <Reference Include="$(GameDir)\Taiko no Tatsujin_Data\Managed\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="$(CustomGameModesPath)" Private="false" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$(DefineConstants.Contains('TDMX_IL2CPP'))">
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.697" />
+    <Reference Include="$(GameDir)\BepInEx\interop\*.dll" Private="false" />
+    <Reference Include="$(CustomGameModesPath)" Private="false" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.1.0" />
-    <PackageReference Include="Costura.Fody" Version="5.7.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Fody" Version="6.6.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; compile</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="com.DB.CustomGameModes">
-      <HintPath>$(GameDir)\BepInEx\plugins\com.DB.CustomGameModes.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <Target Name="PostBuildCopy" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuildCopy" AfterTargets="PostBuildEvent" Condition="$(CopyOutputFiles) == true">
     <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(GameDir)\BepInEx\plugins\$(AssemblyName)" />
     <Copy Condition="$(DefineConstants.Contains('DEBUG'))" SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(GameDir)\BepInEx\plugins\$(AssemblyName)" />
   </Target>

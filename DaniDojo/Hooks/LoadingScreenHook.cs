@@ -29,7 +29,7 @@ namespace DaniDojo.Hooks
                 TaikoSingletonMonoBehaviour<InputGuide>.Instance.DisableGuide();
                 __instance.setManager();
                 //__instance.animPlayClip(LoadingScript.LoadingAnimType.LoadingIcon, 2, null);
-                __instance.StartCoroutine(LoadDaniEnso(__instance));
+                Plugin.Instance.StartCoroutine(LoadDaniEnso(__instance));
 
                 __instance.isAnimPlayed = true;
                 return false;
@@ -56,6 +56,7 @@ namespace DaniDojo.Hooks
         }
 
 
+        static LoadingScript loadingScriptInstance = null;
 
         [HarmonyPatch(typeof(LoadingScript))]
         [HarmonyPatch(nameof(LoadingScript.SetLoadingCanvasOut))]
@@ -65,17 +66,21 @@ namespace DaniDojo.Hooks
         {
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
-                __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, delegate (bool result)
-                {
-                    if (result)
-                    {
-                        //__instance.setAlphaCanvasGroup(false, false, false);
-                        __instance.isDisplaying = false;
-                    }
-                });
+                loadingScriptInstance = __instance;
+                __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, (LoadingScript.BoolDelegate)NewSetLoadingCanvasOut);
                 return false;
             }
             return true;
+        }
+
+        public static void NewSetLoadingCanvasOut(bool flag)
+        {
+            if (flag)
+            {
+                //__instance.setAlphaCanvasGroup(false, false, false);
+                loadingScriptInstance.isDisplaying = false;
+                loadingScriptInstance = null;
+            }
         }
 
         [HarmonyPatch(typeof(LoadingScript))]
@@ -89,7 +94,7 @@ namespace DaniDojo.Hooks
                 __instance.setAlphaCanvasGroup(false, false, false);
                 __instance.isAnimPlayed = false;
 
-                __instance.StartCoroutine(WaitForSeconds(5, callback));
+                Plugin.Instance.StartCoroutine(WaitForSeconds(5, callback));
 
                 return false;
             }
@@ -116,7 +121,11 @@ namespace DaniDojo.Hooks
             yield return new WaitForSeconds(sec);
             if (callback != null)
             {
+#if IL2CPP
+                callback.Invoke(true);
+#else
                 callback(true);
+#endif
             }
             yield break;
         }

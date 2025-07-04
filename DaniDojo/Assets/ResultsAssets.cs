@@ -329,7 +329,7 @@ namespace DaniDojo.Assets
             // Exit if not the correct type of border
             if (!border.IsTotal)
             {
-                Plugin.LogInfo(LogType.Info, "Error creating TotalRequirementPanel: Not TotalRequirement Border");
+                ModLogger.Log("Error creating TotalRequirementPanel: Not TotalRequirement Border");
                 return null;
             }
 
@@ -373,7 +373,7 @@ namespace DaniDojo.Assets
             Rect emptyBarRect = new Rect(396 + 966, 36, 966, 80);
 
 
-            //Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
+            //ModLogger.Log("barData.FillRatio: " + barData.FillRatio);
 
             var fillBar = AssetUtility.CreateImageChild(bar, "CurReqBarFill", fillBarRect, barData.Color);
             var colorLerp = fillBar.AddComponent<ColorLerp>();
@@ -420,7 +420,7 @@ namespace DaniDojo.Assets
         {
             if (border.IsTotal)
             {
-                Plugin.LogInfo(LogType.Info, "Error creating PerSongRequirementPanel: Not PerSongRequirement Border");
+                ModLogger.Log("Error creating PerSongRequirementPanel: Not PerSongRequirement Border");
                 return null;
             }
 
@@ -455,7 +455,7 @@ namespace DaniDojo.Assets
                 AssetUtility.CreateImageChild(bar, "CurReqBarBorder", borderBarRect, Path.Combine("Results", "ResultsBorderSmall.png"));
 
 
-                //Plugin.LogInfo(LogType.Info, "barData.FillRatio: " + barData.FillRatio);
+                //ModLogger.Log("barData.FillRatio: " + barData.FillRatio);
 
                 var fillBarImage = AssetUtility.GetOrAddImageComponent(fillBar);
 

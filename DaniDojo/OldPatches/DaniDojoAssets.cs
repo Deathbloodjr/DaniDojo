@@ -460,29 +460,29 @@ namespace DaniDojo.Patches
 
             public static void UpdateRequirementBar(BorderType borderType, int remainingNotes = -1, bool endOfSong = false, bool endOfCourse = false)
             {
-                Plugin.LogInfo(LogType.Info, "UpdateRequirementBar Start", 2);
+                ModLogger.Log("UpdateRequirementBar Start", LogType.Debug);
                 var indexes = DaniPlayManager.GetIndexexOfBorder(borderType);
                 var borders = DaniPlayManager.GetCurrentBorderOfType(borderType);
 
                 for (int j = 0; j < indexes.Count; j++)
                 {
-                    Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: Index: " + j, 2);
+                    ModLogger.Log("UpdateRequirementBar: Index: " + j, LogType.Debug);
                     GameObject panel = GameObject.Find("Panel" + indexes[j]);
                     if (panel != null)
                     {
-                        Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 1", 2);
+                        ModLogger.Log("UpdateRequirementBar: 1", LogType.Debug);
                         //var bar = panel.transform.Find("CurReqBarFill");
                         var bar = AssetUtility.GetChildByName(panel, "CurReqBarFill");
                         var emptyBar = AssetUtility.GetChildByName(panel, "CurReqBarEmpty");
                         if (bar != null && emptyBar != null)
                         {
-                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 2", 2);
+                            ModLogger.Log("UpdateRequirementBar: 2", LogType.Debug);
                             var image = bar.GetOrAddComponent<Image>();
                             var emptyImage = emptyBar.GetOrAddComponent<Image>();
                             var colorLerp = bar.GetOrAddComponent<ColorLerp>();
                             BorderBarData data = DaniPlayManager.GetBorderBarData(borders[j], DaniPlayManager.GetCurrentPlay(), DaniPlayManager.GetCurrentSongNumber(), remainingNotes: remainingNotes, endOfSong: endOfSong, endOfCourse: endOfCourse);
 
-                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 3", 2);
+                            ModLogger.Log("UpdateRequirementBar: 3", LogType.Debug);
 
                             bool isGold = data.State == BorderBarState.Rainbow;
 
@@ -499,7 +499,7 @@ namespace DaniDojo.Patches
                                 colorLerp.UpdateState(data, borders[j].IsTotal);
                             }
 
-                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 4", 2);
+                            ModLogger.Log("UpdateRequirementBar: 4", LogType.Debug);
 
                             ChangeReqCurrentValue(panel, data.PlayValue, isGold);
 
@@ -508,7 +508,7 @@ namespace DaniDojo.Patches
                             // Probably don't need this clamp anymore, but it shouldn't hurt to have it.
                             newScale.x = Math.Max(newScale.x, 0);
                             newScale.x = Math.Min(newScale.x, 1);
-                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 5", 2);
+                            ModLogger.Log("UpdateRequirementBar: 5", LogType.Debug);
 
                             // Previously was resizing the filled area
                             // Currently resizing the empty area
@@ -516,7 +516,7 @@ namespace DaniDojo.Patches
                             newScale.x -= 1;
                             emptyImage.transform.localScale = newScale;
                             image.color = data.Color;
-                            Plugin.LogInfo(LogType.Info, "UpdateRequirementBar: 6", 2);
+                            ModLogger.Log("UpdateRequirementBar: 6", LogType.Debug);
 
                             if (data.Failed)
                             {
@@ -1315,7 +1315,7 @@ namespace DaniDojo.Patches
 
 
                 var wordDataMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.WordDataMgr;
-                List<MusicDataInterface.MusicInfoAccesser> musicInfoAccessers = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.musicInfoAccessers;
+                //List<MusicDataInterface.MusicInfoAccesser> musicInfoAccessers = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.musicInfoAccessers;
                 FontTMPManager fontTMPMgr = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.FontTMPMgr;
 
                 var titleFontType = wordDataMgr.GetWordListInfo("song_struck").FontType;

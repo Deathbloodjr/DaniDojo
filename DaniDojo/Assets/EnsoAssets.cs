@@ -54,7 +54,7 @@ namespace DaniDojo.Assets
                 var flowersBot = AssetUtility.CreateImageChild(flowerParent, "FlowersBot", new Vector2(0, -155), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgFlowersBot.png"));
 
                 IEnumerator flowersCoroutine = TopBgFlowersAnimation(flowerParent, 45f);
-                Plugin.Instance.StartCustomCoroutine(flowersCoroutine);
+                Plugin.Instance.StartCoroutine(flowersCoroutine);
             }
         }
 
@@ -68,7 +68,7 @@ namespace DaniDojo.Assets
                 var petals = AssetUtility.CreateImageChild(petalParent, "Petals", new Vector2(0, 0), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgPetals.png"));
 
                 IEnumerator flowersCoroutine = TopBgPetalAnimation(petalParent, 250f);
-                Plugin.Instance.StartCustomCoroutine(flowersCoroutine);
+                Plugin.Instance.StartCoroutine(flowersCoroutine);
             }
         }
 
@@ -98,7 +98,7 @@ namespace DaniDojo.Assets
                         //rect.pivot = new Vector2(-1, 0);
                     }
                     IEnumerator bgBlueBackCoroutine = TopBgBlueBackAnimation(blueBack, 96f);
-                    Plugin.Instance.StartCustomCoroutine(bgBlueBackCoroutine);
+                    Plugin.Instance.StartCoroutine(bgBlueBackCoroutine);
                 }
             }
         }
@@ -128,7 +128,7 @@ namespace DaniDojo.Assets
                     }
                     var blueMid = AssetUtility.CreateImageChild(parent, "BlueMid" + (i * 3 + j * 1), new Vector2(x, y), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueMid.png"));
                     IEnumerator bgBlueMidCoroutine = TopBgBlueMidAnimation(blueMid, 64f);
-                    Plugin.Instance.StartCustomCoroutine(bgBlueMidCoroutine);
+                    Plugin.Instance.StartCoroutine(bgBlueMidCoroutine);
                 }
             }
         }
@@ -141,8 +141,8 @@ namespace DaniDojo.Assets
                 var blueFrontBig = AssetUtility.CreateImageChild(parent, "BlueFrontBig" + i, new Vector2(201 + (i * 1920), 38), Path.Combine(AssetFilePath, "Enso", "TopBg", "DonBgBlueFrontBig.png"));
                 IEnumerator bgBlueFrontSmallCoroutine = TopBgBlueFrontAnimation(blueFrontSmall, 76f);
                 IEnumerator bgBlueFrontBigCoroutine = TopBgBlueFrontAnimation(blueFrontBig, 76f);
-                Plugin.Instance.StartCustomCoroutine(bgBlueFrontSmallCoroutine);
-                Plugin.Instance.StartCustomCoroutine(bgBlueFrontBigCoroutine);
+                Plugin.Instance.StartCoroutine(bgBlueFrontSmallCoroutine);
+                Plugin.Instance.StartCoroutine(bgBlueFrontBigCoroutine);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DaniDojo.Assets;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -68,12 +69,7 @@ namespace DaniDojo.Patches
             //imageCanvas.worldCamera = parentCanvas.worldCamera;
             //imageCanvas.renderMode = parentCanvas.renderMode;
 
-            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-            tex.LoadImage(File.ReadAllBytes(filePath));
-
-            Rect rect = new Rect(0, 0, tex.width, tex.height);
-            var sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
-
+            var sprite = AssetUtility.LoadSprite(filePath);
             return CreateImage(name, sprite, location, parent);
         }
         public static GameObject CreateImage(string name, Sprite sprite, Vector2 location, Transform parent)
@@ -150,7 +146,7 @@ namespace DaniDojo.Patches
             {
                 var laneImage = gameObject.GetComponentInChildren<Image>();
 
-                var newSprite = CreateSprite(newImageFilePath);
+                var newSprite = AssetUtility.LoadSprite(newImageFilePath);
 
                 if (laneImage != null && laneImage.sprite != null)
                 {
@@ -178,18 +174,6 @@ namespace DaniDojo.Patches
             }
         }
 
-        public static Sprite CreateSprite(string filePath)
-        {
-            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-            if (File.Exists(filePath))
-            {
-                tex.LoadImage(File.ReadAllBytes(filePath));
-            }
-
-            Rect rect = new Rect(0, 0, tex.width, tex.height);
-            return Sprite.Create(tex, rect, new Vector2(0, 0));
-        }
-
         public static GameObject GetChildWithName(GameObject obj, string name)
         {
             Transform trans = obj.transform;
@@ -213,11 +197,7 @@ namespace DaniDojo.Patches
             }
             var image = obj.GetComponent<Image>();
 
-            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
-            tex.LoadImage(File.ReadAllBytes(filePath));
-
-            Rect rect = new Rect(0, 0, tex.width, tex.height);
-            image.sprite = Sprite.Create(tex, rect, new Vector2(0, 0));
+            image.sprite = AssetUtility.LoadSprite(filePath);
         }
 
         public static void ChangeImageSprite(GameObject obj, Sprite sprite)

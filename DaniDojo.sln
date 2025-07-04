@@ -7,20 +7,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaniDojo", "DaniDojo\DaniDo
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug-IL2CPP|Any CPU = Debug-IL2CPP|Any CPU
-		Debug-Mono|Any CPU = Debug-Mono|Any CPU
-		Release-IL2CPP|Any CPU = Release-IL2CPP|Any CPU
-		Release-Mono|Any CPU = Release-Mono|Any CPU
+		TDMX-IL2CPP-Release|Any CPU = TDMX-IL2CPP-Release|Any CPU
+		TDMX-IL2CPP-Debug|Any CPU = TDMX-IL2CPP-Debug|Any CPU
+		TDMX-Mono-Release|Any CPU = TDMX-Mono-Release|Any CPU
+		TDMX-Mono-Debug|Any CPU = TDMX-Mono-Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Debug-IL2CPP|Any CPU.ActiveCfg = Debug-IL2CPP|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Debug-IL2CPP|Any CPU.Build.0 = Debug-IL2CPP|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Debug-Mono|Any CPU.ActiveCfg = Debug-Mono|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Debug-Mono|Any CPU.Build.0 = Debug-Mono|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Release-IL2CPP|Any CPU.ActiveCfg = Release-IL2CPP|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Release-IL2CPP|Any CPU.Build.0 = Release-IL2CPP|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Release-Mono|Any CPU.ActiveCfg = Release-Mono|Any CPU
-		{9F558C41-CE00-4631-8C60-B858E1E742A5}.Release-Mono|Any CPU.Build.0 = Release-Mono|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-IL2CPP-Release|Any CPU.ActiveCfg = TDMX-IL2CPP-Release|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-IL2CPP-Release|Any CPU.Build.0 = TDMX-IL2CPP-Release|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-IL2CPP-Debug|Any CPU.ActiveCfg = TDMX-IL2CPP-Debug|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-IL2CPP-Debug|Any CPU.Build.0 = TDMX-IL2CPP-Debug|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-Mono-Release|Any CPU.ActiveCfg = TDMX-Mono-Release|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-Mono-Release|Any CPU.Build.0 = TDMX-Mono-Release|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-Mono-Debug|Any CPU.ActiveCfg = TDMX-Mono-Debug|Any CPU
+		{9F558C41-CE00-4631-8C60-B858E1E742A5}.TDMX-Mono-Debug|Any CPU.Build.0 = TDMX-Mono-Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

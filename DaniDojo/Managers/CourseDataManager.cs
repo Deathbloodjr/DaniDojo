@@ -17,10 +17,10 @@ namespace DaniDojo.Managers
         #region LoadCourses
         public static void LoadCourseData()
         {
-            //Plugin.LogInfo(LogType.Info, "LoadCourseData Start", true);
+            //ModLogger.Log("LoadCourseData Start", true);
             AllSeriesData = new List<DaniSeries>(); // I'm not sure if this line is actually needed, or even detrimental
             AllSeriesData = LoadCourseData(Plugin.Instance.ConfigDaniDojoDataLocation.Value);
-            //Plugin.LogInfo(LogType.Info, "LoadCourseData Finished", true);
+            //ModLogger.Log("LoadCourseData Finished", true);
         }
 
         static List<DaniSeries> LoadCourseData(string jsonFolderLocation)
@@ -36,12 +36,12 @@ namespace DaniDojo.Managers
 
             for (int i = 0; i < files.Count; i++)
             {
-                Plugin.LogInfo(LogType.Info, "Loading File \"" + files[i].Name + "\"");
+                ModLogger.Log("Loading File \"" + files[i].Name + "\"");
                 var text = File.ReadAllText(files[i].FullName);
                 LWJson node = LWJson.Parse(text);
                 var series = LoadSeries(node);
                 allSeriesData.Add(series);
-                Plugin.LogInfo(LogType.Info, "Loading File \"" + files[i].Name + "\" complete");
+                ModLogger.Log("Loading File \"" + files[i].Name + "\" complete", LogType.Debug);
             }
 
             allSeriesData.Sort((x, y) => x.Order > y.Order ? 1 : -1);
@@ -51,7 +51,7 @@ namespace DaniDojo.Managers
 
         static DaniSeries LoadSeries(LWJson node)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Series start", true);
+            //ModLogger.Log("Loading Series start", true);
             if (node["danSeriesTitle"] != null)
             {
                 var oldSeriesData = LoadOldSeries(node);
@@ -71,13 +71,13 @@ namespace DaniDojo.Managers
 
             seriesData.Courses.Sort((x, y) => x.Order > y.Order ? 1 : -1);
 
-            //Plugin.LogInfo(LogType.Info, "Loading Series finish", true);
+            //ModLogger.Log("Loading Series finish", true);
             return seriesData;
         }
 
         static DaniCourse LoadCourse(LWJson node, DaniSeries parent)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Course start", true);
+            //ModLogger.Log("Loading Course start", true);
             DaniCourse course = new DaniCourse();
             course.Id = node["Id"].AsString();
             course.Title = course.Id;
@@ -175,13 +175,13 @@ namespace DaniDojo.Managers
             course.Parent = parent;
             course.Hash = GetHashFromCourse(course);
 
-            //Plugin.LogInfo(LogType.Info, "Loading Course finish", true);
+            //ModLogger.Log("Loading Course finish", true);
             return course;
         }
 
         static DaniSongData LoadSongData(LWJson node)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Song Data start", true);
+            //ModLogger.Log("Loading Song Data start", true);
             DaniSongData song = new DaniSongData();
             song.SongId = node["SongId"].AsString();
             song.TitleEng = node["TitleEng"].AsString();
@@ -193,26 +193,26 @@ namespace DaniDojo.Managers
             {
                 var levelInt = node["Level"].AsInteger();
                 levelString = levelInt.ToString();
-                //Plugin.LogInfo(LogType.Info, "Level int = " + levelInt, 2);
+                //ModLogger.Log("Level int = " + levelInt, 2);
             }
             catch { }
             try
             {
                 levelString = node["Level"].AsString();
-                //Plugin.LogInfo(LogType.Info, "Level string = " + levelString, 2);
+                //ModLogger.Log("Level string = " + levelString, 2);
             }
             catch { }
             try
             {
                 var levelInt = node["Course"].AsInteger();
                 levelString = levelInt.ToString();
-                //Plugin.LogInfo(LogType.Info, "Course int = " + levelInt, 2);
+                //ModLogger.Log("Course int = " + levelInt, 2);
             }
             catch { }
             try
             {
                 levelString = node["Course"].AsString();
-                //Plugin.LogInfo(LogType.Info, "Course string = " + levelString, 2);
+                //ModLogger.Log("Course string = " + levelString, 2);
             }
             catch { }
 
@@ -257,32 +257,32 @@ namespace DaniDojo.Managers
                     break;
                 default:
                     song.Level = EnsoData.EnsoLevelType.Mania;
-                    Plugin.LogInfo(LogType.Error, "Error reading Song Level of " + levelString + ", defaulted to Oni");
+                    ModLogger.Log("Error reading Song Level of " + levelString + ", defaulted to Oni", LogType.Error);
                     break;
             }
 
             song.IsHidden = node["IsHidden"].AsBoolean();
-            //Plugin.LogInfo(LogType.Info, "Loading Song Data finish", true);
+            //ModLogger.Log("Loading Song Data finish", true);
             return song;
         }
 
         static DaniBorder LoadBorder(LWJson node)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Border start", true);
+            //ModLogger.Log("Loading Border start", true);
             DaniBorder border = new DaniBorder();
-            //Plugin.LogInfo(LogType.Info, "Loading BorderType", true);
+            //ModLogger.Log("Loading BorderType", true);
             string borderTypeString = string.Empty;
             try
             {
                 var borderTypeInt = node["BorderType"]!.AsInteger();
                 borderTypeString = borderTypeInt.ToString();
-                //Plugin.LogInfo(LogType.Info, "BorderType int = " + borderTypeInt, true);
+                //ModLogger.Log("BorderType int = " + borderTypeInt, true);
             }
             catch { }
             try
             {
                 borderTypeString = node["BorderType"]!.AsString();
-                //Plugin.LogInfo(LogType.Info, "BorderType string = " + borderTypeString, true);
+                //ModLogger.Log("BorderType string = " + borderTypeString, true);
             }
             catch { }
 
@@ -330,15 +330,15 @@ namespace DaniDojo.Managers
                     break;
                 default:
                     border.BorderType = BorderType.TotalHits;
-                    Plugin.LogInfo(LogType.Error, "Error reading BorderType of " + borderTypeString + ", defaulted to TotalHits");
+                    ModLogger.Log("Error reading BorderType of " + borderTypeString + ", defaulted to TotalHits", LogType.Error);
                     break;
             }
 
-            //Plugin.LogInfo(LogType.Info, "BorderType Loaded", true);
+            //ModLogger.Log("BorderType Loaded", true);
             var redBorder = node["RedBorder"];
             if (redBorder is LWJsonArray)
             {
-                //Plugin.LogInfo(LogType.Info, "Border is Array", 2);
+                //ModLogger.Log("Border is Array", 2);
                 var redBorderArray = redBorder.AsArray();
                 var goldBorderArray = node["GoldBorder"].AsArray();
                 for (int i = 0; i < redBorderArray.Count; i++)
@@ -352,19 +352,19 @@ namespace DaniDojo.Managers
             }
             else
             {
-                //Plugin.LogInfo(LogType.Info, "Border is not Array", true);
+                //ModLogger.Log("Border is not Array", true);
                 border.RedReqs.Add(node["RedBorder"].AsInteger());
                 border.GoldReqs.Add(node["GoldBorder"].AsInteger());
                 border.IsTotal = true;
             }
-            //Plugin.LogInfo(LogType.Info, "Loading Border finish", true);
+            //ModLogger.Log("Loading Border finish", true);
             return border;
         }
 
 
         static DaniSeries LoadOldSeries(LWJson node)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Old Series start", true);
+            //ModLogger.Log("Loading Old Series start", true);
             DaniSeries seriesData = new DaniSeries();
             seriesData.Title = node["danSeriesTitle"]!.AsString();
             seriesData.Id = node["danSeriesId"]!.AsString();
@@ -378,13 +378,13 @@ namespace DaniDojo.Managers
                 seriesData.Courses.Add(course);
             }
             seriesData.Courses.Sort((x, y) => x.Order > y.Order ? 1 : -1);
-            //Plugin.LogInfo(LogType.Info, "Loading Old Series finish", true);
+            //ModLogger.Log("Loading Old Series finish", true);
             return seriesData;
         }
 
         static DaniCourse LoadOldCourse(LWJson node, DaniSeries parent)
         {
-            //Plugin.LogInfo(LogType.Info, "Loading Old Course start", true);
+            //ModLogger.Log("Loading Old Course start", true);
             DaniCourse course = new DaniCourse();
 
             course.Order = node["danId"]!.AsInteger();
@@ -522,7 +522,7 @@ namespace DaniDojo.Managers
             course.Parent = parent;
             course.Hash = GetHashFromCourse(course);
 
-            //Plugin.LogInfo(LogType.Info, "Loading Old Course finish", true);
+            //ModLogger.Log("Loading Old Course finish", true);
             return course;
         }
 
@@ -540,7 +540,7 @@ namespace DaniDojo.Managers
                     }
                 }
             }
-            //Plugin.LogInfo(LogType.Error, "Could not find corresponding Course from Hash");
+            //ModLogger.Log(LogType.Error, "Could not find corresponding Course from Hash");
             return null;
         }
 
@@ -553,7 +553,7 @@ namespace DaniDojo.Managers
             //     SongLevel
             //     SongId
             //     SongLevel, etc.
-            //Plugin.LogInfo(LogType.Info, "course.Hash = " + course.Hash, true);
+            //ModLogger.Log("course.Hash = " + course.Hash, true);
             if (course.Hash == 0)
             {
                 string hashString = course.Parent.Id;
@@ -566,14 +566,14 @@ namespace DaniDojo.Managers
 
                 course.Hash = MurmurHash2.Hash(hashString);
             }
-            //Plugin.LogInfo(LogType.Info, "course.Hash = " + course.Hash, true);
+            //ModLogger.Log("course.Hash = " + course.Hash, true);
 
             return course.Hash;
         }
 
         static public int GetCourseIndex(DaniSeries series, DaniCourse course)
         {
-            //Plugin.LogInfo(LogType.Info, "GetCourseIndex: Hash: " + course.Hash, true);
+            //ModLogger.Log("GetCourseIndex: Hash: " + course.Hash, true);
             return series.Courses.FindIndex((x) => x.Hash == course.Hash);
         }
 
@@ -600,7 +600,7 @@ namespace DaniDojo.Managers
             do
             {
                 nextCourse = GetNextCourse(series, nextCourse);
-                //Plugin.LogInfo(LogType.Info, "GetNextUnlockedCourse: Checking " + nextCourse.Id, true);
+                //ModLogger.Log("GetNextUnlockedCourse: Checking " + nextCourse.Id, true);
 
                 numAttempts--;
             } while (SaveDataManager.IsCourseLocked(series, nextCourse) && numAttempts > 0);
@@ -608,7 +608,7 @@ namespace DaniDojo.Managers
             {
                 nextCourse = series.Courses[0];
             }
-            //Plugin.LogInfo(LogType.Info, "GetNextUnlockedCourse: Returning " + nextCourse.Id, true);
+            //ModLogger.Log("GetNextUnlockedCourse: Returning " + nextCourse.Id, true);
             return nextCourse;
         }
 

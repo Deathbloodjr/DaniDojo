@@ -15,11 +15,11 @@ namespace DaniDojo.Hooks
         //[HarmonyPrefix]
         //public static bool EnsoGameManager_ProcToResult_Prefix(EnsoGameManager __instance)
         //{
-        //    Plugin.LogInfo(LogType.Info, "ProcToResult", 1);
+        //    ModLogger.Log("ProcToResult", 1);
 
         //    if (__instance.graphicManager.IsEnsoFadeBlackEnd())
         //    {
-        //        Plugin.LogInfo(LogType.Info, "IsEnsoFadeBlackEnd() == true", 1);
+        //        ModLogger.Log("IsEnsoFadeBlackEnd() == true", 1);
         //    }
 
         //    return true;
@@ -32,9 +32,9 @@ namespace DaniDojo.Hooks
         //public static bool EnsoGameManager_ProcResult_Prefix(EnsoGameManager __instance)
         //{
 
-        //    Plugin.LogInfo(LogType.Info, "ProcResult", 1);
+        //    ModLogger.Log("ProcResult", 1);
 
-        //    Plugin.LogInfo(LogType.Info, "this.ensoParam.IsResultEnd: " + __instance.ensoParam.IsResultEnd);
+        //    ModLogger.Log("this.ensoParam.IsResultEnd: " + __instance.ensoParam.IsResultEnd);
 
         //    return true;
         //}
@@ -55,7 +55,7 @@ namespace DaniDojo.Hooks
                 "__instance.adjustTime: " + __instance.adjustTime,
             };
 
-            //Plugin.LogInfo(LogType.Info, data, 1);
+            //ModLogger.Log(data, 1);
 
             return true;
         }
@@ -76,7 +76,7 @@ namespace DaniDojo.Hooks
         //    //    "__instance.adjustTime: " + __instance.adjustTime,
         //    //};
 
-        //    //Plugin.LogInfo(LogType.Info, data, 1);
+        //    //ModLogger.Log(data, 1);
 
         //    return true;
         //}

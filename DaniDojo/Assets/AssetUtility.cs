@@ -75,8 +75,8 @@ namespace DaniDojo.Assets
             // otherwise, the file doesn't exist, log an error, and return null (or hopefully a small transparent sprite
             else
             {
-                Plugin.LogInfo(LogType.Error, "Could not find file: " + spriteFilePath);
-                Plugin.LogInfo(LogType.Error, "Searched for : " + filePath);
+                ModLogger.Log("Could not find file: " + spriteFilePath, LogType.Error);
+                ModLogger.Log("Searched for : " + filePath, LogType.Error);
                 // Instead of null, could I have this return just a 1x1 transparent sprite or something?
 
                 // Creates a transparent 2x2 texture, and returns that as the sprite
@@ -319,15 +319,23 @@ namespace DaniDojo.Assets
 
         static private Sprite LoadSpriteFromFile(string spriteFilePath)
         {
+#if IL2CPP
+            Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false, IntPtr.Zero);
+#elif MONO
             Texture2D tex = new Texture2D(2, 2, TextureFormat.ARGB32, 1, false);
+#endif
             if (!File.Exists(spriteFilePath))
             {
-                Plugin.Log.LogError("Could not find file: " + spriteFilePath);
-                //return null;
+                ModLogger.Log("Could not find file: " + spriteFilePath, LogType.Error);
             }
             else
             {
+#if IL2CPP
+                //tex.LoadRawTextureDataImplArray(File.ReadAllBytes(spriteFilePath));
+                ImageConversion.LoadImage(tex, File.ReadAllBytes(spriteFilePath));
+#elif MONO
                 tex.LoadImage(File.ReadAllBytes(spriteFilePath));
+#endif
             }
 
 

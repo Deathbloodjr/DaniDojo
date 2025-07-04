@@ -126,9 +126,7 @@ namespace DaniDojo.Assets
 
         static public GameObject CreateSongLevelChild(GameObject parent, Vector2 position, DaniSongData song)
         {
-            List<MusicDataInterface.MusicInfoAccesser> musicInfoAccessers = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.musicInfoAccessers;
-
-            var musicInfo = musicInfoAccessers.Find((x) => x.Id == song.SongId);
+            var musicInfo = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(song.SongId);
             string file = string.Empty;
             if (musicInfo == null)
             {

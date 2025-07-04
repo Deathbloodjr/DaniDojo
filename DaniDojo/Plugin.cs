@@ -12,32 +12,29 @@ using System.Linq;
 using DaniDojo.Managers;
 using DaniDojo.Hooks;
 using CustomGameModes.Patches;
+using UnityEngine.Events;
 
-#if TAIKO_IL2CPP
+
+
+#if IL2CPP
 using BepInEx.Unity.IL2CPP.Utils;
 using BepInEx.Unity.IL2CPP;
+using Il2CppInterop.Runtime;
 #endif
 
 namespace DaniDojo
 {
-    public enum LogType
-    {
-        Info,
-        Warning,
-        Error,
-        Fatal,
-        Message,
-        Debug
-    }
 
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, "Dani Dojo", PluginInfo.PLUGIN_VERSION)]
-    [BepInDependency("com.DB.CustomGameModes")]
-#if TAIKO_MONO
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, ModName, MyPluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("com.DB.TDMX.CustomGameModes")]
+#if MONO
     public class Plugin : BaseUnityPlugin
-#elif TAIKO_IL2CPP
+#elif IL2CPP
     public class Plugin : BasePlugin
 #endif
     {
+        public const string ModName = "DaniDojo";
+
         public static Plugin Instance;
         private Harmony _harmony;
         public static ManualLogSource Log;
@@ -53,43 +50,44 @@ namespace DaniDojo
 
         public ConfigEntry<bool> ConfigNamePlateDanRankEnabled;
 
-        public ConfigEntry<bool> ConfigLoggingEnabled;
-        public ConfigEntry<int> ConfigLoggingDetailLevelEnabled;
 
-
-#if TAIKO_MONO
+#if MONO
         private void Awake()
-#elif TAIKO_IL2CPP
+#elif IL2CPP
         public override void Load()
 #endif
         {
             Instance = this;
 
-#if TAIKO_MONO
+#if MONO
             Log = Logger;
-#elif TAIKO_IL2CPP
+#elif IL2CPP
             Log = base.Log;
 #endif
 
-            SetupConfig();
+            SetupConfig(Config, Path.Combine("BepInEx", "data", ModName));
 
-
+            // This has to be moved somewhere else
+            // But not now
             CourseDataManager.LoadCourseData();
             SaveDataManager.LoadSaveData();
 
             SetupHarmony();
         }
 
-        private void SetupConfig()
+        private void SetupConfig(ConfigFile config, string saveFolder, bool isSaveManager = false)
         {
-            string dataFolder = Path.Combine("BepInEx", "data", "DaniDojo");
+            string dataFolder = Path.Combine("BepInEx", "data", ModName);
 
-            ConfigEnabled = Config.Bind("General",
-                "Enabled",
-                true,
-                "Enables the mod.");
+			if (!isSaveManager)
+			{
+				ConfigEnabled = config.Bind("General",
+				   "Enabled",
+				   true,
+				   "Enables the mod.");
+			}
 
-            ConfigDisplayDanSongsInSongSelect = Config.Bind("General",
+			ConfigDisplayDanSongsInSongSelect = Config.Bind("General",
                 "DisplayDanSongsInSongSelect",
                 true,
                 "Will display an icon by songs that are in the active dan series.");
@@ -106,7 +104,7 @@ namespace DaniDojo
 
             ConfigDaniDojoSaveLocation = Config.Bind("Data",
                 "DaniDojoSaveLocation",
-                Path.Combine(dataFolder, "Save"),
+                Path.Combine(saveFolder, "Save"),
                 "The file location for dani dojo save data.");
 
             ConfigSongTitleLanguage = Config.Bind("General",
@@ -118,23 +116,13 @@ namespace DaniDojo
                 "DanRankEnabled",
                 true,
                 "Enables the Dan Rank icon to the left of your name on the nameplate.");
-
-            ConfigLoggingEnabled = Config.Bind("Debug",
-                "LoggingEnabled",
-                true,
-                "Enables logs to be sent to the console.");
-
-            ConfigLoggingDetailLevelEnabled = Config.Bind("Debug",
-                "LoggingDetailLevelEnabled",
-                0,
-                "Enables more detailed logs to be sent to the console. The higher the number, the more logs will be displayed. Mostly for my own debugging.");
         }
 
 
         private void SetupHarmony()
         {
             // Patch methods
-            _harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+            _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
 
             if (ConfigEnabled.Value)
             {
@@ -173,92 +161,40 @@ namespace DaniDojo
 
                 try
                 {
-                    CustomModeSelectApi.AddButton("DaniDojo", "Dan-i Dojo", "Enters the Dan-i Dojo mode!", new Color32(37, 101, 172, 255), () => DaniDojoDaniCourseSelect.ChangeSceneDaniDojo());
-                }
+#if IL2CPP
+                    CustomModeSelectApi.AddButton("DaniDojo", "Dan-i Dojo", "Enters the Dan-i Dojo mode!", new Color32(37, 101, 172, 255), DelegateSupport.ConvertDelegate<UnityAction>(() => DaniDojoDaniCourseSelect.ChangeSceneDaniDojo()));
+#else
+					CustomModeSelectApi.AddButton("DaniDojo", 
+                        "Dan-i Dojo", 
+                        "Enters the Dan-i Dojo mode!", 
+                        new Color32(37, 101, 172, 255), 
+                        DaniDojoDaniCourseSelect.ChangeSceneDaniDojo);
+#endif
+				}
                 catch (Exception e)
                 {
-                    LogInfo(LogType.Error, "Failed to add button for DaniDojo mode.");
-                    LogInfo(LogType.Error, e.Message);
+                    ModLogger.Log("Failed to add button for DaniDojo mode.", LogType.Error);
+                    ModLogger.Log(e.Message, LogType.Error);
                 }
 
-                Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is loaded!");
+                Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is loaded!");
             }
             else
             {
-                Log.LogInfo($"Plugin {PluginInfo.PLUGIN_NAME} is disabled.");
+                Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_NAME} is disabled.");
             }
         }
 
         // I never used these, but they may come in handy at some point
         public static MonoBehaviour GetMonoBehaviour() => TaikoSingletonMonoBehaviour<CommonObjects>.Instance;
 
-        public void StartCustomCoroutine(IEnumerator enumerator)
+        public void StartCoroutine(IEnumerator enumerator)
         {
-#if TAIKO_MONO
+#if MONO
             GetMonoBehaviour().StartCoroutine(enumerator);
-#elif TAIKO_IL2CPP
+#elif IL2CPP
             GetMonoBehaviour().StartCoroutine(enumerator);
 #endif
         }
-
-
-        public void LogInfoInstance(LogType type, string value, int detailLevel = 0)
-        {
-            // Only print if Detailed Enabled is true, or if DetailedEnabled is false and isDetailed is false
-            if (ConfigLoggingEnabled.Value && (ConfigLoggingDetailLevelEnabled.Value >= detailLevel))
-            {
-                switch (type)
-                {
-                    case LogType.Info:
-                        Log.LogInfo("[" + detailLevel + "] " + value);
-                        break;
-                    case LogType.Warning:
-                        Log.LogWarning("[" + detailLevel + "] " + value);
-                        break;
-                    case LogType.Error:
-                        Log.LogError("[" + detailLevel + "] " + value);
-                        break;
-                    case LogType.Fatal:
-                        Log.LogFatal("[" + detailLevel + "] " + value);
-                        break;
-                    case LogType.Message:
-                        Log.LogMessage("[" + detailLevel + "] " + value);
-                        break;
-                    case LogType.Debug:
-                        Log.LogDebug("[" + detailLevel + "] " + value);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        public static void LogInfo(string value, int detailLevel = 0)
-        {
-            LogInfo(LogType.Info, value, detailLevel);
-        }
-        public static void LogInfo(List<string> value, int detailLevel = 0)
-        {
-            LogInfo(LogType.Info, value, detailLevel);
-        }
-
-        public static void LogInfo(LogType type, string value, int detailLevel = 0)
-        {
-            Instance.LogInfoInstance(type, value, detailLevel);
-        }
-        public static void LogInfo(LogType type, List<string> value, int detailLevel = 0)
-        {
-            if (value.Count == 0)
-            {
-                return;
-            }
-            string sendValue = value[0];
-            for (int i = 1; i < value.Count; i++)
-            {
-                sendValue += "\n" + value[i];
-            }
-            Instance.LogInfoInstance(type, sendValue, detailLevel);
-        }
-
     }
 }

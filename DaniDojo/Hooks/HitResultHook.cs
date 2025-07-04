@@ -71,7 +71,7 @@ namespace DaniDojo.Hooks
                 DaniPlayManager.AddHitResultFromEachPlayer(eachPlayer);
                 SoulGaugeManager.AddSoulGaugeValue(frameResult);
                 return;
-                Plugin.LogInfo(LogType.Info, "eachPlayer.countFuka: " + eachPlayer.countFuka);
+                ModLogger.Log("eachPlayer.countFuka: " + eachPlayer.countFuka);
                 for (int i = 0; i < frameResult.hitResultInfoNum - 1; i++)
                 {
                     if (frameResult.hitResultInfo[i].player == 0)

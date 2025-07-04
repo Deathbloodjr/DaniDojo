@@ -1,15 +1,18 @@
-﻿using DaniDojo.Managers;
+﻿using DaniDojo.Assets;
 using DaniDojo.Data;
+using DaniDojo.Managers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.IO;
-using DaniDojo.Assets;
+#if IL2CPP
+using Il2CppInterop.Runtime.Injection;
+#endif
 
 namespace DaniDojo.Patches
 {
@@ -17,6 +20,9 @@ namespace DaniDojo.Patches
     {
         public class DaniDojoSelectManager : MonoBehaviour
         {
+#if IL2CPP
+            static DaniDojoSelectManager() => ClassInjector.RegisterTypeInIl2Cpp<DaniDojoSelectManager>();
+#endif
 
             static DaniSeries currentSeries;
             static DaniCourse currentCourse;
@@ -73,7 +79,7 @@ namespace DaniDojo.Patches
                 CenterCourseParent = AssetUtility.CreateEmptyObject(this.gameObject, "CourseParent", Vector2.zero);
                 LeftCourseParent = AssetUtility.CreateEmptyObject(this.gameObject, "LeftCourseParent", Vector2.zero);
                 DonChanParent = AssetUtility.CreateEmptyObject(this.gameObject, "DonChanParent", AssetUtility.GetPositionFrom1080p(new Vector2(-32, 27)));
-                StartCoroutine(InitializeScene());
+                Plugin.Instance.StartCoroutine(InitializeScene());
 
                 // This doesn't work how I planned
                 // I thought having multiple CriPlayers would allow for multiple sounds to be played at the same time
@@ -221,8 +227,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Left);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(-1920, 0, 0)), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(-1920, 0, 0)), courseMoveTime, true));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -236,8 +242,8 @@ namespace DaniDojo.Patches
                 previousCourseObject = currentCourseObject;
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Right);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(1920, 0, 0)), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(1920, 0, 0)), courseMoveTime, true));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
 
                 SelectTopCourse(currentCourse);
             }
@@ -269,8 +275,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Up);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, 1080, 0)), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, 1080, 0)), courseMoveTime, true));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 
@@ -302,8 +308,8 @@ namespace DaniDojo.Patches
                 DaniDojoAssets.SelectAssets.CreateSeriesAssets(currentSeries, TopCourseParent);
                 currentCourseObject = DaniDojoAssets.SelectAssets.CreateCourseAssets(currentCourse, CenterCourseParent, DaniDojoAssets.SelectAssets.CourseCreateDir.Down);
 
-                StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, -1080, 0)), courseMoveTime, true));
-                StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(previousCourseObject, previousCourseObject.transform.position + AssetUtility.GetPositionFrom1080p(new Vector3(0, -1080, 0)), courseMoveTime, true));
+                Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(currentCourseObject, AssetUtility.GetPositionFrom1080p(new Vector2(342, 26)), courseMoveTime));
                 SelectTopCourse(currentCourse);
             }
 

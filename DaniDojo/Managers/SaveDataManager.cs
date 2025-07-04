@@ -25,10 +25,10 @@ namespace DaniDojo.Managers
         #region Loading
         public static void LoadSaveData()
         {
-            Plugin.LogInfo(LogType.Info, "LoadSaveData Start", 1);
+            ModLogger.Log("LoadSaveData Start", LogType.Debug);
             SaveData = new DaniSaveData(); // I'm not sure if this line is actually needed, or even detrimental
             SaveData = LoadSaveData(Plugin.Instance.ConfigDaniDojoSaveLocation.Value);
-            Plugin.LogInfo(LogType.Info, "LoadSaveData Finished", 1);
+            ModLogger.Log("Save Data Loaded");
         }
 
         static DaniSaveData LoadSaveData(string folderLocation)
@@ -225,7 +225,7 @@ namespace DaniDojo.Managers
 
         static void SaveDaniSaveData(DaniSaveData saveData)
         {
-            Plugin.LogInfo(LogType.Info, "Saving Dani Data", 1);
+            ModLogger.Log("Saving Dani Data", LogType.Debug);
             var saveJsonObject = new LWJsonObject()
             {
                 ["Courses"] = new LWJsonArray(),
@@ -262,7 +262,7 @@ namespace DaniDojo.Managers
                 File.Move(Path.Combine(folderLocation, TmpSaveFileName), Path.Combine(folderLocation, SaveFileName));
             }
 
-            Plugin.LogInfo(LogType.Info, "Saving Dani Data Complete", 1);
+            ModLogger.Log("Saving Dani Data Complete");
         }
 
         static LWJsonObject SaveCourseObject(SaveCourse course)
@@ -318,7 +318,7 @@ namespace DaniDojo.Managers
 
         static public void AddPlayData(uint hash, PlayData play)
         {
-            Plugin.LogInfo(LogType.Info, "AddPlayData", 1);
+            ModLogger.Log("AddPlayData", LogType.Debug);
             for (int i = 0; i < SaveData.Courses.Count; i++)
             {
                 if (SaveData.Courses[i].Hash == hash)
@@ -357,7 +357,7 @@ namespace DaniDojo.Managers
         /// <returns>The next highest course.</returns>
         static public DaniCourse GetDefaultCourse(DaniSeries series)
         {
-            Plugin.LogInfo(LogType.Info, "GetDefaultCourse Start", 2);
+            ModLogger.Log("GetDefaultCourse Start", LogType.Debug);
             // First find the first dan, which is generally the starting point
             // Then move up from there to find the highest cleared dan
             int highestClearedIndex = 0;
@@ -370,7 +370,7 @@ namespace DaniDojo.Managers
                 }
             }
 
-            Plugin.LogInfo(LogType.Info, "GetDefaultCourse Middle", 2);
+            ModLogger.Log("GetDefaultCourse Middle", LogType.Debug);
 
             for (int i = highestClearedIndex; i < series.Courses.Count - 1; i++)
             {
@@ -381,7 +381,7 @@ namespace DaniDojo.Managers
                 }
             }
 
-            Plugin.LogInfo(LogType.Info, "GetDefaultCourse End", 2);
+            ModLogger.Log("GetDefaultCourse End", LogType.Debug);
             return series.Courses[highestClearedIndex];
         }
 

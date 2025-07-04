@@ -7,6 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+#if IL2CPP
+using Il2CppInterop.Runtime;
+#endif
+
 namespace DaniDojo.Managers
 {
     internal class DaniSoundManager
@@ -126,8 +130,12 @@ namespace DaniDojo.Managers
 
         static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
-            //Plugin.LogInfo(LogType.Info, "PlayProcess: " + cueKey);
-            yield return new WaitWhile(() => player.CheckLoading());
+            //ModLogger.Log("PlayProcess: " + cueKey);
+#if IL2CPP
+            yield return new WaitWhile(DelegateSupport.ConvertDelegate<Il2CppSystem.Func<bool>>(() => player.CheckLoading()));
+#else
+            yield return new WaitWhile(player.CheckLoading);
+#endif
             StopSound(player);
             player.Player.SetVolume(volume);
             player.Player.UpdateAll();
