@@ -4,13 +4,13 @@
   <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_IL2CPP'))">
     <GameDir></GameDir>
     <CopyOutputFiles>false</CopyOutputFiles>
-    <CustomGameModesDllPath></CustomGameModesDllPath>
+    <CustomGameModesPath></CustomGameModesPath>
   </PropertyGroup>
   
   <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_MONO'))">
     <GameDir></GameDir>
     <CopyOutputFiles>false</CopyOutputFiles>
-    <CustomGameModesDllPath></CustomGameModesDllPath>
+    <CustomGameModesPath></CustomGameModesPath>
   </PropertyGroup>
   
 </Project>
