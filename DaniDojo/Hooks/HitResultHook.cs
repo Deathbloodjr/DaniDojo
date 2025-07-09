@@ -67,7 +67,7 @@ namespace DaniDojo.Hooks
             if (DaniPlayManager.CheckIsInDan())
             {
                 var frameResult = __instance.ensoParam.GetFrameResults();
-                EachPlayer eachPlayer = frameResult.GetEachPlayer(0);
+                Blittables.EachPlayer eachPlayer = frameResult.eachPlayer[0];
                 DaniPlayManager.AddHitResultFromEachPlayer(eachPlayer);
                 SoulGaugeManager.AddSoulGaugeValue(frameResult);
                 return;

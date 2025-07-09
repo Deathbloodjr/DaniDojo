@@ -1,5 +1,6 @@
 ﻿using DaniDojo.Assets;
 using DaniDojo.Data;
+using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,12 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using static DaniDojo.Patches.DaniDojoDaniCourseSelect;
 
 namespace DaniDojo.Patches
 {
     // This entire class sucks, but it works for now
     internal class ColorLerp : MonoBehaviour
     {
+#if IL2CPP
+        static ColorLerp() => ClassInjector.RegisterTypeInIl2Cpp<ColorLerp>();
+#endif
+
         bool isEnabled = false;
         bool isRainbow = false;
         bool isSmallRainbow = false;

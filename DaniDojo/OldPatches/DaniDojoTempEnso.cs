@@ -16,6 +16,7 @@ using System.Xml;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static MusicDataInterface;
 using static TaikoCoreTypes;
 
 namespace DaniDojo.Patches
@@ -80,17 +81,33 @@ namespace DaniDojo.Patches
         public static void BeginDan(DaniCourse course)
         {
             // Loading screen here would be awesome
-            Plugin.Log.LogInfo("BeginSong Start");
-            MusicDataInterface.MusicInfoAccesser musicInfoAccesser = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(course.Songs[0].SongId);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoType = EnsoData.EnsoType.Normal;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.rankMatchType = EnsoData.RankMatchType.None;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicuid = musicInfoAccesser.Id;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicUniqueId = musicInfoAccesser.UniqueId;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.genre = (EnsoData.SongGenre)musicInfoAccesser.GenreNo;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.playerNum = 1;
-            var ensoPlayerSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0];
+            ModLogger.Log("BeginSong Start", LogType.Debug);
+
+            MusicInfoAccesser musicInfo = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(course.Songs[0].SongId);
+            SetEnsoSettings(course.Songs[0]);
+
+            CreateAssets = true;
+
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("Enso", false);
+
+            Plugin.Instance.StartCoroutine(CloseLaneCovers(true, course.Songs[0].SongId, (EnsoData.SongGenre)musicInfo.GenreNo));
+            ModLogger.Log("BeginSong End", LogType.Debug);
+        }
+
+        static void SetEnsoSettings(DaniSongData daniSongData)
+        {
+            MusicInfoAccesser musicInfo = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(daniSongData.SongId);
+
+            var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
+            ensoSettings.ensoType = EnsoData.EnsoType.Normal;
+            ensoSettings.rankMatchType = EnsoData.RankMatchType.None;
+            ensoSettings.musicuid = musicInfo.Id;
+            ensoSettings.musicUniqueId = musicInfo.UniqueId;
+            ensoSettings.genre = (EnsoData.SongGenre)musicInfo.GenreNo;
+            ensoSettings.playerNum = 1;
+            var ensoPlayerSettings = ensoSettings.ensoPlayerSettings[0];
             ensoPlayerSettings.neiroId = 0;
-            ensoPlayerSettings.courseType = course.Songs[0].Level;
+            ensoPlayerSettings.courseType = daniSongData.Level;
             ensoPlayerSettings.speed = DataConst.SpeedTypes.Normal;
             ensoPlayerSettings.dron = DataConst.OptionOnOff.Off;
             ensoPlayerSettings.reverse = DataConst.OptionOnOff.Off;
@@ -104,30 +121,27 @@ namespace DaniDojo.Patches
             // To prevent highscores from showing up
             ensoPlayerSettings.hiScore = 2000000;
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0] = ensoPlayerSettings;
+            ensoSettings.ensoPlayerSettings[0] = ensoPlayerSettings;
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songFilePath = musicInfoAccesser.SongFileName;
+            ensoSettings.songFilePath = musicInfo.SongFileName;
 
-            SystemOption systemOption;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.GetSystemOption(out systemOption, false);
+            SystemOption systemOption = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.systemOption;
+            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.GetSystemOption(out systemOption, false);
+
             int deviceTypeIndex = EnsoDataManager.GetDeviceTypeIndex(TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].inputDevice);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDispOffset = (int)systemOption.onpuDispLevels[deviceTypeIndex];
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDelay = (int)systemOption.onpuHitLevels[deviceTypeIndex];
+            ensoSettings.noteDispOffset = (int)systemOption.onpuDispLevels[deviceTypeIndex];
+            ensoSettings.noteDelay = (int)systemOption.onpuHitLevels[deviceTypeIndex];
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameSong);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.seVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.voiceVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Voice);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.bgmVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.neiroVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameNeiro);
+            ensoSettings.songVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameSong);
+            ensoSettings.seVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se);
+            ensoSettings.voiceVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Voice);
+            ensoSettings.bgmVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm);
+            ensoSettings.neiroVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameNeiro);
 
-            var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.SetSettings(ref ensoSettings);
-
-            CreateAssets = true;
-
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeRelayScene("Enso", false);
-
-            Plugin.Instance.StartCoroutine(CloseLaneCovers(true, course.Songs[0].SongId, (EnsoData.SongGenre)musicInfoAccesser.GenreNo));
+            //var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
+            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.SetSettings(ref ensoSettings);
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings = ensoSettings;
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.DecideSetting();
         }
 
         static IEnumerator CloseLaneCovers(bool isInitialClose, string songId, EnsoData.SongGenre genreNo)
@@ -246,48 +260,50 @@ namespace DaniDojo.Patches
         {
             MusicDataInterface.MusicInfoAccesser musicInfoAccesser = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(course.Songs[songIndex].SongId);
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoType = EnsoData.EnsoType.Normal;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.rankMatchType = EnsoData.RankMatchType.None;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicuid = musicInfoAccesser.Id;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicUniqueId = musicInfoAccesser.UniqueId;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.genre = (EnsoData.SongGenre)musicInfoAccesser.GenreNo;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.playerNum = 1;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoType = EnsoData.EnsoType.Normal;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.rankMatchType = EnsoData.RankMatchType.None;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicuid = musicInfoAccesser.Id;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicUniqueId = musicInfoAccesser.UniqueId;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.genre = (EnsoData.SongGenre)musicInfoAccesser.GenreNo;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.playerNum = 1;
 
-            var ensoPlayerSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0];
-            ensoPlayerSettings.neiroId = 0;
-            ensoPlayerSettings.courseType = course.Songs[songIndex].Level;
-            ensoPlayerSettings.speed = DataConst.SpeedTypes.Normal;
-            ensoPlayerSettings.dron = DataConst.OptionOnOff.Off;
-            ensoPlayerSettings.reverse = DataConst.OptionOnOff.Off;
-            ensoPlayerSettings.randomlv = DataConst.RandomLevel.None;
-#if DEBUG
-            ensoPlayerSettings.special = DataConst.SpecialTypes.Auto;
-            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
-#else
-            ensoPlayerSettings.special = DataConst.SpecialTypes.None;
-#endif
-            // To prevent highscores from showing up
-            ensoPlayerSettings.hiScore = 2000000;
+//            var ensoPlayerSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0];
+//            ensoPlayerSettings.neiroId = 0;
+//            ensoPlayerSettings.courseType = course.Songs[songIndex].Level;
+//            ensoPlayerSettings.speed = DataConst.SpeedTypes.Normal;
+//            ensoPlayerSettings.dron = DataConst.OptionOnOff.Off;
+//            ensoPlayerSettings.reverse = DataConst.OptionOnOff.Off;
+//            ensoPlayerSettings.randomlv = DataConst.RandomLevel.None;
+//#if DEBUG
+//            ensoPlayerSettings.special = DataConst.SpecialTypes.Auto;
+//            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
+//#else
+//            ensoPlayerSettings.special = DataConst.SpecialTypes.None;
+//#endif
+//            // To prevent highscores from showing up
+//            ensoPlayerSettings.hiScore = 2000000;
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0] = ensoPlayerSettings;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0] = ensoPlayerSettings;
 
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songFilePath = musicInfoAccesser.SongFileName;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songFilePath = musicInfoAccesser.SongFileName;
 
-            SystemOption systemOption;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.GetSystemOption(out systemOption, false);
-            int deviceTypeIndex = EnsoDataManager.GetDeviceTypeIndex(TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].inputDevice);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDispOffset = (int)systemOption.onpuDispLevels[deviceTypeIndex];
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDelay = (int)systemOption.onpuHitLevels[deviceTypeIndex];
+//            SystemOption systemOption = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.systemOption;
 
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameSong);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.seVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.voiceVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Voice);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.bgmVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm);
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.neiroVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameNeiro);
+//            int deviceTypeIndex = EnsoDataManager.GetDeviceTypeIndex(TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].inputDevice);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDispOffset = (int)systemOption.onpuDispLevels[deviceTypeIndex];
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDelay = (int)systemOption.onpuHitLevels[deviceTypeIndex];
 
-            var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
-            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.SetSettings(ref ensoSettings);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameSong);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.seVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.voiceVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Voice);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.bgmVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm);
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.neiroVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameNeiro);
+
+//            var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
+//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.SetSettings(ref ensoSettings);
+
+            SetEnsoSettings(course.Songs[songIndex]);
 
 
             var ensoSceneObject = GameObject.Find("SceneEnsoGame");
@@ -386,6 +402,7 @@ namespace DaniDojo.Patches
         [HarmonyPrefix]
         public static bool EnsoGraphicManager_CreateParts_Prefix(EnsoGraphicManager __instance)
         {
+            ModLogger.Log("EnsoGraphicManager_CreateParts_Prefix");
             if (DaniPlayManager.CheckIsInDan())
             {
                 return CreateAssets;
@@ -396,12 +413,17 @@ namespace DaniDojo.Patches
         static string baseImageFilePath = Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
 
         [HarmonyPatch(typeof(EnsoGraphicManager))]
-        [HarmonyPatch(nameof(EnsoGraphicManager.CreateParts))]
+        [HarmonyPatch(nameof(EnsoGraphicManager.Update))]
         [HarmonyPatch(MethodType.Normal)]
         [HarmonyPostfix]
-        public static void EnsoGraphicManager_CreateParts_Postfix(EnsoGraphicManager __instance)
+        public static void EnsoGraphicManager_Update_Postfix(EnsoGraphicManager __instance)
         {
-            if (DaniPlayManager.CheckIsInDan() && CreateAssets)
+            //ModLogger.Log("EnsoGraphicManager_Update_Postfix");
+            if (!CreateAssets)
+            {
+                return;
+            }
+            if (DaniPlayManager.CheckIsInDan() && __instance.state == EnsoGraphicManager.State.Exec)
             {
                 Plugin.Log.LogInfo("Image Change Start");
 
@@ -473,6 +495,7 @@ namespace DaniDojo.Patches
 
                 #endregion
 
+                CreateAssets = false;
                 Plugin.Log.LogInfo("Image Change End");
             }
 

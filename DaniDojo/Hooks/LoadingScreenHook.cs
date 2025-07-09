@@ -2,6 +2,7 @@
 using DaniDojo.Managers;
 using DaniDojo.Patches;
 using HarmonyLib;
+using Il2CppInterop.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -56,31 +57,27 @@ namespace DaniDojo.Hooks
         }
 
 
-        static LoadingScript loadingScriptInstance = null;
-
         [HarmonyPatch(typeof(LoadingScript))]
         [HarmonyPatch(nameof(LoadingScript.SetLoadingCanvasOut))]
         [HarmonyPatch(MethodType.Normal)]
         [HarmonyPrefix]
         public static bool LoadingScript_SetLoadingCanvasOut_Prefix(LoadingScript __instance)
         {
+            ModLogger.Log("LoadingScript_SetLoadingCanvasOut_Prefix");
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
-                loadingScriptInstance = __instance;
-                __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, (LoadingScript.BoolDelegate)NewSetLoadingCanvasOut);
+                // DelegateSupport.ConvertDelegate<Il2CppSystem.Func<bool>>
+                __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, DelegateSupport.ConvertDelegate<LoadingScript.BoolDelegate>((bool result) =>
+                {
+                    if (result)
+                    {
+                        //__instance.setAlphaCanvasGroup(false, false, false);
+                        __instance.isDisplaying = false;
+                    }
+                }));
                 return false;
             }
             return true;
-        }
-
-        public static void NewSetLoadingCanvasOut(bool flag)
-        {
-            if (flag)
-            {
-                //__instance.setAlphaCanvasGroup(false, false, false);
-                loadingScriptInstance.isDisplaying = false;
-                loadingScriptInstance = null;
-            }
         }
 
         [HarmonyPatch(typeof(LoadingScript))]
