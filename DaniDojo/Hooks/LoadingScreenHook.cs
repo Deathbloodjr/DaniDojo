@@ -2,7 +2,6 @@
 using DaniDojo.Managers;
 using DaniDojo.Patches;
 using HarmonyLib;
-using Il2CppInterop.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+#if IL2CPP
+using Il2CppInterop.Runtime;
+#endif
 
 namespace DaniDojo.Hooks
 {
@@ -67,14 +69,22 @@ namespace DaniDojo.Hooks
             if (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult())
             {
                 // DelegateSupport.ConvertDelegate<Il2CppSystem.Func<bool>>
+#if IL2CPP
                 __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, DelegateSupport.ConvertDelegate<LoadingScript.BoolDelegate>((bool result) =>
+#else
+                __instance.setLoadingCanvasOut(LoadingScript.LoadingTypeName.LoadingSong, delegate (bool result)
+#endif
                 {
                     if (result)
                     {
                         //__instance.setAlphaCanvasGroup(false, false, false);
                         __instance.isDisplaying = false;
                     }
+#if IL2CPP
                 }));
+#else
+                });
+#endif
                 return false;
             }
             return true;

@@ -85,8 +85,10 @@ namespace DaniDojo.Hooks
         [HarmonyPrefix]
         public static bool EnsoGameManager_ProcResult_Prefix(EnsoGameManager __instance)
         {
+            ModLogger.Log("EnsoGameManager_ProcResult_Prefix", LogType.Debug);
             if (__instance.stateTimer == 1 && (DaniPlayManager.CheckIsInDan() || DaniPlayManager.CheckStartResult()))
             {
+                ModLogger.Log("EnsoGameManager_ProcResult_Prefix Inside if check", LogType.Debug);
                 //__instance.graphicManager.SetActiveStateFade();
                 GameObject ResultsParent = GameObject.Find("DaniResults");
                 if (ResultsParent == null)

@@ -7,11 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using static DaniDojo.Managers.ResultsManager;
+
+#if IL2CPP
+using Il2CppInterop.Runtime.Injection;
+#endif
 
 namespace DaniDojo.Assets
 {
     internal class DaniDojoCourseSelectIcon : MonoBehaviour
     {
+#if IL2CPP
+        static DaniDojoCourseSelectIcon() => ClassInjector.RegisterTypeInIl2Cpp<DaniDojoCourseSelectIcon>();
+#endif
         int yTop = -42;
         int yBot = -47;
         float verticalMovementInterval = 0.18f;

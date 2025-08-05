@@ -260,49 +260,6 @@ namespace DaniDojo.Patches
         {
             MusicDataInterface.MusicInfoAccesser musicInfoAccesser = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.MusicData.GetInfoById(course.Songs[songIndex].SongId);
 
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoType = EnsoData.EnsoType.Normal;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.rankMatchType = EnsoData.RankMatchType.None;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicuid = musicInfoAccesser.Id;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.musicUniqueId = musicInfoAccesser.UniqueId;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.genre = (EnsoData.SongGenre)musicInfoAccesser.GenreNo;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.playerNum = 1;
-
-//            var ensoPlayerSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0];
-//            ensoPlayerSettings.neiroId = 0;
-//            ensoPlayerSettings.courseType = course.Songs[songIndex].Level;
-//            ensoPlayerSettings.speed = DataConst.SpeedTypes.Normal;
-//            ensoPlayerSettings.dron = DataConst.OptionOnOff.Off;
-//            ensoPlayerSettings.reverse = DataConst.OptionOnOff.Off;
-//            ensoPlayerSettings.randomlv = DataConst.RandomLevel.None;
-//#if DEBUG
-//            ensoPlayerSettings.special = DataConst.SpecialTypes.Auto;
-//            //TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].special = DataConst.SpecialTypes.None;
-//#else
-//            ensoPlayerSettings.special = DataConst.SpecialTypes.None;
-//#endif
-//            // To prevent highscores from showing up
-//            ensoPlayerSettings.hiScore = 2000000;
-
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0] = ensoPlayerSettings;
-
-
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songFilePath = musicInfoAccesser.SongFileName;
-
-//            SystemOption systemOption = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.PlayData.systemOption;
-
-//            int deviceTypeIndex = EnsoDataManager.GetDeviceTypeIndex(TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.ensoPlayerSettings[0].inputDevice);
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDispOffset = (int)systemOption.onpuDispLevels[deviceTypeIndex];
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.noteDelay = (int)systemOption.onpuHitLevels[deviceTypeIndex];
-
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.songVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameSong);
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.seVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se);
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.voiceVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Voice);
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.bgmVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm);
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings.neiroVolume = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.InGameNeiro);
-
-//            var ensoSettings = TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.ensoSettings;
-//            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MyDataManager.EnsoData.SetSettings(ref ensoSettings);
-
             SetEnsoSettings(course.Songs[songIndex]);
 
 
@@ -392,10 +349,43 @@ namespace DaniDojo.Patches
             }
         }
 
+#if IL2CPP
+        static List<EnsoPostInfoList> EnsoGraphicManagerPostInfoList = new List<EnsoPostInfoList>();
+        [HarmonyPatch(typeof(EnsoGraphicManager))]
+        [HarmonyPatch(nameof(EnsoGraphicManager.Update))]
+        [HarmonyPatch(MethodType.Normal)]
+        [HarmonyPrefix]
+        public static void EnsoGraphicManager_Update_Prefix(EnsoGraphicManager __instance)
+        {
+            if (EnsoGraphicManagerPostInfoList.Count == 0)
+            {
+                for (int i = 0; i < __instance.postInfos.Count; i++)
+                {
+                    EnsoGraphicManagerPostInfoList.Add(__instance.postInfos[i]);
+                }
+            }
+            if (DaniPlayManager.CheckIsInDan())
+            {
+                if (!CreateAssets)
+                {
+                    __instance.postInfos.Clear();
+                }
+                else
+                {
+                    if (__instance.postInfos.Count == 0)
+                    {
+                        for (int i = 0; i < EnsoGraphicManagerPostInfoList.Count; i++)
+                        {
+                            __instance.postInfos.Add(EnsoGraphicManagerPostInfoList[i]);
+                        }
+                    }
+                }
+            }
+        }
+#endif
 
 
-
-
+#if MONO
         [HarmonyPatch(typeof(EnsoGraphicManager))]
         [HarmonyPatch(nameof(EnsoGraphicManager.CreateParts))]
         [HarmonyPatch(MethodType.Normal)]
@@ -409,6 +399,7 @@ namespace DaniDojo.Patches
             }
             return true;
         }
+#endif
 
         static string baseImageFilePath = Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
 

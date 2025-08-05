@@ -8,6 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static DaniDojo.Patches.DaniDojoDaniCourseSelect;
+#if IL2CPP
+using Il2CppInterop.Runtime.Injection;
+#endif
 
 namespace DaniDojo.Managers
 {
@@ -15,6 +19,9 @@ namespace DaniDojo.Managers
     {
         internal class DaniResultsPlayer : MonoBehaviour
         {
+#if IL2CPP
+            static DaniResultsPlayer() => ClassInjector.RegisterTypeInIl2Cpp<DaniResultsPlayer>();
+#endif
             enum DaniResultScreen
             {
                 Songs,

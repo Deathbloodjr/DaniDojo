@@ -1,6 +1,5 @@
 ﻿using DaniDojo.Assets;
 using DaniDojo.Data;
-using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +9,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using static DaniDojo.Patches.DaniDojoDaniCourseSelect;
+#if IL2CPP
+using Il2CppInterop.Runtime.Injection;
+#endif
 
 namespace DaniDojo.Patches
 {
