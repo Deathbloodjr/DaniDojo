@@ -36,12 +36,13 @@ namespace DaniDojo.Managers
 
             for (int i = 0; i < files.Count; i++)
             {
-                ModLogger.Log("Loading File \"" + files[i].Name + "\"");
+                //ModLogger.Log("Loading File \"" + files[i].Name + "\"");
                 var text = File.ReadAllText(files[i].FullName);
                 LWJson node = LWJson.Parse(text);
                 var series = LoadSeries(node);
                 allSeriesData.Add(series);
-                ModLogger.Log("Loading File \"" + files[i].Name + "\" complete", LogType.Debug);
+                ModLogger.Log("Dani Course loaded: " + files[i].Name);
+                //ModLogger.Log("Loading File \"" + files[i].Name + "\" complete", LogType.Debug);
             }
 
             allSeriesData.Sort((x, y) => x.Order > y.Order ? 1 : -1);

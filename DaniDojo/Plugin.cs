@@ -87,32 +87,32 @@ namespace DaniDojo
 				   "Enables the mod.");
 			}
 
-			ConfigDisplayDanSongsInSongSelect = Config.Bind("General",
+			ConfigDisplayDanSongsInSongSelect = config.Bind("General",
                 "DisplayDanSongsInSongSelect",
                 true,
                 "Will display an icon by songs that are in the active dan series.");
 
-            ConfigDaniDojoDataLocation = Config.Bind("Data",
+            ConfigDaniDojoDataLocation = config.Bind("Data",
                 "DaniDojoDataLocation",
                 Path.Combine(dataFolder, "Courses"),
                 "The file location for all dani dojo course data.");
 
-            ConfigDaniDojoAssetLocation = Config.Bind("Data",
+            ConfigDaniDojoAssetLocation = config.Bind("Data",
                 "DaniDojoAssetLocation",
                 Path.Combine(dataFolder, "Assets"),
                 "The file location for all dani dojo asset data.");
 
-            ConfigDaniDojoSaveLocation = Config.Bind("Data",
+            ConfigDaniDojoSaveLocation = config.Bind("Data",
                 "DaniDojoSaveLocation",
                 Path.Combine(saveFolder, "Save"),
                 "The file location for dani dojo save data.");
 
-            ConfigSongTitleLanguage = Config.Bind("General",
+            ConfigSongTitleLanguage = config.Bind("General",
                 "SongTitleLanguage",
                 "Eng",
                 "The language for any song titles that could not be found. (Eng or Jp)");
 
-            ConfigNamePlateDanRankEnabled = Config.Bind("NamePlate",
+            ConfigNamePlateDanRankEnabled = config.Bind("NamePlate",
                 "DanRankEnabled",
                 true,
                 "Enables the Dan Rank icon to the left of your name on the nameplate.");

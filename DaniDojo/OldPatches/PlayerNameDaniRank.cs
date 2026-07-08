@@ -22,6 +22,7 @@ namespace DaniDojo.Patches
         [HarmonyPostfix]
         public static void PlayerName_Start_Postfix(PlayerName __instance)
         {
+            //ModLogger.Log("PlayerName_Start_Postfix", LogType.Debug);
             if (!Plugin.Instance.ConfigNamePlateDanRankEnabled.Value)
             {
                 return;
@@ -45,10 +46,15 @@ namespace DaniDojo.Patches
             GameObject danRankObject = new GameObject("DanRank");
             danRankObject.transform.SetParent(__instance.gameObject.transform);
 
+            float ResolutionScale = rect.lossyScale.x;
+
             var newPos = rect.position;
-            newPos.x -= 163;
-            newPos.y -= 18;
+            newPos.x -= (163 * ResolutionScale);
+            newPos.y -= (18 * ResolutionScale);
             danRankObject.transform.position = newPos;
+
+            danRankObject.transform.localScale = Vector3.one;
+
             //if (TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.CurrentSceneName == "Enso")
             //{
             //    danRankObject.transform.position = new Vector3(60, 160, 0);
