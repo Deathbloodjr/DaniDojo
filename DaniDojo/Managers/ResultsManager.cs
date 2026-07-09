@@ -50,9 +50,14 @@ namespace DaniDojo.Managers
 
             }
 
+            bool changingScene = false;
+
             public void Update()
             {
-                GetInput();
+                if (!changingScene)
+                {
+                    GetInput();
+                }
             }
 
 
@@ -79,6 +84,7 @@ namespace DaniDojo.Managers
                 {
                     TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
                     DaniPlayManager.SetStartResult(false);
+                    changingScene = true;
                     DaniDojoDaniCourseSelect.ChangeSceneDaniDojo();
                 }
             }

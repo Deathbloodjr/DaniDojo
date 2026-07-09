@@ -73,13 +73,17 @@
     <PackageReference Include="Taiko.GameLibs" Version="1.2.2-r.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.34" IncludeAssets="compile" />
     <Reference Include="$(GameDir)\Taiko no Tatsujin_Data\Managed\Unity.TextMeshPro.dll" Private="false" />
-    <Reference Include="$(CustomGameModesPath)" Private="false" />
   </ItemGroup>
   
   <ItemGroup Condition="$(DefineConstants.Contains('TDMX_IL2CPP'))">
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.697" />
     <Reference Include="$(GameDir)\BepInEx\interop\*.dll" Private="false" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="$(DefineConstants.Contains('TDMX'))">
     <Reference Include="$(CustomGameModesPath)" Private="false" />
+    <Reference Include="$(SaveProfileManagerPath)" Private="false" />
+    <Reference Include="$(AutoScreenshotPath)" Private="false" />
   </ItemGroup>
 
   <Target Name="PostBuildCopy" AfterTargets="PostBuildEvent" Condition="$(CopyOutputFiles) == true">

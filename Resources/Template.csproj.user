@@ -4,13 +4,17 @@
   <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_IL2CPP'))">
     <GameDir></GameDir>
     <CopyOutputFiles>false</CopyOutputFiles>
+    <SaveProfileManagerPath></SaveProfileManagerPath>
     <CustomGameModesPath></CustomGameModesPath>
+    <AutoScreenshotPath></AutoScreenshotPath>
   </PropertyGroup>
   
   <PropertyGroup Condition="$(DefineConstants.Contains('TDMX_MONO'))">
     <GameDir></GameDir>
     <CopyOutputFiles>false</CopyOutputFiles>
+    <SaveProfileManagerPath></SaveProfileManagerPath>
     <CustomGameModesPath></CustomGameModesPath>
+    <AutoScreenshotPath></AutoScreenshotPath>
   </PropertyGroup>
   
 </Project>
