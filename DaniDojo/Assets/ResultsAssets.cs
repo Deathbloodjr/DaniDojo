@@ -38,13 +38,12 @@ namespace DaniDojo.Assets
             return songBg;
         }
 
-        static public void CreateEachSongBg(GameObject parent, DaniCourse course, PlayData play, SaveCourse save)
+        static public List<GameObject> CreateEachSongBg(GameObject parent, DaniCourse course, PlayData play, SaveCourse save, bool toSlideIn = false)
         {
+            var songPanels = new List<GameObject>();
             for (int i = 0; i < Math.Min(course.Songs.Count, 3); i++)
             {
-                int x = 28;
-                int y = 607 - (i * 276);
-                var songBg = AssetUtility.CreateImageChild(parent, "SongBg", new Vector2(x, y), Path.Combine("Results", "SongBg.png"));
+                var songBg = AssetUtility.CreateImageChild(parent, "SongBg", GetSongPanelPosition(i, toSlideIn), Path.Combine("Results", "SongBg.png"));
                 var songPanel = AssetUtility.CreateImageChild(songBg, "SongPanel" + i, new Vector2(38, 119), Path.Combine("Results", "SongPanel.png"));
 
                 AssetUtility.CreateImageChild(songPanel, "SongIndicator", new Vector2(10, 10), Path.Combine("Results", "SongIndicator" + (i + 1) + ".png"));
@@ -92,7 +91,22 @@ namespace DaniDojo.Assets
                     Vector2 digitPosition = basePosition + new Vector2(-28 * (drumroll.Length - (j + 1)), 0);
                     CommonAssets.CreateDigit(songDrumrollsPanel, "Drumroll" + (drumroll.Length - (j + 1)), digitPosition, DigitType.ResultsBlack, drumroll[j]);
                 }
+
+                songPanels.Add(songBg.gameObject);
             }
+
+            return songPanels;
+        }
+
+        public static Vector2 GetSongPanelPosition(int index, bool toSlideIn = false)
+        {
+            int x = 28;
+            if (toSlideIn)
+            {
+                x += 1920;
+            }
+            int y = 607 - (index * 276);
+            return new Vector2(x, y);
         }
 
         static public GameObject CreatePlayRecordBg(GameObject parent)

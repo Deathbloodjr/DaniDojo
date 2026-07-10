@@ -185,16 +185,18 @@ namespace DaniDojo
             }
         }
 
-        // I never used these, but they may come in handy at some point
-        public static MonoBehaviour GetMonoBehaviour() => TaikoSingletonMonoBehaviour<CommonObjects>.Instance;
+        // I'm very upset at whoever convinced me that this was necessary to have in mods
+        // This Plugin class inherits from MonoBehaviour, so all of this stuff is already in the class
+//        // I never used these, but they may come in handy at some point
+//        public static MonoBehaviour GetMonoBehaviour() => TaikoSingletonMonoBehaviour<CommonObjects>.Instance;
 
-        public void StartCoroutine(IEnumerator enumerator)
-        {
-#if MONO
-            GetMonoBehaviour().StartCoroutine(enumerator);
-#elif IL2CPP
-            GetMonoBehaviour().StartCoroutine(enumerator);
-#endif
-        }
+//        public Coroutine StartCoroutine(IEnumerator enumerator)
+//        {
+//#if MONO
+//            return GetMonoBehaviour().StartCoroutine(enumerator);
+//#elif IL2CPP
+//            return GetMonoBehaviour().StartCoroutine(enumerator);
+//#endif
+//        }
     }
 }
