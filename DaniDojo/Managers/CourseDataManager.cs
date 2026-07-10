@@ -67,7 +67,10 @@ namespace DaniDojo.Managers
             for (int i = 0; i < courses.Count; i++)
             {
                 var course = LoadCourse(courses[i], seriesData);
-                seriesData.Courses.Add(course);
+                if (course != null)
+                {
+                    seriesData.Courses.Add(course);
+                }
             }
 
             seriesData.Courses.Sort((x, y) => x.Order > y.Order ? 1 : -1);
@@ -171,6 +174,18 @@ namespace DaniDojo.Managers
             {
                 var border = LoadBorder(borders[i]);
                 course.Borders.Add(border);
+            }
+
+            for (int i = 0; i < course.Borders.Count; i++)
+            {
+                // The borders for a course must have either 1 (meaning it's all songs in total), 
+                // or the number of songs in the course (meaning they're all separate, where they all must have a value)
+                if (course.Borders[i].RedReqs.Count != 1 &&
+                    course.Borders[i].RedReqs.Count != course.Songs.Count)
+                {
+                    ModLogger.Log("Error loading course: " + course.Title + " in series: " + parent.Title, LogType.Error);
+                    return null;
+                }
             }
 
             course.Parent = parent;
