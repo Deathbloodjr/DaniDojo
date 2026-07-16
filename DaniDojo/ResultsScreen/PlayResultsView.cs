@@ -25,6 +25,7 @@ namespace DaniDojo.ResultsScreen
 
         public void Initialize(DaniResultsPlayer newParent, GameObject playRecordParent, DaniCourse course, PlayData currentPlay)
         {
+            parent = newParent;
             PlayRecordParent = playRecordParent;
 
             var scoreBg = ResultsAssets.CreatePlayRecordScoreBg(playRecordParent, currentPlay);

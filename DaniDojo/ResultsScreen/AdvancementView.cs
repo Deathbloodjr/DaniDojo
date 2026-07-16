@@ -23,6 +23,7 @@ namespace DaniDojo.ResultsScreen
 
         public void Initialize(DaniResultsPlayer newParent, GameObject bg, DaniCourse course, PlayData currentPlay)
         {
+            parent = newParent;
         }
 
 

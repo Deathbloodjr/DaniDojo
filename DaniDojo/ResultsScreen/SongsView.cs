@@ -25,6 +25,7 @@ namespace DaniDojo.ResultsScreen
 
         public void Initialize(DaniResultsPlayer newParent, GameObject bg, DaniCourse course, PlayData currentPlay)
         {
+            parent = newParent;
             var songPanel = ResultsAssets.CreateSongPanel(bg);
             songPanels = ResultsAssets.CreateEachSongBg(songPanel, course, currentPlay, SaveDataManager.GetCourseRecord(course.Hash), true);
         }
@@ -118,7 +119,6 @@ namespace DaniDojo.ResultsScreen
             }
             finally
             {
-                ModLogger.Log("PlayIntro finally");
                 SnapToEndPosition();
                 introAnimation = null;
                 StartAutoAdvanceTimer();
@@ -130,6 +130,7 @@ namespace DaniDojo.ResultsScreen
             try
             {
                 ModLogger.Log("AutoAdvanceTimer Songs -> PlayResults", LogType.Debug);
+                // Maybe have this set in the config file?
                 yield return new WaitForSeconds(10.0f);
             }
             finally
