@@ -160,61 +160,72 @@ namespace DaniDojo.Patches
             float currentBuffer = 0;
             public void GetInput()
             {
-                if (currentBuffer != 0)
+                var controller = TaikoSingletonMonoBehaviour<ControllerManager>.Instance;
+                var commonObjects = TaikoSingletonMonoBehaviour<CommonObjects>.Instance;
+
+                if (controller.GetCancelDown(ControllerManager.ControllerPlayerNo.Player1))
+                {
+                    commonObjects.MySoundManager.CommonSePlay("don", false, false);
+                    commonObjects.MySceneManager.ChangeScene("SongSelect", false);
+                    DaniSoundManager.StopBgm();
+                    return;
+                }
+
+                if (currentBuffer > 0)
                 {
                     currentBuffer -= Time.deltaTime;
-                    currentBuffer = Math.Max(currentBuffer, 0);
-                }
-                if (!DaniPlayManager.CheckIsInDan() && isLoaded)
-                {
-                    ControllerManager.Dir dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
-                    if (dir == ControllerManager.Dir.None)
-                    {
-                        dir = TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetDirectionMouseScrollWheel();
-                    }
-                    if (dir == ControllerManager.Dir.Left && currentBuffer == 0)
-                    {
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
-                        PrevCourse();
-                        currentBuffer = inputBuffer;
-                    }
-                    else if (dir == ControllerManager.Dir.Right && currentBuffer == 0)
-                    {
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
-                        NextCourse();
-                        currentBuffer = inputBuffer;
-                    }
-                    else if (dir == ControllerManager.Dir.Up && currentBuffer == 0)
-                    {
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
-                        PrevSeries();
-                        currentBuffer = inputBuffer;
-                    }
-                    else if (dir == ControllerManager.Dir.Down && currentBuffer == 0)
-                    {
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("katsu", false, false);
-                        NextSeries();
-                        currentBuffer = inputBuffer;
-                    }
-                    else if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetOkDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
-                    {
-                        DaniPlayManager.StartDanPlay(currentCourse);
-
-                        DaniSoundManager.StopBgm();
-
-                        DaniDojoTempEnso.BeginDan(currentCourse);
-                        TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
-                    }
-                    else if (dir == ControllerManager.Dir.None)
+                    if (currentBuffer < 0)
                     {
                         currentBuffer = 0;
                     }
                 }
-                if (TaikoSingletonMonoBehaviour<ControllerManager>.Instance.GetCancelDown(ControllerManager.ControllerPlayerNo.Player1) && currentBuffer == 0)
+
+                if (DaniPlayManager.CheckIsInDan() || !isLoaded)
                 {
-                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.CommonSePlay("don", false, false);
-                    TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeScene("SongSelect", false);
+                    return;
+                }
+
+                ControllerManager.Dir dir = controller.GetDirectionButton(ControllerManager.ControllerPlayerNo.Player1, ControllerManager.Prio.None, false);
+                if (dir == ControllerManager.Dir.None)
+                {
+                    dir = controller.GetDirectionMouseScrollWheel();
+                }
+
+                if (dir == ControllerManager.Dir.None)
+                {
+                    currentBuffer = 0f;
+                }
+
+                if (controller.GetOkDown(ControllerManager.ControllerPlayerNo.Player1))
+                {
+                    DaniPlayManager.StartDanPlay(currentCourse);
                     DaniSoundManager.StopBgm();
+                    DaniDojoTempEnso.BeginDan(currentCourse);
+
+                    commonObjects.MySoundManager.CommonSePlay("don", false, false);
+                    return;
+                }
+
+                if (currentBuffer == 0f && dir != ControllerManager.Dir.None)
+                {
+                    commonObjects.MySoundManager.CommonSePlay("katsu", false, false);
+                    currentBuffer = inputBuffer;
+
+                    switch (dir)
+                    {
+                        case ControllerManager.Dir.Left:
+                            PrevCourse();
+                            break;
+                        case ControllerManager.Dir.Right:
+                            NextCourse();
+                            break;
+                        case ControllerManager.Dir.Up:
+                            PrevSeries();
+                            break;
+                        case ControllerManager.Dir.Down:
+                            NextSeries();
+                            break;
+                    }
                 }
             }
 
