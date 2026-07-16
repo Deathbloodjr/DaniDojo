@@ -11,7 +11,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static DaniDojo.Patches.DaniDojoDaniCourseSelect;
 #if IL2CPP
 using Il2CppInterop.Runtime.Injection;
 #endif
@@ -400,6 +399,7 @@ namespace DaniDojo.Managers
                 autoAdvanceCoroutine = null;
             }
 
+            #region Screenshots
             private bool IsAutoScreenshotLoaded()
             {
                 try
@@ -441,6 +441,7 @@ namespace DaniDojo.Managers
                 AutoScreenshot.Screenshot.TakeScreenshot(currentCourse.Parent.Title + "_" + currentCourse.Title + "_" + (int)currentScreen + currentScreen, "DaniDojo");
                 screenshotsTaken[currentScreen] = true;
             }
+            #endregion
         }
     }
 }

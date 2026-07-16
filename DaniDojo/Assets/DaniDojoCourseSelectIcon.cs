@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using static DaniDojo.Managers.ResultsManager;
 
 #if IL2CPP
 using Il2CppInterop.Runtime.Injection;
