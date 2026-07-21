@@ -113,6 +113,7 @@ namespace DaniDojo.ResultsScreen
 
                     //ModLogger.Log("PlaySongPanelsIntro songPanel[" + i + "]", LogType.Debug);
                     // TODO: Play slide sound file
+                    DaniSoundManager.PlaySound("se_daniresult_partial_plate.bin");
                     var newPos = ResultsAssets.GetSongPanelPosition(i, false);
                     yield return MoveSongPanel(songPanels[i], newPos);
                 }

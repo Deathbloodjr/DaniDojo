@@ -81,16 +81,7 @@ namespace DaniDojo.Patches
                 DonChanParent = AssetUtility.CreateEmptyObject(this.gameObject, "DonChanParent", AssetUtility.GetPositionFrom1080p(new Vector2(-32, 27)));
                 Plugin.Instance.StartCoroutine(InitializeScene());
 
-                // This doesn't work how I planned
-                // I thought having multiple CriPlayers would allow for multiple sounds to be played at the same time
-                // However, the last sound will always be played
-                // I thought the issue may have been from making the cue names all the same ("song_trance", which happens to be angel dream)
-                // However, the same issue was popping up, even with separate cue names.
-                // The important part is that the BGM plays properly. Just need to cut the audio so that it loops properly
-                //DaniSoundManager.PlaySound("intro.bin", false);
-
-                DaniSoundManager.SetupBgm("odai_primal_loop.bin", true);
-                DaniSoundManager.PlayBgm();
+                DaniSoundManager.PlayBgm("bgm_daniodai_primal_loop.bin");
 
                 // My attempt at getting animations to work. IDK what I'm doing.
                 //var outDonAnimation = donCommon.gameObject.GetComponent<OutDonAnimation>();

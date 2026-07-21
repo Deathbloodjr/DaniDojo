@@ -201,7 +201,7 @@ namespace DaniDojo.Patches
 
                 Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverLeft, leftPos + new Vector2(711, 0), 0.2f));
                 Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverRight, rightPos - new Vector2(711, 0), 0.2f));
-                DaniSoundManager.PlaySound("lane_close.bin", false);
+                DaniSoundManager.PlaySound("se_daniplay_fusuma_close.bin");
             }
 
             // The initial open will display the song title at the top right a bit sooner than the later songs
@@ -231,7 +231,7 @@ namespace DaniDojo.Patches
             Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverLeft, leftPos - new Vector2(711, 0), 0.2f));
             Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverRight, rightPos + new Vector2(711, 0), 0.2f));
 
-            DaniSoundManager.PlaySound("lane_open.bin", false);
+            DaniSoundManager.PlaySound("se_daniplay_fusuma_open.bin");
 
 
             yield return new WaitForSeconds(3);

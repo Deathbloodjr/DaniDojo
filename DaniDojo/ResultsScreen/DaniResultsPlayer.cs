@@ -56,8 +56,7 @@ namespace DaniDojo.ResultsScreen
             ResultsParent = this.gameObject;
             currentCourse = DaniPlayManager.GetCurrentCourse();
 
-            DaniSoundManager.SetupBgm("results_primal_loop.bin", true);
-            DaniSoundManager.PlayBgm();
+            DaniSoundManager.PlayBgm("bgm_daniresult_primal_loop.bin");
 
             foreach (DaniResultScreen screen in Enum.GetValues(typeof(DaniResultScreen)))
             {

@@ -15,23 +15,52 @@ namespace DaniDojo.Managers
 {
     internal class DaniSoundManager
     {
-        static string AssetFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
+        private static string AssetFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
 
-        static private CriPlayer bgmPlayer;
-        static private Dictionary<string, CriPlayer> players = new Dictionary<string, CriPlayer>();
+        private static CriPlayer bgmPlayer;
+        private static Dictionary<string, CriPlayer> players = new Dictionary<string, CriPlayer>();
 
-        static public void SetupBgm(string fileName, bool isLoop)
+        private static string GetCueNameFromFileName(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName);
+        }
+
+        private static void SetupBgm(string fileName)
         {
             if (bgmPlayer == null)
             {
                 bgmPlayer = new CriPlayer(false);
                 bgmPlayer.Player.AttachFader();
             }
-            bgmPlayer.CueSheetName = "song_trance";
-            BgmPlayerLoad(fileName, isLoop);
+            bgmPlayer.CueSheetName = GetCueNameFromFileName(fileName);
+            SoundPlayerLoad(bgmPlayer, fileName);
         }
 
-        static private CriPlayer SetupSound(string fileName, bool isLoop)
+        public static void PlayBgm(string fileName)
+        {
+            SetupBgm(fileName);
+
+            if (bgmPlayer == null)
+            {
+                return;
+            }
+            string cueName = GetCueNameFromFileName(fileName);
+            Plugin.Instance.StartCoroutine(PlayProcess(bgmPlayer, cueName, TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm)));
+        }
+
+        public static void StopBgm()
+        {
+            if (bgmPlayer != null)
+            {
+                if (bgmPlayer.Player.GetStatus() == CriAtomExPlayer.Status.Stop)
+                {
+                    return;
+                }
+                bgmPlayer.Stop(true);
+            }
+        }
+
+        private static CriPlayer SetupSound(string fileName)
         {
             if (players.ContainsKey(fileName))
             {
@@ -39,27 +68,29 @@ namespace DaniDojo.Managers
             }
             var Player = new CriPlayer(false);
             Player.Player.AttachFader();
-            Player.CueSheetName = "intro";
-            SoundPlayerLoad(Player, fileName, isLoop);
+            string cueName = GetCueNameFromFileName(fileName);
+            Player.CueSheetName = cueName;
+            SoundPlayerLoad(Player, fileName);
             players.Add(fileName, Player);
             return Player;
         }
 
-        static public void PlaySound(string fileName, bool isLoop)
+        public static void PlaySound(string fileName)
         {
             CriPlayer player;
             if (!players.ContainsKey(fileName))
             {
-                player = SetupSound(fileName, isLoop);
+                player = SetupSound(fileName);
             }
             else
             {
                 player = players[fileName];
             }
-            Plugin.Instance.StartCoroutine(PlayProcess(player, "song_trance", TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se)));
+            string cueName = GetCueNameFromFileName(fileName);
+            Plugin.Instance.StartCoroutine(PlayProcess(player, cueName, TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se)));
         }
 
-        static public void StopSound(string fileName)
+        public static void StopSound(string fileName)
         {
             if (players.ContainsKey(fileName))
             {
@@ -71,23 +102,19 @@ namespace DaniDojo.Managers
             }
         }
 
-        static private bool BgmPlayerLoad(string fileName, bool isLoop)
-        {
-            return SoundPlayerLoad(bgmPlayer, fileName, isLoop);
-        }
 
-        static private bool SoundPlayerLoad(CriPlayer player, string fileName, bool isLoop)
+        private static void SoundPlayerLoad(CriPlayer player, string fileName)
         {
             player.IsPrepared = false;
             player.LoadingState = CriPlayer.LoadingStates.Loading;
             player.IsLoadSucceed = false;
             player.LoadTime = -1f;
             player.loadStartTime = Time.time;
-            player.Player.Loop(isLoop);
+            //player.Player.Loop(isLoop);
             if (player.CueSheetName == "")
             {
                 player.LoadingState = CriPlayer.LoadingStates.Finished;
-                return false;
+                return;
             }
             if (File.Exists(Path.Combine(AssetFilePath, "Sound", fileName)))
             {
@@ -95,51 +122,23 @@ namespace DaniDojo.Managers
             }
             if (player.CueSheet != null)
             {
-                return true;
+                return;
             }
             player.LoadingState = CriPlayer.LoadingStates.Finished;
-            return false;
+            return;
         }
 
-        static public void PlayBgm()
+        private static IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
         {
-            if (bgmPlayer == null)
-            {
-                return;
-            }
-            Plugin.Instance.StartCoroutine(PlayProcess(bgmPlayer, "song_trance", TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Bgm)));
-        }
-
-        static public void StopBgm()
-        {
-            StopSound(bgmPlayer);
-        }
-
-        static public void StopSound(CriPlayer player)
-        {
-            if (player == null)
-            {
-                return;
-            }
-            if (player.Player.GetStatus() == CriAtomExPlayer.Status.Stop)
-            {
-                return;
-            }
-            player.Player.Stop(false);
-        }
-
-        static private IEnumerator PlayProcess(CriPlayer player, string cueKey, float volume)
-        {
-            //ModLogger.Log("PlayProcess: " + cueKey);
 #if IL2CPP
             yield return new WaitWhile(DelegateSupport.ConvertDelegate<Il2CppSystem.Func<bool>>(() => player.CheckLoading()));
 #else
             yield return new WaitWhile(player.CheckLoading);
 #endif
-            StopSound(player);
+            //StopSound(player);
             player.Player.SetVolume(volume);
             player.Player.UpdateAll();
-            player.Play(cueKey);
+            player.Play(0);
             yield break;
         }
     }
