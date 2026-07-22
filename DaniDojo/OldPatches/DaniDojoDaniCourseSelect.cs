@@ -1,4 +1,5 @@
 ﻿using DaniDojo.Assets;
+using DaniDojo.Assets.Audio;
 using DaniDojo.Data;
 using DaniDojo.Managers;
 using System;
@@ -81,7 +82,7 @@ namespace DaniDojo.Patches
                 DonChanParent = AssetUtility.CreateEmptyObject(this.gameObject, "DonChanParent", AssetUtility.GetPositionFrom1080p(new Vector2(-32, 27)));
                 Plugin.Instance.StartCoroutine(InitializeScene());
 
-                DaniSoundManager.PlayBgm("bgm_daniodai_primal_loop.bin");
+                DaniSoundManager.PlayBgm(DaniDojoAudio.BgmDaniOdaiPrimalLoop);
 
                 // My attempt at getting animations to work. IDK what I'm doing.
                 //var outDonAnimation = donCommon.gameObject.GetComponent<OutDonAnimation>();

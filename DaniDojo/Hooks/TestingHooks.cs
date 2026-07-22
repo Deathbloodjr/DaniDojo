@@ -1,4 +1,4 @@
-﻿using DaniDojo.Managers;
+﻿using DaniDojo.Assets.Audio;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -100,18 +100,17 @@ namespace DaniDojo.Hooks
             Dictionary<string, bool> loadedCues;
             SoundManager soundManager;
 
-            private readonly Dictionary<KeyCode, string> testAudioMappings = new Dictionary<KeyCode, string>
+            private readonly Dictionary<KeyCode, DaniDojoAudio> testAudioMappings = new Dictionary<KeyCode, DaniDojoAudio>
             {
-                { KeyCode.Alpha1, "bgm_daniodai_primal_loop.bin" },
-                { KeyCode.Alpha2, "bgm_daniresult_primal_loop.bin" },
-                { KeyCode.Alpha3, "se_daniodai_intro.bin" },
-                { KeyCode.Alpha4, "se_daniplay_disqualify.bin" },
-                { KeyCode.Alpha5, "se_daniplay_fusuma_close.bin" },
-                { KeyCode.Alpha6, "se_daniplay_fusuma_open.bin" },
-                { KeyCode.Alpha7, "se_daniresult_partial_plate.bin" },
-                { KeyCode.Alpha8, "voice_daniodai_gaiden.bin" },
-                { KeyCode.Alpha9, "voice_daniodai_decide.bin" },
-                { KeyCode.Alpha0, "voice_daniresult_advance.bin" },
+                { KeyCode.Alpha1, DaniDojoAudio.BgmDaniOdaiPrimalLoop },
+                { KeyCode.Alpha2, DaniDojoAudio.BgmDaniResultPrimalLoop },
+                { KeyCode.Alpha3, DaniDojoAudio.SeDaniOdaiIntro },
+                { KeyCode.Alpha4, DaniDojoAudio.SeDaniPlayDisqualify },
+                { KeyCode.Alpha5, DaniDojoAudio.SeDaniPlayFusumaClose },
+                { KeyCode.Alpha6, DaniDojoAudio.SeDaniPlayFusumaOpen },
+                { KeyCode.Alpha7, DaniDojoAudio.SeDaniResultPartialPlate },
+                { KeyCode.Alpha8, DaniDojoAudio.VoiceDaniOdaiDecide },
+                { KeyCode.Alpha9, DaniDojoAudio.VoiceDaniResultAdvance },
             };
 
             private static string AssetFilePath => Plugin.Instance.ConfigDaniDojoAssetLocation.Value;
@@ -152,16 +151,17 @@ namespace DaniDojo.Hooks
                 soundManager.CommonSePlay(audioCue, true, false);
             }
 
-            void PlayAudio2(string audioFileName)
+            void PlayAudio2(DaniDojoAudio sound)
             {
+                string audioFileName = sound.GetFileName();
                 ModLogger.Log("PlayAudio: " + audioFileName);
                 if (audioFileName.Contains("bgm"))
                 {
-                    DaniSoundManager.PlayBgm(audioFileName);
+                    DaniSoundManager.PlayBgm(sound);
                 }
                 else
                 {
-                    DaniSoundManager.PlaySound(audioFileName);
+                    DaniSoundManager.PlaySound(sound);
                 }
             }
         }

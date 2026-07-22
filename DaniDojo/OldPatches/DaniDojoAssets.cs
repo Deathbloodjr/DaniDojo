@@ -1,4 +1,5 @@
 ﻿using DaniDojo.Assets;
+using DaniDojo.Assets.Audio;
 using DaniDojo.Data;
 using DaniDojo.Managers;
 using System;
@@ -615,7 +616,7 @@ namespace DaniDojo.Patches
                     // TODO: Add the fail sound effect here
                     if (!isResult)
                     {
-                        DaniSoundManager.PlaySound("se_daniplay_disqualify.bin");
+                        DaniSoundManager.PlaySound(DaniDojoAudio.SeDaniPlayDisqualify);
                     }
                 }
 

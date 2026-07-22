@@ -1,6 +1,7 @@
 ﻿using App;
 using Blittables;
 using DaniDojo.Assets;
+using DaniDojo.Assets.Audio;
 using DaniDojo.Data;
 using DaniDojo.Hooks;
 using DaniDojo.Managers;
@@ -201,7 +202,7 @@ namespace DaniDojo.Patches
 
                 Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverLeft, leftPos + new Vector2(711, 0), 0.2f));
                 Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverRight, rightPos - new Vector2(711, 0), 0.2f));
-                DaniSoundManager.PlaySound("se_daniplay_fusuma_close.bin");
+                DaniSoundManager.PlaySound(DaniDojoAudio.SeDaniPlayFusumaClose);
             }
 
             // The initial open will display the song title at the top right a bit sooner than the later songs
@@ -231,7 +232,7 @@ namespace DaniDojo.Patches
             Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverLeft, leftPos - new Vector2(711, 0), 0.2f));
             Plugin.Instance.StartCoroutine(AssetUtility.MoveOverSeconds(laneCoverRight, rightPos + new Vector2(711, 0), 0.2f));
 
-            DaniSoundManager.PlaySound("se_daniplay_fusuma_open.bin");
+            DaniSoundManager.PlaySound(DaniDojoAudio.SeDaniPlayFusumaOpen);
 
 
             yield return new WaitForSeconds(3);

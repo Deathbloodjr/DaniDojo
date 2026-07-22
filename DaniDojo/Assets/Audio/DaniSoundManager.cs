@@ -11,7 +11,7 @@ using UnityEngine;
 using Il2CppInterop.Runtime;
 #endif
 
-namespace DaniDojo.Managers
+namespace DaniDojo.Assets.Audio
 {
     internal class DaniSoundManager
     {
@@ -36,8 +36,9 @@ namespace DaniDojo.Managers
             SoundPlayerLoad(bgmPlayer, fileName);
         }
 
-        public static void PlayBgm(string fileName)
+        public static void PlayBgm(DaniDojoAudio audio)
         {
+            string fileName = audio.GetFileName();
             SetupBgm(fileName);
 
             if (bgmPlayer == null)
@@ -75,8 +76,9 @@ namespace DaniDojo.Managers
             return Player;
         }
 
-        public static void PlaySound(string fileName)
+        public static void PlaySound(DaniDojoAudio audio)
         {
+            string fileName = audio.GetFileName();
             CriPlayer player;
             if (!players.ContainsKey(fileName))
             {
@@ -90,8 +92,9 @@ namespace DaniDojo.Managers
             Plugin.Instance.StartCoroutine(PlayProcess(player, cueName, TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySoundManager.GetVolume(SoundManager.SoundType.Se)));
         }
 
-        public static void StopSound(string fileName)
+        public static void StopSound(DaniDojoAudio audio)
         {
+            string fileName = audio.GetFileName();
             if (players.ContainsKey(fileName))
             {
                 if (players[fileName].Player.GetStatus() == CriAtomExPlayer.Status.Stop)
